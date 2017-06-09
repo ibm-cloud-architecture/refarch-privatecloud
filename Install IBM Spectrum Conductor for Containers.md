@@ -151,8 +151,7 @@ After making configuration changes restart the NTP server with the command:
 ![alt text](Installation/hostname.png "hostname")
     2.  Modify /etc/network/interfaces to configure a static IP address
         In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
-        <img src="media/image10.png" width="561" height="326" />
-
+![alt text](Installation/interfaces.png "interfaces")
     3.  In ubuntu 16.04, resetting the network with the standard “systemctl restart networking” does not seem to change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
         shutdown -r now
 
