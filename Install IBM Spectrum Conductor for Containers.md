@@ -87,7 +87,6 @@ After making configuration changes restart the NTP server with the command:
 
 ![alt text](Installation/sysctl2.png "sysctl-2")
 
-
 2.  Install docker
 
     1.  apt-get update
