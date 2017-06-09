@@ -339,7 +339,8 @@ save
 
 Now the bgpPeer connection shows as established and you should be able to reach addresses on your Calico network (10.1.0.0/16 in our example.)
 
-<img src="media/image21.png" width="578" height="290" />
+![alt text](Installation/bgp-peer.png "bpgPeer")
+
 Appendix B
 
 High Availability
