@@ -48,7 +48,6 @@ Installation
 
         2.  passwd \# Set the root password
         
-            ![alt text](Installation/root-pwd.png "Root password")
 
     2.  Enable remote login as root
 
