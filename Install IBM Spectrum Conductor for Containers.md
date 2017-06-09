@@ -38,7 +38,7 @@ Installation
 
 1.  Update /etc/host file with IP addresses and hostnames of all cluster servers
 
-> <img src="media/image1.png" width="494" height="188" />
+![alt text](Installation/host-file.png "Host file")
 
 1.  Enable root login remotely via ssh
 
@@ -47,7 +47,9 @@ Installation
         1.  sudo su - \# provide your user password to get to the root shell
 
         2.  passwd \# Set the root password
-            <img src="media/image2.png" width="321" height="102" />
+
+![alt text](Installation/root-pwd.png "Root password")
+
 
     2.  Enable remote login as root
 
