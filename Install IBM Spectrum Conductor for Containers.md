@@ -207,7 +207,8 @@ After making configuration changes restart the NTP server with the command:
 10. Configure the cfc installer
 
     1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
-        <img src="media/image13.png" width="138" height="181" />
+    
+    
 
     2.  Copy the id\_rsa file created in step 11b over the /opt/cluster/ssh\_key file and ensure its permissions are set to 400.
         cp ~/.ssh/id\_rsa /opt/cluster/ssh\_key
@@ -240,8 +241,8 @@ After making configuration changes restart the NTP server with the command:
 
 12. About 10 minutes later you should have a deployed IBM Spectrum Conductor for Containers implementation.
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
-    <img src="media/image14.png" width="624" height="57" />
-    <img src="media/image15.png" width="624" height="241" />
+![alt text](Installation/deployment-1.png "deployment 1")
+![alt text](Installation/deployment-2.png "deployment 2")
     Login to your new implementation at <http://172.16.50.255>:8443 with userid of admin and password of admin.
 
 Appendix A
