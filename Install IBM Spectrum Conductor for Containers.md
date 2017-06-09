@@ -102,7 +102,6 @@ After making configuration changes restart the NTP server with the command:
     5.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
         apt-key fingerprint 0EBFCD88
 ![alt text](Installation/fingerprint.png "fingerprint")
-        
     6.  Setup the docker stable repository
         add-apt-repository “deb \[arch=amd64\] <https://download.docker.com/linux/ubuntu> $(lsb\_release -cs) stable”
 
@@ -149,8 +148,7 @@ After making configuration changes restart the NTP server with the command:
 
     1.  Change the hostname
         Edit the file /etc/hostname with your favorite text editor (e.g. vim) and change the value to match the node: e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
-        <img src="media/image9.png" width="348" height="37" />
-
+![alt text](Installation/hostname.png "hostname")
     2.  Modify /etc/network/interfaces to configure a static IP address
         In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
         <img src="media/image10.png" width="561" height="326" />
