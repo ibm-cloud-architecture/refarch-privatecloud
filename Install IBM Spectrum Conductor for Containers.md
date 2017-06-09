@@ -257,13 +257,13 @@ It should also be noted that the BGP instructions for VyOS are skimpy at best. I
 
 Configuring the calico network requires use of a utlity called calicoctl which is installed by default, but is buried deep within the aufs filesystem installed by kubernetes. For convenience, you can copy this utility to a more common location such as /usr/local/bin. To find the utility you will have to use a find command:
 find / -name “calicoctl”
-<img src="media/image16.png" width="624" height="40" />
+![alt text](Installation/calicoctl.png "calicoctl")
+
 
 Then copy the file to a directory in your path:
 
-<img src="media/image17.png" width="624" height="28" />
-
-<img src="media/image18.png" width="360" height="70" />
+![alt text](Installation/copy.png "copy")
+![alt text](Installation/catalicoctl-2.png "calicoctl-2")
 
 Before making these changes we will take a snapshot of our currently well-running cfc VMs as well as our VyOS router VM.
 
