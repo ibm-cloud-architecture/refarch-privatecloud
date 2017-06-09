@@ -263,7 +263,7 @@ find / -name “calicoctl”
 Then copy the file to a directory in your path:
 
 ![alt text](Installation/copy.png "copy")
-![alt text](Installation/catalicoctl-2.png "calicoctl-2")
+![alt text](Installation/calicoctl-2.png "calicoctl-2")
 
 Before making these changes we will take a snapshot of our currently well-running cfc VMs as well as our VyOS router VM.
 
