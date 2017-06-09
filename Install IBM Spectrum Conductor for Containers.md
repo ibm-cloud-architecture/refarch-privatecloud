@@ -298,7 +298,8 @@ calicoctl create -f ~/bgpPeer.yaml
 
 When you check the calico node status you will find that now one side of the bgpPeer connection is configured, but the other is not:
 
-<img src="media/image20.png" width="624" height="264" />
+![alt text](Installation/calicoctl-node.png "calicoctl node")
+
 
 Now we have to configure the VyOS router for the other side of the BGP connection. Use the following commands to configure the router:
 
