@@ -57,6 +57,9 @@ Installation
 
         2.  <img src="media/image3.png" width="624" height="505" />systemctl restart ssh
 
+![alt text](Installation/remote-login.png "Remote login")
+
+
 2.  Update NTP settings to make sure time stays in sync
 
     1.  apt-get install -y ntp
