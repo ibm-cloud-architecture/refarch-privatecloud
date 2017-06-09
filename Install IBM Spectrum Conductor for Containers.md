@@ -347,45 +347,45 @@ Appendix B
 High Availability
 -----------------
 
-> Configuring high availability for the cluster is outside the scope of this document, but the following are things to consider for local High Availability configuration within the datacenter.
->
-> High Aviailability (HA) requires redundancy at all levels. This includes the data and SAN networks, compute nodes, virtualization, and servers.
->
-> The environment in this tutorial is running in a traditional computer lab with the following characteristics:
->
-> Compute
->
-> 2 PureFlex Chassis
->
-> 2 Compute Nodes (x240), one running in each chassis
->
-> Data Network
->
-> Each chassis has 2x 10GB EN4093R network switches
->
-> The chassis switches are configured with InterSwitch Links (ISLs).
->
-> Each switch has two vLAG/LACP links to two redundant core switches providing a total of 40GB total bandwidth to the core.
->
-> Two core switches are also configured with ISLs providing a total of 40GB total bandwidth and full redundancy at the core.
->
-> SAN Network
->
-> Each chassis also has 2x Brocade FC5022 8/16G Fiber Switches connected to two core SAN Switches (Fabric A and Fabric B). Storage is provided via v7000 SVC with internal mechanical and SSD disks as well as external FlashStorage 820 appliances providing flash storage as external disks.
->
-> Volumes provided to the CFC cluster are made up of mechanical, SSD, and Flash storage with EasyTier enabled.
->
-> A single thinly provisioned SAN volume is exposed to both compute nodes in the VMware cluster such that vMotion, HA, and DRS can be enabled.
->
-> With this configuration, all resources are fully redundant and highly available within the datacenter.
->
-> ![alt text](Installation/HA.png "HA")
->
-> For DR purposes, a second datacenter (or more) with similar characteristics would need to be available. For the highest level of HA/DR, the environment would be spread across a hybrid environment made up of on-premises resources (such as is defined in this tutorial), and public/dedicated cloud environments from two or more cloud service providers.
->
-> In this scenario, resources would be available regardless of the availability of any of the three cloud service providers. This would require site-to-site VPN connections between the on-prem resources and any cloud service providers to allow for direct network connectivtiy between all resources.
->
-> Redundancy of the cluster itself is discussed in a separate document.
+Configuring high availability for the cluster is outside the scope of this document, but the following are things to consider for local High Availability configuration within the datacenter.
+
+High Aviailability (HA) requires redundancy at all levels. This includes the data and SAN networks, compute nodes, virtualization, and servers.
+
+The environment in this tutorial is running in a traditional computer lab with the following characteristics:
+
+Compute
+
+2 PureFlex Chassis
+
+2 Compute Nodes (x240), one running in each chassis
+
+Data Network
+
+Each chassis has 2x 10GB EN4093R network switches
+
+The chassis switches are configured with InterSwitch Links (ISLs).
+
+Each switch has two vLAG/LACP links to two redundant core switches providing a total of 40GB total bandwidth to the core.
+
+Two core switches are also configured with ISLs providing a total of 40GB total bandwidth and full redundancy at the core.
+
+SAN Network
+
+Each chassis also has 2x Brocade FC5022 8/16G Fiber Switches connected to two core SAN Switches (Fabric A and Fabric B). Storage is provided via v7000 SVC with internal mechanical and SSD disks as well as external FlashStorage 820 appliances providing flash storage as external disks.
+
+Volumes provided to the CFC cluster are made up of mechanical, SSD, and Flash storage with EasyTier enabled.
+
+A single thinly provisioned SAN volume is exposed to both compute nodes in the VMware cluster such that vMotion, HA, and DRS can be enabled.
+ 
+With this configuration, all resources are fully redundant and highly available within the datacenter.
+
+![alt text](Installation/HA.png "HA")
+
+For DR purposes, a second datacenter (or more) with similar characteristics would need to be available. For the highest level of HA/DR, the environment would be spread across a hybrid environment made up of on-premises resources (such as is defined in this tutorial), and public/dedicated cloud environments from two or more cloud service providers.
+
+In this scenario, resources would be available regardless of the availability of any of the three cloud service providers. This would require site-to-site VPN connections between the on-prem resources and any cloud service providers to allow for direct network connectivtiy between all resources.
+
+Redundancy of the cluster itself is discussed in a separate document.
 
 Appendix C
 ==========
