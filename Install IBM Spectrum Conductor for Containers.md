@@ -79,7 +79,9 @@ After making configuration changes restart the NTP server with the command:
 1.  Update the vm.max\_map\_count setting to 262144:
     sysctl -w vm.max\_map\_count=262144
     Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
-    <img src="media/image6.png" width="518" height="170" />
+    
+![alt text](Installation/sysctl.png "sysctl")
+    
     To check the current value use the command:
     sysctl vm.max\_map\_count
     <img src="media/image7.png" width="402" height="53" />
