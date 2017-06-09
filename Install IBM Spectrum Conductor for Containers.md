@@ -188,9 +188,9 @@ After making configuration changes restart the NTP server with the command:
 
 9.  Next we need to download the cfc installer docker image.
 
-    1.  <img src="media/image11.png" width="624" height="156" />On the boot-master node as the root user ensure your docker service is running:
+    1.  On the boot-master node as the root user ensure your docker service is running:
         systemctl status docker
-
+![alt text](Installation/status-docker.png "status docker")
     2.  If the response shows that docker is not running you can start it with the command:
         systemctl start docker
 
