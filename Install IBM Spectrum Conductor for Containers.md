@@ -85,7 +85,7 @@ After making configuration changes restart the NTP server with the command:
     To check the current value use the command:
     sysctl vm.max\_map\_count
 
-![alt text](Installation/sysctl2.png "sysctl-2")
+![alt text](Installation/sysctl-2.png "sysctl-2")
 
 2.  Install docker
 
