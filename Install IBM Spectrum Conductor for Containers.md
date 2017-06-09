@@ -79,8 +79,7 @@ After making configuration changes restart the NTP server with the command:
 1.  Update the vm.max\_map\_count setting to 262144:
     sysctl -w vm.max\_map\_count=262144
     Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
-    
-![alt text](Installation/sysctl.png "sysctl")
+    ![alt text](Installation/sysctl.png "sysctl")
     
     To check the current value use the command:
     sysctl vm.max\_map\_count
@@ -102,8 +101,8 @@ After making configuration changes restart the NTP server with the command:
 
     5.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
         apt-key fingerprint 0EBFCD88
-        <img src="media/image8.png" width="609" height="118" />
-
+![alt text](Installation/fingerprint.png "fingerprint")
+        
     6.  Setup the docker stable repository
         add-apt-repository “deb \[arch=amd64\] <https://download.docker.com/linux/ubuntu> $(lsb\_release -cs) stable”
 
