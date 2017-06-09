@@ -197,12 +197,10 @@ After making configuration changes restart the NTP server with the command:
     3.  If the status is failed you will need to troubleshot the docker installation before going forward.
 
     4.  Pull the cfc installer docker image:
-
-        1.  <img src="media/image12.png" width="624" height="219" />docker pull ibmcom/cfc-installer:1.1.0
-
+        1.  docker pull ibmcom/cfc-installer:1.1.0
+![alt text](Installation/cfc-installer.png "cfc-installer")
         2.  Change directory to /opt
             cd /opt
-
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
             docker run -e LICENSE=accept –rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.1.0 cp -r cluster /data
 
