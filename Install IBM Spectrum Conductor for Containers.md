@@ -64,12 +64,17 @@ Installation
 
     1.  apt-get install -y ntp
 
-    2.  <img src="media/image4.png" width="624" height="184" />If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
+    2.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
-> <img src="media/image5.png" width="624" height="223" />After making configuration changes restart the NTP server with the command:
+![alt text](Installation/ntp.png "NTP")
+
+After making configuration changes restart the NTP server with the command:
 > sytemctl retart ntp
 > To test the status of your NTP servers, use the command:
 > ntpq -p
+
+![alt text](Installation/ntpq.png "ntpq -p")
+
 
 1.  Update the vm.max\_map\_count setting to 262144:
     sysctl -w vm.max\_map\_count=262144
