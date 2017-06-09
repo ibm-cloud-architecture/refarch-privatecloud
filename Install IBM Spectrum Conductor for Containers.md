@@ -406,6 +406,6 @@ Since we are at a good stage now to which we may want to revert in the future if
 
 [2] When I tried to configure the BGP above I got an error that the endpoint was not listening. Using the etcdctl command I found that the proper port was 4001 and not 2379 as is the default. If port 4001 does not work for you, you can find your local endpoint using etcdctl. This file is buried deep in the ausfs filesystem as was the calicoctl command. Use the same proceedure to find the location of this file and copy it some location in your path such as /usr/local/bin.
 The command to find the endpoint is etcdctl member list:
-<img src="media/image19.png" width="624" height="52" />
+![alt text](Installation/etcd.png "etc")
 
 Your proper endpoint is the “clientURLs” value. In oder for you bgpctl command to work you should use this value in an envvar named ETCD\_ENDPOINTS to override the default.
