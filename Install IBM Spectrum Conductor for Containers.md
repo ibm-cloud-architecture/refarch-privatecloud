@@ -342,6 +342,7 @@ Now the bgpPeer connection shows as established and you should be able to reach 
 ![alt text](Installation/bgp-peer.png "bpgPeer")
 
 Appendix B
+==========
 
 High Availability
 -----------------
@@ -378,7 +379,7 @@ High Availability
 >
 > With this configuration, all resources are fully redundant and highly available within the datacenter.
 >
-> <img src="media/image22.png" width="624" height="351" />
+> ![alt text](Installation/HA.png "HA")
 >
 > For DR purposes, a second datacenter (or more) with similar characteristics would need to be available. For the highest level of HA/DR, the environment would be spread across a hybrid environment made up of on-premises resources (such as is defined in this tutorial), and public/dedicated cloud environments from two or more cloud service providers.
 >
