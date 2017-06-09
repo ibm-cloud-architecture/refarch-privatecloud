@@ -47,7 +47,9 @@ Installation
         1.  sudo su - \# provide your user password to get to the root shell
 
         2.  passwd \# Set the root password
-        
+
+![alt text](Installation/root-pwd.png "Root password")
+
 
     2.  Enable remote login as root
 
