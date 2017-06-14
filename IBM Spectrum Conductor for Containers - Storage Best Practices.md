@@ -70,7 +70,7 @@ click the “Create Storage” button.
 
 For now, lets scroll down to the bottom and look at our options:
 
-![](media/image4.png){width="6.5in" height="6.069444444444445in"}
+![alt text](Storage/Storage-options.png "Storage options") 
 
 The important bits here are Capacity, Access Mode, and Reclaim Policy
 and we will discuss these in a lot more detail.
