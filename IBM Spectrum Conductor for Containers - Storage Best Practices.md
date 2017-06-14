@@ -50,7 +50,7 @@ on ubuntu for use with CFC.
 For reasons which will be discussed later, it is highly recommended that
 the disks used for NFS storage be thinly provisioned.
 
-![alt text](Storage/df-h.png "Host file") 
+![alt text](Storage/df-h.png "df -h") 
 
 There are a number of ways to configure storage in CFC and how you use
 your NFS server will depend upon your application’s storage needs and
@@ -61,8 +61,7 @@ Login to the CFC console as admin (the default password is admin) and
 click on the menu icon at the top left, then on Infrastructure and
 Storage:
 
-![](media/image2.png){width="3.111111111111111in"
-height="5.736111111111111in"}
+![alt text](Storage/Storage.png "Storage") 
 
 Next click on the Storage tab (it should already be selected), and then
 click the “Create Storage” button.
