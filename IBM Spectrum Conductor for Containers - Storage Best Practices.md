@@ -390,8 +390,8 @@ Last, we need to add our newly created filesystem in /etc/fstab so that
 it will be mounted every time the system reboots. Your /etc/fstab should
 look something like this:
 
-![](media/image20.png){width="7.847222222222222in"
-height="1.1111111111111112in"}
+![alt text](Storage/fstab.png "fstab") 
+
 
 ### Installing the NFS server
 
