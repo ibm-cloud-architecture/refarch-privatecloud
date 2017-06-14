@@ -359,8 +359,7 @@ since this is a newly provisioned virtual disk.
 > lvcreate -l 100%FREE -n storage cfc-nfs-vg \# Create a new logical
 > volume using all available capacity
 
-![](media/image17.png){width="5.097222222222222in"
-height="0.3888888888888889in"}
+![alt text](Storage/lvcreate.png "lvcreate") 
 
 > lvs \# Show all available volumes
 
