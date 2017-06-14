@@ -144,8 +144,7 @@ is writing data and another is reading that data.
 The next important parameter is the Reclaim Policy and for this, you
 have three options: Retain, Recycle, and Delete.
 
-![](media/image7.png){width="2.388888888888889in"
-height="2.111111111111111in"}
+![alt text](Storage/Reclaim-policy.png "Reclaim policy") 
 
 **Retain** means that when the volume has finished using the storage, it
 leaves all the data it created on the storage and someone will have to
