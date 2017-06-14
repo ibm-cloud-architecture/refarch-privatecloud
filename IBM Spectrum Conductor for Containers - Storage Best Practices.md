@@ -317,8 +317,7 @@ with /dev/sda, and /dev/sdb. /dev/sdb will be your second 500GB disk.
 There is no /dev/sdb1 because this disk does not currently have any
 partition.
 
-![](media/image11.png){width="4.513888888888889in"
-height="0.5694444444444444in"}
+![alt text](Storage/ls-dev.png "ls /dev") 
 
 We will use sudo to get a root shell so we don’t have to type “sudo” a
 million times.
