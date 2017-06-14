@@ -416,7 +416,8 @@ Toi tell the service which filesystems should be exported, edit the file
 /etc/exports and add your filesystem. Your file should look something
 like this:
 
-![](media/image22.png){width="5.75in" height="0.5277777777777778in"}
+![alt text](Storage/exports.png "exports") 
+
 
 Note that the configuration noted above opens up this filesystem to
 anyone to mount as read/write which may not be secure enough for your
