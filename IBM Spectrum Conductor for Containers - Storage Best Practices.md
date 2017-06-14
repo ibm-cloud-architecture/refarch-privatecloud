@@ -66,7 +66,7 @@ Storage:
 Next click on the Storage tab (it should already be selected), and then
 click the “Create Storage” button.
 
-![](media/image3.png){width="6.5in" height="1.6805555555555556in"}
+![alt text](Storage/Create-Storage.png "Create Storage") 
 
 For now, lets scroll down to the bottom and look at our options:
 
