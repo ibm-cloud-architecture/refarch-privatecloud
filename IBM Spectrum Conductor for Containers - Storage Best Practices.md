@@ -336,8 +336,7 @@ since this is a newly provisioned virtual disk.
 >
 > Type “w” to write the partition information to the disk.
 
-![](media/image12.png){width="6.763888888888889in"
-height="2.9444444444444446in"}
+![alt text](Storage/fdisk.png "fdisk") 
 
 > ls /dev/sd\* \# You should now see /dev/sdb1 listed
 
