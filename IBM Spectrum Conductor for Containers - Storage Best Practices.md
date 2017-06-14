@@ -199,7 +199,7 @@ specified here.
 The last part of creating storage is specifying the NFS server
 information.
 
-![](media/image9.png){width="4.125in" height="2.75in"}
+![alt text](Storage/nfs.png "NFS") 
 
 First, set the storage type as NFS.
 
