@@ -363,8 +363,7 @@ since this is a newly provisioned virtual disk.
 
 > lvs \# Show all available volumes
 
-![](media/image18.png){width="7.763888888888889in"
-height="1.0972222222222223in"}
+![alt text](Storage/lvs.png "lvs") 
 
 Now that we have some available capacity in a logical volume. We must
 format the volume so we can write stuff to it.
