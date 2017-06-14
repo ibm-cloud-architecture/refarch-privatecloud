@@ -344,7 +344,7 @@ since this is a newly provisioned virtual disk.
 
 > pvcreate /dev/sdb1 \# Create a new physical volume for lvm
 
-![alt text](Storage/pv-create.png "pvcreate") 
+![alt text](Storage/pvcreate.png "pvcreate") 
 
 > pvs \# You should see /dev/sdb1 in the list. Note that the new volume
 > is not yet associated with a volume group
