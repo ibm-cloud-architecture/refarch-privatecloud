@@ -178,7 +178,7 @@ they release their volume all their data will be lost.
 
 Now lets scroll back to the top and have a look at those parameters.
 
-![](media/image8.png){width="6.5in" height="2.7777777777777777in"}
+![alt text](Storage/Storage-options-2.png "More storage options") 
 
 **Name** can be any unique name that complies with the naming
 guildelines. Importantly, volumes do not ask for storage by name. They
