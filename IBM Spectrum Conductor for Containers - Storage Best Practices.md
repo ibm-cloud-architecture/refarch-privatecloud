@@ -281,6 +281,7 @@ Which option you choose will depend on your situation and business
 policies.
 
 Appendix A
+==========
 
 Creating an NFS server on Ubuntu for use as a external storage with CFC
 -----------------------------------------------------------------------
