@@ -372,7 +372,7 @@ format the volume so we can write stuff to it.
 > hyphens in the filename anywhere a\
 > \# hyphen exists in the volume name.
 
-![](media/image19.png){width="6.75in" height="2.5555555555555554in"}
+![alt text](Storage/mkfs.png "mkfs") 
 
 Now we have a writable filesystem and we need to mount it somewhere so
 we can make use of it. We will mount it in /storage.
