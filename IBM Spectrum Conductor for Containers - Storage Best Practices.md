@@ -102,8 +102,7 @@ The rule of thumb for most virtualization is that storage can be
 overpovisoned by an average of 4:1. This, of course, is just a rule of
 thumb and will vary depending on the workloads.
 
-![](media/image5.png){width="2.4444444444444446in"
-height="2.1527777777777777in"}
+![alt text](Storage/Access-mode.png "Access mode") 
 
 **ReadWriteOnce** (abbreviated RWO in the storage table) means that only
 a single volume can use the storage at a time and that volume has
