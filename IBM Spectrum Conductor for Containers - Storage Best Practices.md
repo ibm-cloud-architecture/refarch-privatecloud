@@ -238,7 +238,7 @@ On the CFC dashboard, then, you can see at-a-glance exactly how much
 storage you have provisioned as well as how much has been allocated and
 how much is availble.
 
-![alt text](Storage/Dashboard.png "Dashboard") 
+![alt text](Storage/dashboard.png "Dashboard") 
 
 In this case, we have provisioned a total of 180GiB of storage. Volumes
 are using 50GiB of that storage , 50GiB has been used and then released,
