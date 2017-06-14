@@ -108,9 +108,9 @@ thumb and will vary depending on the workloads.
 a single volume can use the storage at a time and that volume has
 ReadWrite access. Once a volume is bound to a storage with this Access
 Mode, it is unusable to any other volume until that volume is destroyed
-and it’s clam is released.
+and its clam is released.
 
-![](media/image6.png){width="6.5in" height="1.0833333333333333in"}
+![alt text](Storage/rwo.png "RWO") 
 
 Since these are ReadWriteOnce storage, If you create storage with a 50Gi
 capacity and the volume is only asking for 1Gi, but the only available
