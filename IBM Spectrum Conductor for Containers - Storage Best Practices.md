@@ -340,8 +340,7 @@ since this is a newly provisioned virtual disk.
 
 > ls /dev/sd\* \# You should now see /dev/sdb1 listed
 
-![](media/image13.png){width="5.277777777777778in"
-height="0.5277777777777778in"}
+![alt text](Storage/ls-dev-2.png "ls /dev") 
 
 > pvcreate /dev/sdb1 \# Create a new physical volume for lvm
 
