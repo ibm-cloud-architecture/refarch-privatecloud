@@ -404,8 +404,8 @@ Make sure the server installed correctly and is running:
 
 > systemctl status nfs-kernel-server
 
-![](media/image21.png){width="7.680555555555555in"
-height="1.9166666666666667in"}
+![alt text](Storage/nfs-kernel-server.png "nfs-kernel-server") 
+
 
 Make sure the filesystem to be mounted is read/write/execute for
 everyone.
