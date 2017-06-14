@@ -354,8 +354,7 @@ since this is a newly provisioned virtual disk.
 > vgextend cfc-nfs-vg /dev/sdb1 \# Add your newly created partition to
 > the volume group
 
-![](media/image16.png){width="4.347222222222222in"
-height="0.4027777777777778in"}
+![alt text](Storage/vgextend.png "vgextend") 
 
 > lvcreate -l 100%FREE -n storage cfc-nfs-vg \# Create a new logical
 > volume using all available capacity
