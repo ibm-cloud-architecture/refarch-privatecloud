@@ -50,8 +50,7 @@ on ubuntu for use with CFC.
 For reasons which will be discussed later, it is highly recommended that
 the disks used for NFS storage be thinly provisioned.
 
-![](media/image1.png){width="6.013888888888889in"
-height="2.0555555555555554in"}
+![alt text](Storage/df-h.png "Host file") 
 
 There are a number of ways to configure storage in CFC and how you use
 your NFS server will depend upon your application’s storage needs and
