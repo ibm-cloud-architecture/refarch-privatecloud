@@ -349,8 +349,7 @@ since this is a newly provisioned virtual disk.
 > pvs \# You should see /dev/sdb1 in the list. Note that the new volume
 > is not yet associated with a volume group
 
-![](media/image15.png){width="4.222222222222222in"
-height="0.8888888888888888in"}
+![alt text](Storage/pvs.png "pvs") 
 
 > vgextend cfc-nfs-vg /dev/sdb1 \# Add your newly created partition to
 > the volume group
