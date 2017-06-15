@@ -6,7 +6,7 @@ To access the environment through the CLI, follow these steps:
 * Click on your user name on the top right corner
 * You will see the following menu:
 
-![alt text](Access/M enu.png "Menu") 
+![alt text](Access/Menu.png "Menu") 
 
 * Click *Configure Client*
 
