@@ -10,6 +10,8 @@ To access the environment through the CLI, follow these steps:
 
 * Click *Configure Client*
 
+If you get a blank page, you might need to clear your browser cache and do it again.
+
 * Copy and paste the sequence of commands to a text editor (We have seen many times that this information is displayed only once and requires cleaning the browser cache to display it again)
 * Save the commands as a script
 * Run the script
