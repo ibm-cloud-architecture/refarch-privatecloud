@@ -116,7 +116,7 @@ And under the “3. Configure Instance” tab, change the number of
 instances to 4. And change the “Auto-assign Public IP” value to
 “Disable”.
 
-![](media/image11.png){width="6.5in" height="4.379166666666666in"}
+![](AWS/NumberOfInstances.png)
 
 On the “4. Add Storage” tab, you can leave the size of the storage at
 the default. Storage for applications will be provided via NFS. This
@@ -126,7 +126,7 @@ etc.
 On the “6. Configure Security Group”, all nodes need to have all inbound
 ports opened from the master node.
 
-![](media/image12.png){width="6.5in" height="2.2243055555555555in"}
+![](AWS/SecurityGroupNode.png)
 
 On the “7. Review” tab, click Launch, select your keypair, and then
 update the name of your instances so you can easily find them later.
