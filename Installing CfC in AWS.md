@@ -218,21 +218,18 @@ shell execute the command “sudo su –“.
     \
     Edit the /etc/hostname file and replace the default value with
     “cfc-bmp”\
-    ![](media/image22.png){width="3.2243055555555555in"
-    height="0.5430555555555555in"}\
+    ![](AWS/Hostname.png)\
     \
     Edit the /etc/hosts file to specify an IP address and hostname for
     each node (instance) in your cluster.\
-    ![](media/image23.png){width="2.870833333333333in"
-    height="1.6465277777777778in"}\
+    ![](AWS/Hosts.png)\
     \
     If you exit the root shell and log back in (with “sudo su –“) you
     will see the hostname reflected on your command line and, if you are
     using PuTTY, the title of the window will also be updated to make it
     easier for you to tell one node from another.
 
-> ![](media/image24.png){width="1.7930555555555556in"
-> height="0.9222222222222223in"}
+> ![](AWS/CommandLine.png)
 
 1)  Install NTP to ensure all nodes stay in time sync\
     apt-get install -y ntp
@@ -242,12 +239,10 @@ shell execute the command “sudo su –“.
     sysctl -w vm.max\_map\_count=262144\
     echo “vm.max\_map\_count=262144” &gt;&gt; /etc/sysctl.conf\
     \
-    ![](media/image25.png){width="3.654861111111111in"
-    height="0.49166666666666664in"}\
+    ![](AWS/SetMax.png)\
     \
     Check the value with the command “sysctl vm.max\_map\_count”.\
-    ![](media/image26.png){width="2.0347222222222223in"
-    height="0.3013888888888889in"}
+    ![](AWS/GetMax.png)
 
 3)  Install docker
 
