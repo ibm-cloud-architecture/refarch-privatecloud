@@ -586,8 +586,7 @@ storage available for applications.
 For more information on storage best practices see the document “IBM
 Spectrum Conductor for Containers – Storage Best Practices”.
 
-![](media/image50.png){width="2.4916666666666667in"
-height="2.6381944444444443in"}
+![](AWS/PersistanceStorage.png)
 
 In the “Key” section add 2 new keys.
 
@@ -595,8 +594,7 @@ In the “Key” section add 2 new keys.
 >
 > Path: /storage
 
-![](media/image51.png){width="2.4569444444444444in"
-height="2.3881944444444443in"}
+![](AWS/Key.png)
 
 Click the Create button to create your storage.
 
@@ -613,7 +611,7 @@ left of the selection windo to “All Files (\*.\*)”.
 PuTTYgen will import the .pem file and convert it to its own internal
 format (.ppk).
 
-![](media/image52.png){width="6.5in" height="3.732638888888889in"}
+![](AWS/Putty.png)
 
 Click the “Save Private Key” button at the bottom left in the “Actions”
 pane and give your private key a name – e.g.
