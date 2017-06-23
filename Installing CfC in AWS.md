@@ -134,7 +134,7 @@ update the name of your instances so you can easily find them later.
 When you are done you should have 5 instances in a running state each
 labeled for the function they will perform.
 
-![](media/image13.png){width="6.5in" height="1.5083333333333333in"}
+![](AWS/FiveInstances.png)
 
 For the needed packages to be installed, the proxy and worker nodes need
 a temporary public IP address.
@@ -142,35 +142,30 @@ a temporary public IP address.
 On the EC2 dashboard, click on Network & Security -&gt; Elastic IPs,
 then click on the “Allocate New Address” button at the top.
 
-![](media/image14.png){width="2.9569444444444444in"
-height="3.3881944444444443in"}
+![](AWS/AllocateNewAddress.png)
 
 On the following screen click “Allocate”.
 
-![](media/image15.png){width="3.448611111111111in"
-height="1.1548611111111111in"}
+![](AWS/Allocate.png)
 
 You should get a confirmation screen, just click “Close”.
 
-![](media/image16.png){width="3.6381944444444443in" height="1.43125in"}
+![](AWS/CloseAllocate.png)
 
 Next, you need to associate this address with an instance. On the
 elastic IP address dashboard, choose an address and then click on
 “Actions -&gt; Associate Address“.
 
-![](media/image17.png){width="5.2243055555555555in"
-height="2.3618055555555557in"}
+![](AWS/AssociateAddress.png)
 
 Choose an instance which which to associate this IP address
 
-![](media/image18.png){width="3.301388888888889in"
-height="2.7416666666666667in"}
+![](AWS/ChooseInstance.png)
 
 Then chose the internal IP address that should be associated with this
 public IP address.
 
-![](media/image19.png){width="2.870833333333333in"
-height="1.7930555555555556in"}
+![](AWS/ChooseInternal.png)
 
 Then click “Associate” at the bottom left, and then “Close” on the
 following screen.
@@ -180,7 +175,7 @@ Repeat this process until all of your nodes has a public IP assigned.
 On your instances dashboard, you should now see the public IP assigned
 to each instance.
 
-![](media/image20.png){width="6.5in" height="1.5173611111111112in"}
+![](AWS/InstanceDashboard.png)
 
 You are now ready to prepare your environment for CfC installation.
 
@@ -209,8 +204,8 @@ shell execute the command “sudo su –“.
     the cluster. On the EC2 dashboard, select each instance in turn and
     look at the detailed information in the bottom pane for “Private
     IPs”.\
-    ![](media/image21.png){width="5.948611111111111in" height="3.75in"}
-
+    ![](AWS/PrivateIPs.png)
+    
 > Make note of the private IP address of each instance.
 
 1)  Change the hostname of each node to represent the function. The
