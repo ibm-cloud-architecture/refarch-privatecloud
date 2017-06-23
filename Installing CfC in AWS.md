@@ -265,8 +265,7 @@ shell execute the command “sudo su –“.
         \
         apt-key fingerprint 0EBFCD88\
         \
-        ![](media/image27.png){width="3.68125in"
-        height="0.7152777777777778in"}
+        ![](AWS/Fingerprint.png)
 
     f.  Setup the docker stable repository\
         add-apt-repository “deb \[arch=amd64\]
@@ -304,8 +303,7 @@ a.  If this doesn’t work, you will need to do some troubleshooting
         \
         Accept the default location for the new files.\
         \
-        ![](media/image28.png){width="2.5430555555555556in"
-        height="1.56875in"}
+        ![](AWS/DefaultLocation.png)
 
     b.  Update the /root/.ssh/authorized\_keys file on each node
         (master, proxy, and all worker nodes) with the value of
@@ -317,8 +315,7 @@ a.  If this doesn’t work, you will need to do some troubleshooting
         On the master node, cat the value of /root/.ssh/id\_rsa.pub to
         the screen and copy it to the clipboard (Note that some of the
         text here is intentionally obscured).\
-        ![](media/image29.png){width="4.017361111111111in"
-        height="0.81875in"}\
+        ![](AWS/IdRsa.png)\
         \
         Paste that value into each other node’s
         /root/.ssh/authorized\_keys file, replacing the existing
@@ -337,8 +334,7 @@ a.  If this doesn’t work, you will need to do some troubleshooting
         answer yes, it will add the master node to the list of known
         hosts and this will not be required again in the future.\
         \
-        ![](media/image30.png){width="3.5861111111111112in"
-        height="1.836111111111111in"}
+        ![](AWS/NoPassword.png)
 
 > Your instances are now configured and ready to install CfC
 
