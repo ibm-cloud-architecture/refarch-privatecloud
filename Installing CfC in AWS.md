@@ -348,8 +348,7 @@ Install IBM Spectrum Conductor for Containers
 1)  Make sure docker is running\
     systemctl status docker\
     \
-    ![](media/image31.png){width="3.6118055555555557in"
-    height="1.8881944444444445in"}\
+    ![](AWS/Docker.png)\
     \
     If it is not running start it\
     systemctl start docker
@@ -357,8 +356,7 @@ Install IBM Spectrum Conductor for Containers
 2)  Pull the CfC installer docker image from the repository\
     docker pull ibmcom/cfc-installer:1.1.0\
     \
-    ![](media/image32.png){width="3.404861111111111in"
-    height="1.198611111111111in"}
+    ![](AWS/CfCInstaller.png)
 
 3)  **IMPORTANT:** Change to the /opt directory\
     cd /opt
@@ -378,8 +376,7 @@ Install IBM Spectrum Conductor for Containers
     a.  Edit the /opt/cluster/hosts file to specify the correct
         **internal** IP addresses of each node in your cluster.\
         \
-        ![](media/image33.png){width="2.672222222222222in"
-        height="1.301388888888889in"}
+        ![](AWS/ClusterHosts.png)
 
     b.  Copy the value of /root/.ssh/id\_rsa over the ssh\_keys file and
         make sure the file permissions for the ssh\_key file is 400.\
@@ -394,8 +391,7 @@ Install IBM Spectrum Conductor for Containers
         environment is 172.16.0.0/20, we have no conflicts with either
         of these subnet definitions.
 
-> ![](media/image34.png){width="2.3965277777777776in"
-> height="0.7583333333333333in"}\
+> ![](AWS/Config.png)\
 > \
 > To see which subnets are defined in your environment you can execute
 > the “netstat -arn” command on the master node and check for any
@@ -421,23 +417,21 @@ Install IBM Spectrum Conductor for Containers
         default userid is “admin” (without the quotes), and the default
         password is “admin” (without the quotes).\
         \
-        ![](media/image35.png){width="3.0430555555555556in"
-        height="2.4569444444444444in"}
+        ![](AWS/Login.png)
 
 2)  With all installation and configuration complete, you can now
     disassociate your elastic IPs from your proxy and worker nodes. On
     the instance dashboard, select a node, then click on
     Actions-&gt;Networking-&gt;Disassociate Elastic IP Address.\
     \
-    ![](media/image36.png){width="6.5in" height="1.8534722222222222in"}\
+    ![](AWS/Disassociate.png)\
     On the following screen click “Yes, Disassociate”.
 
 3)  Repeat this for all of your elastic IPs.
 
 4)  When you are done, only your master node should have an external IP
     address\
-    ![](media/image37.png){width="6.5in" height="1.4826388888888888in"}
-
+    ![](AWS/MasterNode.png)
 \
 Installing an NFS server for persistent storage
 -----------------------------------------------
@@ -465,13 +459,13 @@ want to plan for the future where you might want to attach this same
 disk to a different instance, you may want to leave the “Delete on
 Termination” checkbox unchecked.
 
-![](media/image38.png){width="6.508333333333334in" height="1.68125in"}
+![](AWS/DeleteOnTermination.png)
 
 On the “6. Configure Security Group” tab, allow all traffic from all
 nodes in the cluster to the NFS server, specifying the internal
 (private) IP address for each node.
 
-![](media/image39.png){width="6.5in" height="2.3534722222222224in"}
+![](AWS/SecurityGroupStorage.png)
 
 On the “7. Review” tab, click the Launch button and choose your existing
 SSH keys to deploy your new instance.
