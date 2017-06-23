@@ -54,17 +54,16 @@ access to the console by the users.
 
 On the EC2 dashboard, click the “Launch Instance” button.
 
-![](media/image1.png){width="3.6638888888888888in"
-height="2.6381944444444443in"}
+![](AWS/LaunchInstance.png)
 
 On the “1. Choose AMI” tab, choose Ubuntu 16.04 LTS.
 
-![](media/image2.png){width="6.5in" height="2.672222222222222in"}
+![](AWS/ChooseAMI.png)
 
 On the “2.Choose Instance Type” tab, choose the t2.medium flavor for all
 servers
 
-![](media/image3.png){width="6.5in" height="1.9222222222222223in"}
+![](AWS/InstanceType.png)
 
 The worker nodes need not be this large, so we will first create only
 this single node and will repeat the process to create the worker nodes.
@@ -73,7 +72,7 @@ Leave “3. Configure Instance” at the default settings ensuring you are
 creating only one instance and that “Auto-assign Public IP” is enabled
 (the default subnet setting).
 
-![](media/image4.png){width="6.5in" height="4.310416666666667in"}
+![](AWS/ConfigureInstance.png)
 
 On the “4. Add Storage” tab change the size of the disk to 40GB. This is
 to allow adequate space for the elasticsearch logs.
