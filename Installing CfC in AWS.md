@@ -508,23 +508,23 @@ no existing partition.
 
 Use the “n” command to create a new primary partition and accept all the
 defaults to use the entire disk
+
 ![](AWS/PrimaryPartition.png)
 
 Use the “w” command to write the partition to the disk and exist fdisk.
 
 ![](AWS/WritePartition.png)
+
 Listing /dev/xvd\* will now show /dev/xvdb1 – your new partition.
 
-![](media/image44.png){width="2.551388888888889in"
-height="0.39652777777777776in"}
+![](AWS/Xvd.png)
 
 Now that we have a partition, we need to format it so it can be used. We
 will format it as ext4.
 
 mkfs -t ext4 /dev/xvdb1
 
-![](media/image45.png){width="4.2243055555555555in"
-height="1.5256944444444445in"}
+![](AWS/Mkfs.png)
 
 Now we can mount the disk. We need a mount point so we will first create
 /storage and then mount the disk to this mount point and make it
@@ -537,12 +537,11 @@ chmod 777 /storage\
 mount -t ext4 /dev/xvdb1 /storage\
 ls /storage
 
-![](media/image46.png){width="2.81875in" height="0.5951388888888889in"}
+![](AWS/Storage.png)
 
 To make the mount permanent, we will add it to the /etc/fstab file.
 
-![](media/image47.png){width="3.3534722222222224in"
-height="0.4222222222222222in"}
+![](AWS/Fstab.png)
 
 Now that we have something to share, we need to install the nfs server
 to share it.
@@ -566,8 +565,7 @@ server
 
 ufw disable
 
-![](media/image48.png){width="2.8965277777777776in"
-height="0.3451388888888889in"}
+![](AWS/Ufw.png)
 
 Your new NFS server is now available for use in your new CfC
 environment.
@@ -576,8 +574,7 @@ To make this storage available login to the CfC console as the admin
 user and click on the menu icon at the top left and select
 Infrastructure -&gt; Storage then click the “Create New Storage” button.
 
-![](media/image49.png){width="3.629166666666667in"
-height="3.051388888888889in"}
+![](AWS/CfCStorage.png)
 
 Give your new storage a name (e.g. vol1.1g.rwo.recycle), set the
 Capacity to 1 Gi, Access Mode “ReadWriteOnce” and Reclaim Policy
