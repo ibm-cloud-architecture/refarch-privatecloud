@@ -77,13 +77,13 @@ creating only one instance and that “Auto-assign Public IP” is enabled
 On the “4. Add Storage” tab change the size of the disk to 40GB. This is
 to allow adequate space for the elasticsearch logs.
 
-![](media/image5.png){width="6.5in" height="2.060416666666667in"}
+![](AWS/AddStorage.png)
 
 Optionally, on the “5. Add Tags” tab, add some tags to help you identify
 your environment. These tags can be used to filter on the dashboard so
 you can see only the instances created for this project.
 
-![](media/image6.png){width="6.5in" height="1.9569444444444444in"}
+![](AWS/AddTags.png)
 
 On the “6. Configure Security Group” tab, add additional rules to allow
 inbound traffic to port 8443 from anywhere (or from your home or
@@ -91,26 +91,24 @@ workplace internet gateway to restrict who can access the admin console)
 and inbound TCP traffic from all other nodes in the cluster to the
 master node.
 
-![](media/image7.png){width="6.5in" height="3.379166666666667in"}
+![](AWS/SecurityGroups.png)
 
 On the “7. Review” tab, click the blue “Launch” button at the bottom
 right.
 
-![](media/image8.png){width="6.491666666666666in"
-height="3.3361111111111112in"}
+![](AWS/Review.png)
 
 Select an existing keypair create a new one can click the blue “Launch
 Instances” button.
 
-![](media/image9.png){width="3.8618055555555557in"
-height="2.4138888888888888in"}
+![](AWS/KeyPair.png)
 
 In the instance window, find and mouse over the “Name” column in the row
 of your newly created instance to make the pencil icon visible and then
 click it to give your instance a name so you can easily recognize it
 later.
 
-![](media/image10.png){width="6.491666666666666in" height="1.56875in"}
+![](AWS/Rename.png)
 
 Repeat this process to create the proxy and worker nodes.
 
