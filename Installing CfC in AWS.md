@@ -489,8 +489,7 @@ Next, find the device which represents your second hard disk
 
 ls /dev/xvd\*
 
-![](media/image40.png){width="2.198611111111111in"
-height="0.38819444444444445in"}
+![](AWS/Device.png)
 
 /dev/xvda is your first disk, and /dev/xvda1 is the first partition on
 the disk.
@@ -505,17 +504,15 @@ Before a disk can be mounted, it must have a partition and be formatted.
 Use fdisk to create a partition on your second disk. fdisk will report
 no existing partition.
 
-![](media/image41.png){width="3.68125in" height="1.3451388888888889in"}
+![](AWS/Fdisk.png)
 
 Use the “n” command to create a new primary partition and accept all the
 defaults to use the entire disk
-![](media/image42.png){width="3.827777777777778in"
-height="1.2326388888888888in"}.
+![](AWS/PrimaryPartition.png)
 
 Use the “w” command to write the partition to the disk and exist fdisk.
 
-![](media/image43.png){width="2.18125in" height="0.6118055555555556in"}
-
+![](AWS/WritePartition.png)
 Listing /dev/xvd\* will now show /dev/xvdb1 – your new partition.
 
 ![](media/image44.png){width="2.551388888888889in"
