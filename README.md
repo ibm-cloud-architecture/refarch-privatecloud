@@ -12,7 +12,7 @@ See the instructions at: [Installing CfC](Install%20IBM%20Spectrum%20Conductor%2
 
 ## Installing CfC on AWS
 
-See the instructions at: [Installing CfC on AWS](nstalling%20CfC%20in%20AWS.md)
+See the instructions at: [Installing CfC on AWS](Installing%20CfC%20in%20AWS.md)
 
 ## Best practices in using storage with CfC
 
