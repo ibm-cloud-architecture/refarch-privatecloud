@@ -6,9 +6,13 @@ This project provides guidance on how to deploy IBM Private Cloud
 
 [Accessing CfC](Accessing%20CfC%20through%20the%20CLI.md)
 
-## Installing Spectrum Conductor for Containers (CfC)
+## Installing CfC
 
 See the instructions at: [Installing CfC](Install%20IBM%20Spectrum%20Conductor%20for%20Containers.md)
+
+## Installing CfC on AWS
+
+See the instructions at: [Installing CfC on AWS](nstalling%20CfC%20in%20AWS.md)
 
 ## Best practices in using storage with CfC
 
