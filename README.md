@@ -1,6 +1,14 @@
 # IBM Private Cloud
 This project provides guidance on how to deploy IBM Private Cloud
 
+## Announcement
+
+Announcement:http://www-01.ibm.com/common/ssi/ShowDoc.wss?docURL=/common/ssi/rep_ca/6/897/ENUS217-356/index.html&lang=en&request_locale=en
+
+Sales enablement: https://apps.na.collabserv.com/wikis/home?lang=en-us#!/wiki/W6a1c2cf32e79_46d3_a29a_8922f8ebeeeb/page/IBM%20Cloud%20private
+
+Docker Hub community edition: https://hub.docker.com/r/ibmcom/cfc-installer/
+
 
 ## Accessing Spectrum Conductor for Containers (CfC) through the CLI
 
