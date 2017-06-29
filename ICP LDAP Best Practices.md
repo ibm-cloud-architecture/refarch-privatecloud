@@ -200,7 +200,7 @@ To check the status of keystone execute “/etc/init.d/keystone status”.
 
 ![](./LDAP/image4.png)
 
-You can also check the logs from thkkkkke keystone container with the
+You can also check the logs from the keystone container with the
 command:
 
 > docker logs &lt;keystone container&gt;
