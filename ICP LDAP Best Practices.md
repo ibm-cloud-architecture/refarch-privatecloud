@@ -110,7 +110,7 @@ When these values are set, continue to install as the documentation
 directs. If everything works correctly you should see something like
 this following:
 
-![](./media/image1.png)
+![](./LDAP/image1.png)
 
 If authentication is successful, you can click on the menu icon at the
 top left of the dashboard window and click on System to see a list of
@@ -173,7 +173,7 @@ Authentication happens within the keystone container. To find the name
 of your keystone container execute “docker ps -a |grep keystone” on the
 command line of the boot/master node.
 
-![](./media/image2.png)
+![](./LDAP/image2.png)
 
 The name of the container is in the last column and should begin with
 k8s\_keystone\_k8s-auth followed by a representaion of the IP address of
@@ -187,7 +187,7 @@ docker exec -it &lt;containername&gt; /bin/bash
 Executing a ‘pwd’ command will now show you to be at root (/) in the
 keystone container:
 
-![](./media/image3.png)
+![](./LDAP/image3.png)
 
 Keystone configuration files are in /etc/keystone and the keystone
 logfiles are in /var/log/keystone.
@@ -198,7 +198,7 @@ file in that location.
 
 To check the status of keystone execute “/etc/init.d/keystone status”.
 
-![](./media/image4.png)
+![](./LDAP/image4.png)
 
 You can also check the logs from thkkkkke keystone container with the
 command:
