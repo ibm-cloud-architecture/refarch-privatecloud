@@ -233,7 +233,8 @@ After making configuration changes restart the NTP server with the command:
 
         7.  None of the additional options should be modified
 
-11. Deploy your environment. From the /opt directory execute:
+11. Deploy your environment. From the /opt/cluster directory execute:
+
     cd /opt/cluster
     docker run -e LICENSE=accept –net=host –rm -t -v “$(pwd)”:/opt/cluster ibmcom/cfc-installer:1.2.0 install
 
