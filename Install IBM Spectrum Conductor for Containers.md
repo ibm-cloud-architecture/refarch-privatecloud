@@ -237,7 +237,7 @@ After making configuration changes restart the NTP server with the command:
 
     cd /opt/cluster
     
-    docker run -e LICENSE=accept –net=host –rm -t -v “$(pwd)”:/opt/cluster ibmcom/cfc-installer:1.2.0 install
+    docker run -e LICENSE=accept –net=host –rm -t -v “$(pwd)”:/installer/cluster ibmcom/cfc-installer:1.2.0 install
 
 12. About 10 minutes later you should have a deployed IBM Spectrum Conductor for Containers implementation.
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
