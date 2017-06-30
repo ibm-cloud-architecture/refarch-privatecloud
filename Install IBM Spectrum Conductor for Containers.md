@@ -171,17 +171,28 @@ After making configuration changes restart the NTP server with the command:
             You will now find that there is a new file called ‘authorized\_keys’ in your .ssh folder which contains the contents of id\_rsa.
 
         2.  Repeat for each additional server:
-            ssh-copy-id -I .ssh/id\_rsa <root@172.16.50.254>
-            ssh-copy-id -I .ssh/id\_rsa <root@172.16.50.253>
-            ssh-copy-id -I .ssh/id\_rsa <root@172.16.50.252>
-            ssh-copy-id -I .ssh/id\_rsa <root@172.16.50.251>
+        
+            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.254
+            
+            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.253
+            
+            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.252
+            
+            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.251
+            
 
         3.  When this is complete you should be able to ssh from the boot-master node to each of the other nodes without having to provide a password. You can test this by executing:
-            ssh <root@172.16.50.255>
+        
+            ssh root@172.16.50.255
+            
             ssh root@172.16.50.254
+            
             ssh root@172.16.50.253
+            
             ssh root@172.16.50.252
+            
             ssh root@172.16.50.251
+            
             If you cannot gain access via SSH without a password, ensure that you have enabled root login on each VM and have modified /etc/ssh/sshd\_config on each VM to allow remote login.
 
 8.  Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
