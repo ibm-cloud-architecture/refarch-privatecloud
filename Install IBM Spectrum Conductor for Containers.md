@@ -200,6 +200,7 @@ After making configuration changes restart the NTP server with the command:
         1.  docker pull ibmcom/cfc-installer:1.2.0
 ![alt text](Installation/cfc-installer.png "cfc-installer")
         2.  Change directory to /opt
+        
             cd /opt
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
             docker run -e LICENSE=accept –rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
@@ -209,7 +210,9 @@ After making configuration changes restart the NTP server with the command:
     1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
     
     2.  Copy the id\_rsa file created in step 11b over the /opt/cluster/ssh\_key file and ensure its permissions are set to 400.
+    
         cp ~/.ssh/id\_rsa /opt/cluster/ssh\_key
+        
         chmod 400 /opt/cluster/ssh\_key
 
     3.  Modify the /opt/cluster/conifg.yaml file to compliment your environment.
