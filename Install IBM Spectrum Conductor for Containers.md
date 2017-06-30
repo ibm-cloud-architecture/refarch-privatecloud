@@ -197,19 +197,17 @@ After making configuration changes restart the NTP server with the command:
     3.  If the status is failed you will need to troubleshot the docker installation before going forward.
 
     4.  Pull the cfc installer docker image:
-        1.  docker pull ibmcom/cfc-installer:1.1.0
+        1.  docker pull ibmcom/cfc-installer:1.2.0
 ![alt text](Installation/cfc-installer.png "cfc-installer")
         2.  Change directory to /opt
             cd /opt
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
-            docker run -e LICENSE=accept –rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.1.0 cp -r cluster /data
+            docker run -e LICENSE=accept –rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
 
 10. Configure the cfc installer
 
     1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
     
-    
-
     2.  Copy the id\_rsa file created in step 11b over the /opt/cluster/ssh\_key file and ensure its permissions are set to 400.
         cp ~/.ssh/id\_rsa /opt/cluster/ssh\_key
         chmod 400 /opt/cluster/ssh\_key
@@ -236,8 +234,8 @@ After making configuration changes restart the NTP server with the command:
         7.  None of the additional options should be modified
 
 11. Deploy your environment. From the /opt directory execute:
-    cd /opt
-    docker run -e LICENSE=accept –net=host –rm -t -v “$(pwd)/cluster”:/opt/cluster ibmcom/cfc-installer:1.1.0 install
+    cd /opt/cluster
+    docker run -e LICENSE=accept –net=host –rm -t -v “$(pwd)”:/opt/cluster ibmcom/cfc-installer:1.2.0 install
 
 12. About 10 minutes later you should have a deployed IBM Spectrum Conductor for Containers implementation.
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
