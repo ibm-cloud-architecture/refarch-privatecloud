@@ -157,39 +157,36 @@ After making configuration changes restart the NTP server with the command:
     1.  Login as to the boot-master node as root
 
     2.  From root’s home directory execute:
-        ssh-keygen -t rsa -P ‘’ \# Upper case P and two single quotes for no password
+        ```ssh-keygen -t rsa -P ''``` \# Upper case P and two single quotes for no password
         Accept the default location of /root/.ssh/id\_rsa for the new key file
-        Now, executing “ls .ssh” from root’s home directory should show three files: id\_rsa, id\_rsa.pub and known\_hosts
+        Now, executing ```ls .ssh``` from root’s home directory should show three files: ```id_rsa```, ```id_rsa.pub``` and ```known_hosts```
 
-    3.  Copy the resulting is\_rsa key file to each node in the cluster (including the boot-master node on which we are currently operating).
+    3.  Copy the resulting ```id_rsa``` key file to each node in the cluster (including the boot-master node on which we are currently operating).
 
         1.  Copy to the master node (to the current node):
-            ssh-copy-id -i .ssh/id\_rsa <root@172.16.50.255>
-            You will now find that there is a new file called ‘authorized\_keys’ in your .ssh folder which contains the contents of id\_rsa.
+            ```ssh-copy-id -i .ssh/id_rsa root@cfc-proxy```
+            You will now find that there is a new file called ```authorized_keys``` in your .ssh folder which contains the contents of ```id_rsa```.
 
         2.  Repeat for each additional server:
         
-            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.254
+            ```ssh-copy-id -I .ssh/id_rsa root@cfc-worker1```
             
-            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.253
+            ```ssh-copy-id -I .ssh/id_rsa root@cfc-worker2```
             
-            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.252
-            
-            ssh-copy-id -I .ssh/id\_rsa root@172.16.50.251
+            ```ssh-copy-id -I .ssh/id_rsa root@cfc-worker3```
             
 
         3.  When this is complete you should be able to ssh from the boot-master node to each of the other nodes without having to provide a password. You can test this by executing:
         
-            ssh root@172.16.50.255
+            ```ssh root@cfc-proxy```
             
-            ssh root@172.16.50.254
+            ```ssh root@cfc-worker1```
             
-            ssh root@172.16.50.253
+            ```ssh root@cfc-worker2```
             
-            ssh root@172.16.50.252
+            ```ssh root@cfc-worker3```
             
-            ssh root@172.16.50.251
-            
+
             If you cannot gain access via SSH without a password, ensure that you have enabled root login on each VM and have modified /etc/ssh/sshd\_config on each VM to allow remote login.
 
 8.  Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
