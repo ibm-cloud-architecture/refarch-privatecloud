@@ -41,90 +41,90 @@ Installation
 
     1.  Set a password for the root user
 
-        1.  sudo su - \# provide your user password to get to the root shell
+        1.  ```sudo su -``` \# provide your user password to get to the root shell
 
-        2.  passwd \# Set the root password
+        2.  ```passwd``` \# Set the root password
 
 ![alt text](Installation/root-pwd.png "Root password")
 
 
     2.  Enable remote login as root
 
-        1.  sed -I ‘s/prohibit-password/yes/’ /etc/ssh/sshd\_config
+        1.  ```sed -I ‘s/prohibit-password/yes/’ /etc/ssh/sshd_config```
 
-        2.  <img src="media/image3.png" width="624" height="505" />systemctl restart ssh
+        2.  ```systemctl restart ssh```
 
 ![alt text](Installation/remote-login.png "Remote login")
 
 
 2.  Update NTP settings to make sure time stays in sync
 
-    1.  apt-get install -y ntp
+    1.  ```apt-get install -y ntp```
 
     2.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
 ![alt text](Installation/ntp.png "NTP")
 
 After making configuration changes restart the NTP server with the command:
-> sytemctl retart ntp
+> ```sytemctl retart ntp```
 > To test the status of your NTP servers, use the command:
-> ntpq -p
+> ```ntpq -p```
 
 ![alt text](Installation/ntpq.png "ntpq -p")
 
 
 1.  Update the vm.max\_map\_count setting to 262144:
-    sysctl -w vm.max\_map\_count=262144
+    ```sysctl -w vm.max\_map\_count=262144```
     Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
     ![alt text](Installation/sysctl.png "sysctl")
     
     To check the current value use the command:
-    sysctl vm.max\_map\_count
+    ```sysctl vm.max_map_count```
 
 ![alt text](Installation/sysctl-2.png "sysctl-2")
 
 2.  Install docker
 
-    1.  apt-get update
+    1.  ```apt-get update```
 
     2.  Install Linux image extra packages
-        apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+        ```apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual```
 
     3.  Install the docker repositories
-        apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+        ```apt-get install -y apt-transport-https ca-certificates curl software-properties-common```
 
     4.  Add Docker’s official GPG key
-        curl -fsSL <https://download.docker.com/linux/ubuntu/gpg> | apt-key add -
+        ```curl -fsSL <https://download.docker.com/linux/ubuntu/gpg> | apt-key add -```
 
     5.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
-        apt-key fingerprint 0EBFCD88
+        ```apt-key fingerprint 0EBFCD88```
 ![alt text](Installation/fingerprint.png "fingerprint")
     6.  Setup the docker stable repository
-        add-apt-repository “deb \[arch=amd64\] <https://download.docker.com/linux/ubuntu> $(lsb\_release -cs) stable”
+        ```add-apt-repository "deb \[arch=amd64\] <https://download.docker.com/linux/ubuntu> $(lsb\_release -cs) stable"```
 
     7.  Install docker
 
-        1.  apt-get update
+        1.  ```apt-get update```
 
-        2.  apt-get install -y docker-ce
+        2.  ```apt-get install -y docker-ce```
 
     8.  Makes sure docker is running
 
-        1.  docker run hello-world
+        1.  ```docker run hello-world```
 
     9.  If this doesn’t work, you will need to do some troubleshooting.
 
 3.  Install docker.py
 
-    1.  apt-get install -y python-setuptools
+    1.  ```apt-get install -y python-setuptools```
 
-    2.  easy\_install pip
+    2.  ```easy_install pip```
 
-    3.  pip install docker-py&gt;=1.7.0
+    3.  ```pip install docker-py>=1.7.0```
 
 4.  Shutdown your VM
 
-    1.  Shutdown -h now
+    1.  ```shutdown -h now```
 
 5.  In the VMware vCenter Web Client convert this VM to a template. We will use this template to provision any additional nodes we need in the environment including additional worker nodes as needed.
     Create new VMs from your new template for each of the nodes in the cluster:
