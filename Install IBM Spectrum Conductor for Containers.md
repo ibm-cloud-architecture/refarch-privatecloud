@@ -251,7 +251,7 @@ After making configuration changes restart the NTP server with the command:
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
 ![alt text](Installation/deployment-1.png "deployment 1")
 ![alt text](Installation/deployment-2.png "deployment 2")
-    Login to your new implementation at <http://172.16.50.255>:8443 with userid of admin and password of admin.
+    Login to your new implementation at <https://172.16.50.255>:8443 with userid of admin and password of admin.
 
 Appendix A
 ==========
