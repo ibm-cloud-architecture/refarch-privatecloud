@@ -224,7 +224,7 @@ After making configuration changes restart the NTP server with the command:
 
         1.  ```mesos_enabled: false```
 
-        2.  ```install_docker\_py: false``` \# We already installed this in step 7
+        2.  ```install_docker_py: false``` \# We already installed this in step 7
 
         3.  ```network_type: calico```
             Calico networking uses BGP for routing. Enabling routing between an existing network infrastructure and the cfc cluster requires separate configuration. See Appendix A.
@@ -232,11 +232,11 @@ After making configuration changes restart the NTP server with the command:
         4.  ```network_cidr: 10.1.0.0/16```
             This value must be routable within your network so it cannot overlap any existing subnet.
 
-        5.  Service\_cluster\_ip\_range: 10.0.0.1/24
+        5.  ```service_cluster_ip_range: 10.0.0.1/24```
             This value does not need to be routable, but should not conflict with the network\_cidr range or anything in your existing host network.
             (Interestingly, this subnet is the lowest possible subnet in the 10.x class A private IP range. The subnet starts with .1 because 10.0.0.0 is the subnet name and is not available for assignment.
 
-        6.  Cluster\_domain: cluster.local
+        6.  ```cluster_domain: cluster.local```
             This should be sufficient unless you have other clusters in your network. No two cluster\_domains can be the same.
 
         7.  None of the additional options should be modified
