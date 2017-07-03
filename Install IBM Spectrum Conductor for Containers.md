@@ -36,9 +36,6 @@ Installation
 >
 > Initially, configure the server for DHCP (if available). We will assign static IP’s later. If not available assign the static IP of your boot/master server here.
 
-1.  Update /etc/host file with IP addresses and hostnames of all cluster servers
-
-![alt text](Installation/host-file.png "Host file")
 
 1.  Enable root login remotely via ssh
 
