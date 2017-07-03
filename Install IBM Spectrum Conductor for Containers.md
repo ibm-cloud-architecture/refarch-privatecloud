@@ -194,7 +194,7 @@ After making configuration changes restart the NTP server with the command:
 9.  Next we need to download the cfc installer docker image.
 
     1.  On the boot-master node as the root user ensure your docker service is running:
-        systemctl status docker
+        ```systemctl status docker```
 ![alt text](Installation/status-docker.png "status docker")
     2.  If the response shows that docker is not running you can start it with the command:
         systemctl start docker
@@ -208,28 +208,28 @@ After making configuration changes restart the NTP server with the command:
         
             cd /opt
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
-            docker run -e LICENSE=accept –rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
+            ```docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data```
 
 10. Configure the cfc installer
 
     1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
     
-    2.  Copy the id\_rsa file created in step 11b over the /opt/cluster/ssh\_key file and ensure its permissions are set to 400.
+    2.  Copy the ```id_rsa``` file created in step 11b over the ```/opt/cluster/ssh_key``` file and ensure its permissions are set to 400.
     
-        cp ~/.ssh/id\_rsa /opt/cluster/ssh\_key
+        ```cp ~/.ssh/id_rsa /opt/cluster/ssh_key```
         
-        chmod 400 /opt/cluster/ssh\_key
+        ```chmod 400 /opt/cluster/ssh_key```
 
     3.  Modify the /opt/cluster/conifg.yaml file to compliment your environment.
 
-        1.  mesos\_enabled: false
+        1.  ```mesos_enabled: false```
 
-        2.  install\_docker\_py: false \# We already installed this in step 7
+        2.  ```install_docker\_py: false``` \# We already installed this in step 7
 
-        3.  network\_type: calico
+        3.  ```network_type: calico```
             Calico networking uses BGP for routing. Enabling routing between an existing network infrastructure and the cfc cluster requires separate configuration. See Appendix A.
 
-        4.  network\_cidr: 10.1.0.0/16
+        4.  ```network_cidr: 10.1.0.0/16```
             This value must be routable within your network so it cannot overlap any existing subnet.
 
         5.  Service\_cluster\_ip\_range: 10.0.0.1/24
@@ -245,7 +245,7 @@ After making configuration changes restart the NTP server with the command:
 
     cd /opt/cluster
     
-    docker run -e LICENSE=accept –net=host –rm -t -v “$(pwd)”:/installer/cluster ibmcom/cfc-installer:1.2.0 install
+    ```docker run -e LICENSE=accept --net=host --rm -t -v "$(pwd)":/installer/cluster ibmcom/cfc-installer:1.2.0 install```
 
 12. About 10 minutes later you should have a deployed IBM Spectrum Conductor for Containers implementation.
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
