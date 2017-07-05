@@ -4,22 +4,33 @@ Install IBM Spectrum Conductor for Containers
 Assumptions:
 
 1.  **Overprovisioning**: The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
+
     This means that whether you allocate 1 vCPU or 2 vCPUs, you are not using more capacity on the host to run the same workload.
+    
     The same is the case for Memory. If you allocate 16GB of memory, but your VM is only using 2 GB of it, the host only allocates 2 GB.
     Studies indicate that the average dedicated server only uses about 10 – 20% of its available capacity. Because of this, a cloud service may overprovision the amount of CPU and RAM on a host by a factor of as much as 10 and still provide optimal responsiveness to VMs it hosts.
+    
     To add additional CPU and Memory resources to a guest (virtual machine) it must be shutdown and resources re-allocated. For this reason, we will allocate ample CPU and Memory for our virtual machines knowing that we will only be using what we need at any given time and it is better to have too much than too little.
+    
     Similarly, storage can normally be overprovisioned by a factor of 4 when all VMs are using thin provisioned disks. It is better to create a larger thinly provisioned disk than we think we may need than to create a smaller one and then have to come back later and increase the size or add additional disks to satisfy the need.
+    
     If provisioning into a public cloud provider, this may not be the case depending on that providers billing model. If you are only charged for resources **used** then this model still works, but if you are billed for resources **allocated**, then you may want to make sure you request only what you need so you are not charged for resources you are not using.
+    
     In this example we will use the former model and allocate ample resources so we do not have to come back later and add more.
 
 2.  Installation will be performed on Ubuntu 16.04.2 LTS server amd64. All commands will be for this platform.
 
 3.  Installation must be done as root. To reduce the number of keystrokes, we will login to the root account rather than running sudo in front of every command.
 
-4.  For simple demo/test purposes, all can be installed onto a single node, but this is not suitable for any amount of test or production use. The Topology for this implementation will have a combined boot and master server plus a proxy server and three worker nodes.
+4.  For simple demo/test purposes, the entire environment can be installed onto a single node, but this is not suitable for any amount of test or production use. The Topology for this implementation will have a combined boot and master server plus a proxy server and three worker nodes.
+
     A short video tutorial for installing IBM Spectrum Conductor for Containers in a single node can be found on the developerWorks page at <https://www.ibm.com/developerworks/community/blogs/fe25b4ef-ea6a-4d86-a629-6f87ccf4649e/entry/Installing_your_cluster?lang=en>.
 
-5.  In this tutorial, we will be installing onto a VMware cluster made up of two hosts with DRS, vMotion, and HA enabled. For more information on the high availability aspects of the infrastructure see Appendix B.
+5.  **HA/DR:** In this tutorial, we will be installing onto a VMware cluster made up of two hosts with DRS, vMotion, and HA enabled. This will provide for host based HA for our environment
+
+For more information on the high availability aspects of the infrastructure see Appendix B.
+
+For DR, we are using Tivoli Storage Manager (TSM) Data Protection for VMware.  It is configured to take a backup snapshot nightly and store the snapshot which can then be restored at a later time in the event of catastrophic failure.
 
 Installation
 ------------
@@ -28,38 +39,36 @@ Installation
 
 > <http://releases.ubuntu.com/16.04/ubuntu-16.04.2-server-amd64.iso>
 >
-> (Do we need to put a tutorial on how to set this up on vmware/KVM? If they are doing this can we assume they know how to install Ubuntu? They could be using redhat)
->
 > CPUs: 4
 > Memory: 8GB
 > Disk: 100GB (Thin Provisioned)
+>       **Note:** All application storage (PersistentVolume [PV] storage) is via NFS and is external to this environment. There is no need to allocate additional storage for PV storage here.
 >
 > Initially, configure the server for DHCP (if available). We will assign static IP’s later. If not available assign the static IP of your boot/master server here.
-
 
 1.  Enable root login remotely via ssh
 
     1.  Set a password for the root user
 
-        1.  ```sudo su -``` \# provide your user password to get to the root shell
+        1.  `sudo su -` \# provide your user password to get to the root shell
 
-        2.  ```passwd``` \# Set the root password
+        2.  `passwd` \# Set the root password
 
 ![alt text](Installation/root-pwd.png "Root password")
 
 
     2.  Enable remote login as root
 
-        1.  sed -I 's/prohibit-password/yes/' /etc/ssh/sshd_config
+        1.  `sed -I 's/prohibit-password/yes/' /etc/ssh/sshd_config`
 
-        2.  systemctl restart ssh
+        2.  `systemctl restart ssh`
 
 ![alt text](Installation/remote-login.png "Remote login")
 
 
 2.  Update NTP settings to make sure time stays in sync
 
-    1.  ```apt-get install -y ntp```
+    1.  `apt-get install -y ntp`
 
     2.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
