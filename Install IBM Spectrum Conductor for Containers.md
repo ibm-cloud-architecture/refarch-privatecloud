@@ -219,7 +219,7 @@ To test the status of your NTP servers, use the command:
     1.  On the boot-master node as the root user ensure your docker service is running:
         `systemctl status docker`
         
-![alt text](Installation/status-docker.png "status docker")
+        ![alt text](Installation/status-docker.png "status docker")
 
     2.  If the response shows that docker is not running you can start it with the command:
         `systemctl start docker`
@@ -230,14 +230,15 @@ To test the status of your NTP servers, use the command:
     
         1.  `docker pull ibmcom/cfc-installer:1.2.0`
         
-![alt text](Installation/cfc-installer.png "cfc-installer")
+        ![alt text](Installation/cfc-installer.png "cfc-installer")
 
         2.  Change directory to /opt
         
->            `cd /opt`
+            `cd /opt`
             
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
->            `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
+        
+            `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
 
 10. Configure the cfc installer
 
@@ -284,9 +285,9 @@ To test the status of your NTP servers, use the command:
 
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
     
-![alt text](Installation/deployment-1.png "deployment 1")
+    ![alt text](Installation/deployment-1.png "deployment 1")
 
-![alt text](Installation/deployment-2.png "deployment 2")
+    ![alt text](Installation/deployment-2.png "deployment 2")
 
     Login to your new implementation at <https://172.16.50.255>:8443 with userid of admin and password of admin.
 
