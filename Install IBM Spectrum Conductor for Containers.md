@@ -382,19 +382,19 @@ Now we have to configure the VyOS router for the other side of the BGP connectio
     set protocols bgp 65536 neighbor 172.16.50.254 ebgp-multihop '2'
     set protocols bgp 65536 neighbor 172.16.50.254 remote-as '64511'
     set protocols bgp 65536 neighbor 172.16.50.254 update-source '172.16.255.250'
-    set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-proxy"
+    set protocols bgp 65536 neighbor 172.16.50.254 description "cfc-proxy"
     set protocols bgp 65536 neighbor 172.16.50.253 ebgp-multihop '2'
     set protocols bgp 65536 neighbor 172.16.50.253 remote-as '64511'
     set protocols bgp 65536 neighbor 172.16.50.253 update-source '172.16.255.250'
-    set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker3"
+    set protocols bgp 65536 neighbor 172.16.50.253 description "cfc-worker3"
     set protocols bgp 65536 neighbor 172.16.50.252 ebgp-multihop '2'
     set protocols bgp 65536 neighbor 172.16.50.252 remote-as '64511'
     set protocols bgp 65536 neighbor 172.16.50.252 update-source '172.16.255.250'
-    set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker2"
+    set protocols bgp 65536 neighbor 172.16.50.252 description "cfc-worker2"
     set protocols bgp 65536 neighbor 172.16.50.251 ebgp-multihop '2'
     set protocols bgp 65536 neighbor 172.16.50.251 remote-as '64511'
     set protocols bgp 65536 neighbor 172.16.50.251 update-source '172.16.255.250'
-    set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker1"
+    set protocols bgp 65536 neighbor 172.16.50.251 description "cfc-worker1"
     set protocols bgp 65536 network "10.2.0.0/16"
     set protocols bgp 65536 parameters router-id '172.16.255.250'
     set protocols static route 10.2.0.0/16 blackhole distance '254'
