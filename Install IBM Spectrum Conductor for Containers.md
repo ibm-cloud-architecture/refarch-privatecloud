@@ -271,6 +271,7 @@ To test the status of your NTP servers, use the command:
             (Interestingly, this subnet is the lowest possible subnet in the 10.x class A private IP range. The subnet starts with .1 because 10.0.0.0 is the subnet name and is not available for assignment.
 
         6.  `cluster_domain: cluster.local`
+        
             This should be sufficient unless you have other clusters in your network. No two cluster\_domains can be the same.
 
         7.  None of the additional options should be modified
