@@ -1,4 +1,4 @@
-Install IBM Spectrum Conductor for Containers
+Install IBM Cloud private-ce
 =============================================
 
 Assumptions:
@@ -89,23 +89,30 @@ To test the status of your NTP servers, use the command:
 
 2.  Install docker
 
-    1.  `apt-get update`
+    1. Update your ubuntu repositories
+    
+    >   `apt-get update`
 
     2.  Install Linux image extra packages
-        `apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual`
+    
+    >   `apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual`
 
     3.  Install the docker repositories
-        `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
+    
+    >   `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
 
     4.  Add Docker’s official GPG key
+    
         `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -`
 
     5.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+    
         `apt-key fingerprint 0EBFCD88`
         
 ![alt text](Installation/fingerprint.png "fingerprint")
 
     6.  Setup the docker stable repository
+    
         `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"`
 
     7.  Install docker
