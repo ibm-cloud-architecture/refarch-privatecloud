@@ -300,7 +300,7 @@ shell execute the command “sudo su –“.
 2)  Setup passwordless SSH from the master node to the proxy node and
     all three worker nodes
 
-    a.  From root’s home directory on the master node create ssh keys.
+    1.  From root’s home directory on the master node create ssh keys.
         In the following command the P is upper case and the ‘’ are two
         single quotes:
         
@@ -311,7 +311,7 @@ shell execute the command “sudo su –“.
         
     ![](AWS/DefaultLocation.png)
 
-    b.  Update the /root/.ssh/authorized\_keys file on each node
+    2.  Update the /root/.ssh/authorized\_keys file on each node
         (master, proxy, and all worker nodes) with the value of
         /root/.ssh/id\_rsa.pub on the master node. Note that there will
         already be a file there with existing content from AWS. Replace
@@ -334,7 +334,7 @@ shell execute the command “sudo su –“.
             cd ~/.ssh
             cp id_rsa.pub authorized_keys
 
-    c.  When this is complete, the root user on the master node should
+    3.  When this is complete, the root user on the master node should
         be able to ssh to each node (including itself) without the need
         for a password. Note that on the first attempt, the system will
         require you to confirm the authenticity of the host. If you
@@ -343,7 +343,7 @@ shell execute the command “sudo su –“.
         
         ![](AWS/NoPassword.png)
 
-> Your instances are now configured and ready to install CfC
+Your instances are now configured and ready to install CfC
 
 Install IBM Spectrum Conductor for Containers
 ---------------------------------------------
@@ -381,18 +381,18 @@ Install IBM Spectrum Conductor for Containers
     
         cd /opt/cluster
 
-    a.  Edit the /opt/cluster/hosts file to specify the correct
+    1.  Edit the /opt/cluster/hosts file to specify the correct
         **internal** IP addresses of each node in your cluster.
         
         ![](AWS/ClusterHosts.png)
 
-    b.  Copy the value of /root/.ssh/id\_rsa over the ssh\_keys file and
+    2.  Copy the value of /root/.ssh/id\_rsa over the ssh\_keys file and
         make sure the file permissions for the ssh\_key file is 400.
         
             cp /root/.ssh/id\_rsa /opt/cluster/ssh_key
             chmod 400 /opt/cluster/ssh_key
 
-    c.  Make any needed changes to the config.yml file. For our purposes
+    3.  Make any needed changes to the config.yml file. For our purposes
         we will leave these values at their defaults. However, if either
         of the *network\_cidr* or *service\_cluster\_ip\_range* values
         conflict with any network defined in your environment, they must
@@ -410,17 +410,17 @@ Install IBM Spectrum Conductor for Containers
 
 1)  Deploy your environment
 
-    a.  **IMPORTANT**: Make sure to launch the deployment from the /opt directory
+    1.  **IMPORTANT**: Make sure to launch the deployment from the /opt directory
         
         cd /opt
 
-    b.  Launch the installer
+    2.  Launch the installer
     
             docker run -e LICENSE=accept –net=host –rm -t -v "$(pwd)/cluster":/installer/cluster ibmcom/cfc-installer:1.2.0 install
 
-    c.  About 10 minutes later your environment is installed.
+    3.  About 10 minutes later your environment is installed.
 
-    d.  Login with https to the external IP address of your master node
+    4.  Login with https to the external IP address of your master node
         on port 8443. E.g. https:// 1.2.3.413.58.36.247:8443. The
         default userid is “admin” (without the quotes), and the default
         password is “admin” (without the quotes).
