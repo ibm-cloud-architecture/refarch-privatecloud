@@ -162,12 +162,12 @@ To test the status of your NTP servers, use the command:
     1.  Change the hostname
         Edit the file /etc/hostname with your favorite text editor (e.g. vim) and change the value to match the node: e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
         
-![alt text](Installation/hostname.png "hostname")
+        ![alt text](Installation/hostanme.png "hostname)
 
     2.  Modify /etc/network/interfaces to configure a static IP address
         In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
         
-![alt text](Installation/interfaces.png "interfaces")
+        ![alt text](Installation/interfaces.png "interfaces")
 
     3.  In ubuntu 16.04, resetting the network with the standard “systemctl restart networking” does not seem to change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
     
