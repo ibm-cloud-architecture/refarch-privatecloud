@@ -206,7 +206,7 @@ shell execute the command “sudo su –“.
     
     ![](AWS/PrivateIPs.png)
     
-> Make note of the private IP address of each instance.
+    Make note of the private IP address of each instance.
 
 1)  Change the hostname of each node to represent the function. The
     instance you named cfc-boot-master should also have a hostname of
@@ -232,7 +232,7 @@ shell execute the command “sudo su –“.
     using PuTTY, the title of the window will also be updated to make it
     easier for you to tell one node from another.
 
-> ![](AWS/CommandLine.png)
+    ![](AWS/CommandLine.png)
 
 1)  Install NTP to ensure all nodes stay in time sync
 
@@ -240,12 +240,14 @@ shell execute the command “sudo su –“.
 
 2)  Update the vm.max\_map\_count setting to 26214
     
-    > sysctl -w vm.max_map_count=262144
-    > echo “vm.max_map_count=262144” >> /etc/sysctl.conf
+    sysctl -w vm.max_map_count=262144
+    echo “vm.max_map_count=262144” >> /etc/sysctl.conf
     
     ![](AWS/SetMax.png)
     
-    Check the value with the command `sysctl vm.max_map_count`.
+    Check the value with the command:
+    
+    sysctl vm.max_map_count
     
     ![](AWS/GetMax.png)
 
@@ -253,7 +255,7 @@ shell execute the command “sudo su –“.
 
     a.  Make sure your repository information is up-to-date
     
-        `apt-get update`
+        apt-get update
 
     b.  Install the linux image extra virtual package
     
