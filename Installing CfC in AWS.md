@@ -234,13 +234,14 @@ shell execute the command “sudo su –“.
 
 > ![](AWS/CommandLine.png)
 
-1)  Install NTP to ensure all nodes stay in time sync\
-    apt-get install -y ntp
+1)  Install NTP to ensure all nodes stay in time sync
+
+    `apt-get install -y ntp`
 
 2)  Update the vm.max\_map\_count setting to 26214
     
-    `sysctl -w vm.max_map_count=262144`
-    `echo “vm.max_map_count=262144” >> /etc/sysctl.conf`
+    > sysctl -w vm.max_map_count=262144
+    > echo “vm.max_map_count=262144” >> /etc/sysctl.conf
     
     ![](AWS/SetMax.png)
     
@@ -279,8 +280,8 @@ shell execute the command “sudo su –“.
 
     g.  Install docker
 
-        `apt-get update`
-        `apt-get install -y docker-ce`
+        >apt-get update
+        >apt-get install -y docker-ce
 
 4.  Make sure docker is working
 
@@ -290,9 +291,9 @@ shell execute the command “sudo su –“.
 
 6.  Install docker.py
 
-    `apt-get install -y python-setuptools`
-    `easy_install pip`
-    `pip install docker-py>=1.7.0`
+    >apt-get install -y python-setuptools
+    >easy_install pip
+    >pip install docker-py>=1.7.0
 
 2)  Setup passwordless SSH from the master node to the proxy node and
     all three worker nodes
@@ -301,8 +302,8 @@ shell execute the command “sudo su –“.
         In the following command the P is upper case and the ‘’ are two
         single quotes:
         
-        `cd ~`
-        `ssh-keygen -t rsa -P ''`
+        >cd ~
+        >ssh-keygen -t rsa -P ''
         
         Accept the default location for the new files.
         
@@ -328,8 +329,8 @@ shell execute the command “sudo su –“.
         On the master node, you can just change to root’s .ssh directory
         and copy the id\_rsa.pub file over the authorized\_keys file.
         
-        `cd ~/.ssh\`
-        `cp id_rsa.pub authorized_keys`
+        >cd ~/.ssh
+        >cp id_rsa.pub authorized_keys
 
     c.  When this is complete, the root user on the master node should
         be able to ssh to each node (including itself) without the need
