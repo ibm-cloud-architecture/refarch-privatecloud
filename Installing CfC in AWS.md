@@ -1,4 +1,4 @@
-Installing CfC in an AWS EC2 Environment
+Installing IBM Cloud private (ICP) in an AWS EC2 Environment
 ========================================
 
 Assumptions
@@ -44,7 +44,6 @@ Assumptions
     three worker nodes. The nodes will be named cfc-boot-master,
     cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
 
-\
 Creation of Nodes
 -----------------
 
@@ -179,7 +178,7 @@ to each instance.
 
 You are now ready to prepare your environment for CfC installation.
 
-Preparing your environment for CfC installation
+Preparing your environment for ICP installation
 -----------------------------------------------
 
 Using your preferred SSH client attach to each node in a separate
@@ -195,7 +194,7 @@ right-clicking on another PuTTY window will paste it into that window.
 This makes replicating commands in multiple instances very easy.
 
 **The** **following instructions should be completed on each node**
-(cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3).
+(icp-boot-master, icp-proxy, icp-worker1, icp-worker2, and icp-worker3).
 
 All commands will be run as the root user. To gain access to a root
 shell execute the command “sudo su –“.
@@ -203,27 +202,31 @@ shell execute the command “sudo su –“.
 1)  First, we need to know the internal IP addresses of each node in
     the cluster. On the EC2 dashboard, select each instance in turn and
     look at the detailed information in the bottom pane for “Private
-    IPs”.\
+    IPs”.
+    
     ![](AWS/PrivateIPs.png)
     
 > Make note of the private IP address of each instance.
 
 1)  Change the hostname of each node to represent the function. The
     instance you named cfc-boot-master should also have a hostname of
-    cfc-boot-master, and so on.\
-    \
-    To change the hostname execute the “hostname &lt;newhostname&gt;”
-    command.\
-    hostname cfc-bmp\
-    \
+    cfc-boot-master, and so on.
+    
+    To change the hostname execute the “hostname <newhostname>”
+    command.
+    
+    `hostname icp-bmp`
+    
     Edit the /etc/hostname file and replace the default value with
-    “cfc-bmp”\
-    ![](AWS/Hostname.png)\
-    \
+    “cfc-bmp”
+    
+    ![](AWS/Hostname.png)
+    
     Edit the /etc/hosts file to specify an IP address and hostname for
-    each node (instance) in your cluster.\
-    ![](AWS/Hosts.png)\
-    \
+    each node (instance) in your cluster.
+    
+    ![](AWS/Hosts.png)
+    
     If you exit the root shell and log back in (with “sudo su –“) you
     will see the hostname reflected on your command line and, if you are
     using PuTTY, the title of the window will also be updated to make it
@@ -234,75 +237,75 @@ shell execute the command “sudo su –“.
 1)  Install NTP to ensure all nodes stay in time sync\
     apt-get install -y ntp
 
-2)  Update the vm.max\_map\_count setting to 26214\
-    \
-    sysctl -w vm.max\_map\_count=262144\
-    echo “vm.max\_map\_count=262144” &gt;&gt; /etc/sysctl.conf\
-    \
-    ![](AWS/SetMax.png)\
-    \
-    Check the value with the command “sysctl vm.max\_map\_count”.\
+2)  Update the vm.max\_map\_count setting to 26214
+    
+    `sysctl -w vm.max_map_count=262144`
+    `echo “vm.max_map_count=262144” >> /etc/sysctl.conf`
+    
+    ![](AWS/SetMax.png)
+    
+    Check the value with the command `sysctl vm.max_map_count`.
+    
     ![](AWS/GetMax.png)
 
 3)  Install docker
 
-    a.  Make sure your repository information is up-to-date\
-        apt-get update
+    a.  Make sure your repository information is up-to-date
+    
+        `apt-get update`
 
-    b.  Install the linux image extra virtual package\
-        apt-get install -y linux-image-extra-virtual
+    b.  Install the linux image extra virtual package
+    
+        `apt-get install -y linux-image-extra-virtual`
 
-    c.  Install the additional required packages\
-        apt-get install -y apt-transport-https ca-certificates curl
-        software-properties-common
+    c.  Install the additional required packages
+    
+        `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
 
-    d.  Add Docker’s official GPG Key\
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg |
-        apt-key add -
+    d.  Add Docker’s official GPG Key
+    
+        `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -`
 
-    e.  Verify that the key fingerprint is\
-        9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88\
-        \
-        apt-key fingerprint 0EBFCD88\
-        \
+    e.  Verify that the key fingerprint is
+        9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+        
+        `apt-key fingerprint 0EBFCD88`
+        
         ![](AWS/Fingerprint.png)
 
-    f.  Setup the docker stable repository\
-        add-apt-repository “deb \[arch=amd64\]
-        https://download.docker.com/linux/ubuntu \$(lsb\_release -cs)
-        stable”
+    f.  Setup the docker stable repository
+    
+        `add-apt-repository "deb \[arch=amd64\] https://download.docker.com/linux/ubuntu \$(lsb\_release -cs) stable"`
 
     g.  Install docker
 
-> <span id="_Hlk485217144" class="anchor"></span>apt-get update<span
-> id="_Hlk485217153" class="anchor"></span>\
-> apt-get install -y docker-ce
+        `apt-get update`
+        `apt-get install -y docker-ce`
 
-a.  Makes sure docker is working
+4.  Make sure docker is working
 
-> docker run hello-world
+    `docker run hello-world`
 
-a.  If this doesn’t work, you will need to do some troubleshooting
+5.  If this doesn’t work, you will need to do some troubleshooting
 
-<!-- -->
+6.  Install docker.py
 
-1)  Install docker.py\
-    apt-get install -y python-setuptools\
-    easy\_install pip\
-    pip install docker-py&gt;=1.7.0
+    `apt-get install -y python-setuptools`
+    `easy_install pip`
+    `pip install docker-py>=1.7.0`
 
 2)  Setup passwordless SSH from the master node to the proxy node and
     all three worker nodes
 
     a.  From root’s home directory on the master node create ssh keys.
         In the following command the P is upper case and the ‘’ are two
-        single quotes:\
-        \
-        cd \~\
-        ssh-keygen -t rsa -P ‘’\
-        \
-        Accept the default location for the new files.\
-        \
+        single quotes:
+        
+        `cd ~`
+        `ssh-keygen -t rsa -P ''`
+        
+        Accept the default location for the new files.
+        
         ![](AWS/DefaultLocation.png)
 
     b.  Update the /root/.ssh/authorized\_keys file on each node
@@ -310,78 +313,81 @@ a.  If this doesn’t work, you will need to do some troubleshooting
         /root/.ssh/id\_rsa.pub on the master node. Note that there will
         already be a file there with existing content from AWS. Replace
         the contents of this file with the contents from the
-        \~/.ssh/id\_rsa.pub file on the master node.\
-        \
+        \~/.ssh/id\_rsa.pub file on the master node.
+        
         On the master node, cat the value of /root/.ssh/id\_rsa.pub to
         the screen and copy it to the clipboard (Note that some of the
-        text here is intentionally obscured).\
-        ![](AWS/IdRsa.png)\
-        \
+        text here is intentionally obscured).
+        
+        ![](AWS/IdRsa.png)
+        
         Paste that value into each other node’s
         /root/.ssh/authorized\_keys file, replacing the existing
-        contents.\
-        \
+        contents.
+        
         On the master node, you can just change to root’s .ssh directory
-        and copy the id\_rsa.pub file over the authorized\_keys file.\
-        \
-        cd \~/.ssh\
-        cp id\_rsa.pub authorized\_keys
+        and copy the id\_rsa.pub file over the authorized\_keys file.
+        
+        `cd ~/.ssh\`
+        `cp id_rsa.pub authorized_keys`
 
     c.  When this is complete, the root user on the master node should
         be able to ssh to each node (including itself) without the need
         for a password. Note that on the first attempt, the system will
         require you to confirm the authenticity of the host. If you
         answer yes, it will add the master node to the list of known
-        hosts and this will not be required again in the future.\
-        \
+        hosts and this will not be required again in the future.
+        
         ![](AWS/NoPassword.png)
 
 > Your instances are now configured and ready to install CfC
 
-\
 Install IBM Spectrum Conductor for Containers
 ---------------------------------------------
 
-**NOTE: The following commands are only executed on the master**
-**node.**
+**NOTE: The following commands are only executed on the master node.**
 
-1)  Make sure docker is running\
-    systemctl status docker\
-    \
-    ![](AWS/Docker.png)\
-    \
-    If it is not running start it\
-    systemctl start docker
+1)  Make sure docker is running
+
+    `systemctl status docker`
+    
+    ![](AWS/Docker.png)
+    
+    If it is not running start it
+    
+    `systemctl start docker`
 
 2)  Pull the CfC installer docker image from the repository\
-    docker pull ibmcom/cfc-installer:1.1.0\
-    \
+    
+    `docker pull ibmcom/cfc-installer:1.2.0`
+    
     ![](AWS/CfCInstaller.png)
 
-3)  **IMPORTANT:** Change to the /opt directory\
-    cd /opt
+3)  **IMPORTANT:** Change to the /opt directory
+    
+       `cd /opt`
 
-4)  Extract the configuration files\
-    \
-    docker run -e LICENSE=accept –rm -v “\$(pwd)”:/data
-    ibmcom/cfc-installer:1.1.0 cp -r cluster /data\
-    \
+4)  Extract the configuration files
+    
+    `docker run -e LICENSE=accept -–rm -v “\$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
+    
     You should now have a subdirectory under /opt named “cluster”
 
 5)  Change to the /opt/cluster directory and edit the configuration
-    files as needed for the install\
-    \
-    cd /opt/cluster
+    files as needed for the install
+    
+    `cd /opt/cluster`
 
     a.  Edit the /opt/cluster/hosts file to specify the correct
-        **internal** IP addresses of each node in your cluster.\
-        \
+        **internal** IP addresses of each node in your cluster.
+        
         ![](AWS/ClusterHosts.png)
 
     b.  Copy the value of /root/.ssh/id\_rsa over the ssh\_keys file and
-        make sure the file permissions for the ssh\_key file is 400.\
-        cp /root/.ssh/id\_rsa /opt/cluster/ssh\_key\
-        chmod 400 /opt/cluster/ssh\_key
+        make sure the file permissions for the ssh\_key file is 400.
+        
+        `cp /root/.ssh/id\_rsa /opt/cluster/ssh_key`
+        `chmod 400 /opt/cluster/ssh_key`
 
     c.  Make any needed changes to the config.yml file. For our purposes
         we will leave these values at their defaults. However, if either
@@ -391,8 +397,8 @@ Install IBM Spectrum Conductor for Containers
         environment is 172.16.0.0/20, we have no conflicts with either
         of these subnet definitions.
 
-> ![](AWS/Config.png)\
-> \
+> ![](AWS/Config.png)
+
 > To see which subnets are defined in your environment you can execute
 > the “netstat -arn” command on the master node and check for any
 > existing routes to these subnets. If any exist, then you will need to
@@ -403,36 +409,37 @@ Install IBM Spectrum Conductor for Containers
 
     a.  **IMPORTANT**: Make sure to launch the deployment from the /opt
         directory\
-        cd /opt
+        `cd /opt`
 
-    b.  Launch the installer\
-        docker run -e LICENSE=accept –net=host –rm -t -v
-        “\$(pwd)/cluster”:/installer/cluster \\\
-        ibmcom/cfc-installer:1.1.0 install
+    b.  Launch the installer
+    
+        `docker run -e LICENSE=accept –net=host –rm -t -v "$(pwd)/cluster":/installer/cluster ibmcom/cfc-installer:1.2.0 install
 
     c.  About 10 minutes later your environment is installed.
 
     d.  Login with https to the external IP address of your master node
         on port 8443. E.g. https:// 1.2.3.413.58.36.247:8443. The
         default userid is “admin” (without the quotes), and the default
-        password is “admin” (without the quotes).\
-        \
+        password is “admin” (without the quotes).
+        
         ![](AWS/Login.png)
 
 2)  With all installation and configuration complete, you can now
     disassociate your elastic IPs from your proxy and worker nodes. On
     the instance dashboard, select a node, then click on
-    Actions-&gt;Networking-&gt;Disassociate Elastic IP Address.\
-    \
-    ![](AWS/Disassociate.png)\
+    Actions-&gt;Networking-&gt;Disassociate Elastic IP Address.
+    
+    ![](AWS/Disassociate.png)
+    
     On the following screen click “Yes, Disassociate”.
 
 3)  Repeat this for all of your elastic IPs.
 
 4)  When you are done, only your master node should have an external IP
-    address\
+    address
+    
     ![](AWS/MasterNode.png)
-\
+
 Installing an NFS server for persistent storage
 -----------------------------------------------
 
@@ -487,7 +494,7 @@ internal IP address.
 
 Next, find the device which represents your second hard disk
 
-ls /dev/xvd\*
+`ls /dev/xvd\*`
 
 ![](AWS/Device.png)
 
@@ -522,7 +529,7 @@ Listing /dev/xvd\* will now show /dev/xvdb1 – your new partition.
 Now that we have a partition, we need to format it so it can be used. We
 will format it as ext4.
 
-mkfs -t ext4 /dev/xvdb1
+`mkfs -t ext4 /dev/xvdb1`
 
 ![](AWS/Mkfs.png)
 
@@ -532,10 +539,10 @@ read/write/execute for world. A directory listing of the newly mounted
 disk will show a lost+found directory which is the hallmark of a mounted
 partition.
 
-mkdir /storage\
-chmod 777 /storage\
-mount -t ext4 /dev/xvdb1 /storage\
-ls /storage
+`mkdir /storage`
+`chmod 777 /storage`
+`mount -t ext4 /dev/xvdb1 /storage`
+`ls /storage`
 
 ![](AWS/Storage.png)
 
@@ -546,24 +553,22 @@ To make the mount permanent, we will add it to the /etc/fstab file.
 Now that we have something to share, we need to install the nfs server
 to share it.
 
-apt-get install -y nfs-kernel-server
+`apt-get install -y nfs-kernel-server`
 
 Now tell the nfs server what to share and how to share it. Note that
 there is a tab between /storage and the asterisk and that there is no
 space between the asterisk and the open parenthesis.
 
-echo “/storage
-\*(rw,no\_subtree\_check,async,insecure,no\_root\_squash)” &gt;&gt;
-/etc/exports
+`echo “/storage \*(rw,no_subtree_check,async,insecure,no_root_squash)” >> etc/exports`
 
 Now restart your nfs server to read the new exports
 
-systemctl restart nfs-kernel-server
+`systemctl restart nfs-kernel-server`
 
 Disable your firewall so the worker nodes can communicate with your new
 server
 
-ufw disable
+`ufw disable`
 
 ![](AWS/Ufw.png)
 
@@ -590,8 +595,7 @@ Spectrum Conductor for Containers – Storage Best Practices”.
 
 In the “Key” section add 2 new keys.
 
-> Server: &lt;IP of your NFS server&gt;
->
+> Server: <IP of your NFS server>
 > Path: /storage
 
 ![](AWS/Key.png)
