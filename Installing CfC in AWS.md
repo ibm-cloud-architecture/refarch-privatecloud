@@ -307,9 +307,9 @@ shell execute the command “sudo su –“.
             cd ~
             ssh-keygen -t rsa -P ''
             
-        Accept the default location for the new files.
+    Accept the default location for the new files.
         
-        ![](AWS/DefaultLocation.png)
+    ![](AWS/DefaultLocation.png)
 
     b.  Update the /root/.ssh/authorized\_keys file on each node
         (master, proxy, and all worker nodes) with the value of
