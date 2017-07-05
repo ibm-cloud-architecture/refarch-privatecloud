@@ -240,14 +240,14 @@ shell execute the command “sudo su –“.
 
 2)  Update the vm.max\_map\_count setting to 26214
     
-    sysctl -w vm.max_map_count=262144
-    echo “vm.max_map_count=262144” >> /etc/sysctl.conf
+    >sysctl -w vm.max_map_count=262144
+    >echo “vm.max_map_count=262144” >> /etc/sysctl.conf
     
     ![](AWS/SetMax.png)
     
     Check the value with the command:
     
-    sysctl vm.max_map_count
+    >sysctl vm.max_map_count
     
     ![](AWS/GetMax.png)
 
@@ -259,43 +259,43 @@ shell execute the command “sudo su –“.
 
     b.  Install the linux image extra virtual package
     
-        `apt-get install -y linux-image-extra-virtual`
+        apt-get install -y linux-image-extra-virtual
 
     c.  Install the additional required packages
     
-        `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
+        apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 
     d.  Add Docker’s official GPG Key
     
-        `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -`
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
 
     e.  Verify that the key fingerprint is
         9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
         
-        `apt-key fingerprint 0EBFCD88`
+        apt-key fingerprint 0EBFCD88
         
-        ![](AWS/Fingerprint.png)
+![](AWS/Fingerprint.png)
 
     f.  Setup the docker stable repository
     
-        `add-apt-repository "deb \[arch=amd64\] https://download.docker.com/linux/ubuntu \$(lsb\_release -cs) stable"`
+        add-apt-repository "deb \[arch=amd64\] https://download.docker.com/linux/ubuntu \$(lsb\_release -cs) stable"
 
     g.  Install docker
 
-        >apt-get update
-        >apt-get install -y docker-ce
+        apt-get update
+        apt-get install -y docker-ce
 
 4.  Make sure docker is working
 
-    `docker run hello-world`
+        docker run hello-world
 
 5.  If this doesn’t work, you will need to do some troubleshooting
 
 6.  Install docker.py
 
-    >apt-get install -y python-setuptools
-    >easy_install pip
-    >pip install docker-py>=1.7.0
+        apt-get install -y python-setuptools
+        easy_install pip
+        pip install docker-py>=1.7.0
 
 2)  Setup passwordless SSH from the master node to the proxy node and
     all three worker nodes
@@ -304,8 +304,8 @@ shell execute the command “sudo su –“.
         In the following command the P is upper case and the ‘’ are two
         single quotes:
         
-        >cd ~
-        >ssh-keygen -t rsa -P ''
+            cd ~
+            ssh-keygen -t rsa -P ''
         
         Accept the default location for the new files.
         
@@ -331,8 +331,8 @@ shell execute the command “sudo su –“.
         On the master node, you can just change to root’s .ssh directory
         and copy the id\_rsa.pub file over the authorized\_keys file.
         
-        >cd ~/.ssh
-        >cp id_rsa.pub authorized_keys
+            cd ~/.ssh
+            cp id_rsa.pub authorized_keys
 
     c.  When this is complete, the root user on the master node should
         be able to ssh to each node (including itself) without the need
@@ -352,34 +352,34 @@ Install IBM Spectrum Conductor for Containers
 
 1)  Make sure docker is running
 
-    `systemctl status docker`
+        systemctl status docker
     
     ![](AWS/Docker.png)
     
     If it is not running start it
     
-    `systemctl start docker`
+        systemctl start docker
 
 2)  Pull the CfC installer docker image from the repository\
     
-    `docker pull ibmcom/cfc-installer:1.2.0`
+        docker pull ibmcom/cfc-installer:1.2.0
     
     ![](AWS/CfCInstaller.png)
 
 3)  **IMPORTANT:** Change to the /opt directory
     
-       `cd /opt`
+        cd /opt
 
 4)  Extract the configuration files
     
-    `docker run -e LICENSE=accept -–rm -v “\$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
+        docker run -e LICENSE=accept -–rm -v “\$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
     
     You should now have a subdirectory under /opt named “cluster”
 
 5)  Change to the /opt/cluster directory and edit the configuration
     files as needed for the install
     
-    `cd /opt/cluster`
+        cd /opt/cluster
 
     a.  Edit the /opt/cluster/hosts file to specify the correct
         **internal** IP addresses of each node in your cluster.
@@ -389,8 +389,8 @@ Install IBM Spectrum Conductor for Containers
     b.  Copy the value of /root/.ssh/id\_rsa over the ssh\_keys file and
         make sure the file permissions for the ssh\_key file is 400.
         
-        `cp /root/.ssh/id\_rsa /opt/cluster/ssh_key`
-        `chmod 400 /opt/cluster/ssh_key`
+            cp /root/.ssh/id\_rsa /opt/cluster/ssh_key
+            chmod 400 /opt/cluster/ssh_key
 
     c.  Make any needed changes to the config.yml file. For our purposes
         we will leave these values at their defaults. However, if either
@@ -410,13 +410,13 @@ Install IBM Spectrum Conductor for Containers
 
 1)  Deploy your environment
 
-    a.  **IMPORTANT**: Make sure to launch the deployment from the /opt
-        directory\
-        `cd /opt`
+    a.  **IMPORTANT**: Make sure to launch the deployment from the /opt directory
+        
+        cd /opt
 
     b.  Launch the installer
     
-        `docker run -e LICENSE=accept –net=host –rm -t -v "$(pwd)/cluster":/installer/cluster ibmcom/cfc-installer:1.2.0 install
+            docker run -e LICENSE=accept –net=host –rm -t -v "$(pwd)/cluster":/installer/cluster ibmcom/cfc-installer:1.2.0 install
 
     c.  About 10 minutes later your environment is installed.
 
@@ -497,7 +497,7 @@ internal IP address.
 
 Next, find the device which represents your second hard disk
 
-`ls /dev/xvd\*`
+    ls /dev/xvd\*
 
 ![](AWS/Device.png)
 
@@ -532,7 +532,7 @@ Listing /dev/xvd\* will now show /dev/xvdb1 – your new partition.
 Now that we have a partition, we need to format it so it can be used. We
 will format it as ext4.
 
-`mkfs -t ext4 /dev/xvdb1`
+    mkfs -t ext4 /dev/xvdb1
 
 ![](AWS/Mkfs.png)
 
@@ -542,10 +542,10 @@ read/write/execute for world. A directory listing of the newly mounted
 disk will show a lost+found directory which is the hallmark of a mounted
 partition.
 
-`mkdir /storage`
-`chmod 777 /storage`
-`mount -t ext4 /dev/xvdb1 /storage`
-`ls /storage`
+    mkdir /storage
+    chmod 777 /storage
+    mount -t ext4 /dev/xvdb1 /storage
+    ls /storage
 
 ![](AWS/Storage.png)
 
@@ -556,22 +556,22 @@ To make the mount permanent, we will add it to the /etc/fstab file.
 Now that we have something to share, we need to install the nfs server
 to share it.
 
-`apt-get install -y nfs-kernel-server`
+    apt-get install -y nfs-kernel-server
 
 Now tell the nfs server what to share and how to share it. Note that
 there is a tab between /storage and the asterisk and that there is no
 space between the asterisk and the open parenthesis.
 
-`echo “/storage \*(rw,no_subtree_check,async,insecure,no_root_squash)” >> etc/exports`
+    echo “/storage "rw,no_subtree_check,async,insecure,no_root_squash)” >> etc/exports
 
 Now restart your nfs server to read the new exports
 
-`systemctl restart nfs-kernel-server`
+    systemctl restart nfs-kernel-server
 
 Disable your firewall so the worker nodes can communicate with your new
 server
 
-`ufw disable`
+    ufw disable
 
 ![](AWS/Ufw.png)
 
@@ -598,8 +598,8 @@ Spectrum Conductor for Containers – Storage Best Practices”.
 
 In the “Key” section add 2 new keys.
 
-> Server: <IP of your NFS server>
-> Path: /storage
+    Server: <IP of your NFS server>
+    Path: /storage
 
 ![](AWS/Key.png)
 
