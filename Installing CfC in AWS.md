@@ -306,7 +306,7 @@ shell execute the command “sudo su –“.
         
             cd ~
             ssh-keygen -t rsa -P ''
-        
+            
         Accept the default location for the new files.
         
         ![](AWS/DefaultLocation.png)
