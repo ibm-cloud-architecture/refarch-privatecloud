@@ -215,10 +215,10 @@ shell execute the command “sudo su –“.
     To change the hostname execute the “hostname <newhostname>”
     command.
     
-    `hostname icp-bmp`
+    `hostname icp-boot-master`
     
     Edit the /etc/hostname file and replace the default value with
-    “cfc-bmp”
+    “icp-boot-master”
     
     ![](AWS/Hostname.png)
     
