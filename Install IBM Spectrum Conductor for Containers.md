@@ -2,6 +2,7 @@ Install IBM Spectrum Conductor for Containers
 =============================================
 
 Assumptions:
+------------
 
 1.  **Overprovisioning**: The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
 
@@ -53,14 +54,16 @@ Installation
         1.  `sudo su -` \# provide your user password to get to the root shell
 
         2.  `passwd` \# Set the root password
-            ![alt text](Installation/root-pwd.png "Root password")
+        
+![alt text](Installation/root-pwd.png "Root password")
 
     2.  Enable remote login as root
 
         1.  `sed -I 's/prohibit-password/yes/' /etc/ssh/sshd_config`
 
         2.  `systemctl restart ssh`
-            ![alt text](Installation/remote-login.png "Remote login")
+
+![alt text](Installation/remote-login.png "Remote login")
 
 2.  Update NTP settings to make sure time stays in sync
 
@@ -92,48 +95,51 @@ To test the status of your NTP servers, use the command:
 
 2.  Install docker
 
-    1.  ```apt-get update```
+    1.  `apt-get update`
 
     2.  Install Linux image extra packages
-        ```apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual```
+        `apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual`
 
     3.  Install the docker repositories
-        ```apt-get install -y apt-transport-https ca-certificates curl software-properties-common```
+        `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
 
     4.  Add Docker’s official GPG key
-        ```curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -```
+        `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -`
 
     5.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
-        ```apt-key fingerprint 0EBFCD88```
+        `apt-key fingerprint 0EBFCD88`
+        
 ![alt text](Installation/fingerprint.png "fingerprint")
+
     6.  Setup the docker stable repository
-        ```add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"```
+        `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"`
 
     7.  Install docker
 
-        1.  ```apt-get update```
+        1.  `apt-get update`
 
-        2.  ```apt-get install -y docker-ce```
+        2.  `apt-get install -y docker-ce`
 
     8.  Makes sure docker is running
 
-        1.  ```docker run hello-world```
+        1.  `docker run hello-world`
 
     9.  If this doesn’t work, you will need to do some troubleshooting.
 
 3.  Install docker.py
 
-    1.  ```apt-get install -y python-setuptools```
+    1.  `apt-get install -y python-setuptools`
 
-    2.  ```easy_install pip```
+    2.  `easy_install pip`
 
-    3.  ```pip install docker-py>=1.7.0```
+    3.  `pip install docker-py>=1.7.0`
 
 4.  Shutdown your VM
 
-    1.  ```shutdown -h now```
+    1.  `shutdown -h now`
 
 5.  In the VMware vCenter Web Client convert this VM to a template. We will use this template to provision any additional nodes we need in the environment including additional worker nodes as needed.
+
     Create new VMs from your new template for each of the nodes in the cluster:
 
     1.  cfc-boot-master
@@ -147,53 +153,62 @@ To test the status of your NTP servers, use the command:
     5.  cfc-worker3
 
 6.  If your network interface is configured for DHCP, boot all of the newly provisioned nodes and then, using the VMware console, login to each VM and reconfigure the hostname and add the appropriate static IP address.
+
     If you do not have a dhcp server and configured the original VM with a static IP, you will need to boot each VM in turn configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
+    
     For each of your new VMs perform the following tasks to change the IP address and hostname of your servers.
 
     1.  Change the hostname
         Edit the file /etc/hostname with your favorite text editor (e.g. vim) and change the value to match the node: e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
+        
 ![alt text](Installation/hostname.png "hostname")
+
     2.  Modify /etc/network/interfaces to configure a static IP address
         In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
+        
 ![alt text](Installation/interfaces.png "interfaces")
+
     3.  In ubuntu 16.04, resetting the network with the standard “systemctl restart networking” does not seem to change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
-        shutdown -r now
+    
+        `shutdown -r now`
 
 7.  You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
 
     1.  Login as to the boot-master node as root
 
     2.  From root’s home directory execute:
-        ```ssh-keygen -t rsa -P ''``` \# Upper case P and two single quotes for no password
+        `ssh-keygen -t rsa -P ''` \# Upper case P and two single quotes for no password
+        
         Accept the default location of /root/.ssh/id\_rsa for the new key file
-        Now, executing ```ls .ssh``` from root’s home directory should show three files: ```id_rsa```, ```id_rsa.pub``` and ```known_hosts```
+        
+        Now, executing `ls .ssh` from root’s home directory should show three files: id_rsa, id_rsa.pub and known_hosts
 
-    3.  Copy the resulting ```id_rsa``` key file to each node in the cluster (including the boot-master node on which we are currently operating).
+    3.  Copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which we are currently operating).
 
         1.  Copy to the master node (to the current node):
-            ```ssh-copy-id -i .ssh/id_rsa root@cfc-proxy```
-            You will now find that there is a new file called ```authorized_keys``` in your .ssh folder which contains the contents of ```id_rsa```.
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-proxy`  \# Remember, master and proxy are on the same node
+            
+            You will now find that there is a new file called "authorized_keys" in your .ssh folder which contains the contents of id_rsa.pub.
 
         2.  Repeat for each additional server:
         
-            ```ssh-copy-id -I .ssh/id_rsa root@cfc-worker1```
+            `ssh-copy-id -I .ssh/id_rsa root@cfc-worker1`
             
-            ```ssh-copy-id -I .ssh/id_rsa root@cfc-worker2```
+            `ssh-copy-id -I .ssh/id_rsa root@cfc-worker2`
             
-            ```ssh-copy-id -I .ssh/id_rsa root@cfc-worker3```
+            `ssh-copy-id -I .ssh/id_rsa root@cfc-worker3`
             
 
         3.  When this is complete you should be able to ssh from the boot-master node to each of the other nodes without having to provide a password. You can test this by executing:
         
-            ```ssh root@cfc-proxy```
+            `ssh root@cfc-proxy`
             
-            ```ssh root@cfc-worker1```
+            `ssh root@cfc-worker1`
             
-            ```ssh root@cfc-worker2```
+            `ssh root@cfc-worker2`
             
-            ```ssh root@cfc-worker3```
+            `ssh root@cfc-worker3`
             
-
             If you cannot gain access via SSH without a password, ensure that you have enabled root login on each VM and have modified /etc/ssh/sshd\_config on each VM to allow remote login.
 
 8.  Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
@@ -201,49 +216,59 @@ To test the status of your NTP servers, use the command:
 9.  Next we need to download the cfc installer docker image.
 
     1.  On the boot-master node as the root user ensure your docker service is running:
-        ```systemctl status docker```
+        `systemctl status docker`
+        
 ![alt text](Installation/status-docker.png "status docker")
+
     2.  If the response shows that docker is not running you can start it with the command:
-        systemctl start docker
+        `systemctl start docker`
 
     3.  If the status is failed you will need to troubleshot the docker installation before going forward.
 
     4.  Pull the cfc installer docker image:
-        1.  docker pull ibmcom/cfc-installer:1.2.0
+    
+        1.  `docker pull ibmcom/cfc-installer:1.2.0`
+        
 ![alt text](Installation/cfc-installer.png "cfc-installer")
+
         2.  Change directory to /opt
         
-            cd /opt
+>            `cd /opt`
+            
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
-            ```docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data```
+>            `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
 
 10. Configure the cfc installer
 
     1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
     
-    2.  Copy the ```id_rsa``` file created in step 11b over the ```/opt/cluster/ssh_key``` file and ensure its permissions are set to 400.
+    2.  Copy the id_rsa file created in step 11b over the /opt/cluster/ssh_key file and ensure its permissions are set to 400.
     
-        ```cp ~/.ssh/id_rsa /opt/cluster/ssh_key```
+        `cp ~/.ssh/id_rsa /opt/cluster/ssh_key`
         
-        ```chmod 400 /opt/cluster/ssh_key```
+        `chmod 400 /opt/cluster/ssh_key`
 
     3.  Modify the /opt/cluster/conifg.yaml file to compliment your environment.
 
-        1.  ```mesos_enabled: false```
+        1.  `mesos_enabled: false`
 
-        2.  ```install_docker_py: false``` \# We already installed this in step 7
+        2.  `install_docker_py: false` \# We already installed this in step 7
 
-        3.  ```network_type: calico```
+        3.  `network_type: calico`
+        
             Calico networking uses BGP for routing. Enabling routing between an existing network infrastructure and the cfc cluster requires separate configuration. See Appendix A.
 
-        4.  ```network_cidr: 10.1.0.0/16```
+        4.  `network_cidr: 10.1.0.0/16`
+        
             This value must be routable within your network so it cannot overlap any existing subnet.
 
-        5.  ```service_cluster_ip_range: 10.0.0.1/24```
+        5.  `service_cluster_ip_range: 10.0.0.1/24`
+        
             This value does not need to be routable, but should not conflict with the network\_cidr range or anything in your existing host network.
+            
             (Interestingly, this subnet is the lowest possible subnet in the 10.x class A private IP range. The subnet starts with .1 because 10.0.0.0 is the subnet name and is not available for assignment.
 
-        6.  ```cluster_domain: cluster.local```
+        6.  `cluster_domain: cluster.local`
             This should be sufficient unless you have other clusters in your network. No two cluster\_domains can be the same.
 
         7.  None of the additional options should be modified
@@ -252,12 +277,16 @@ To test the status of your NTP servers, use the command:
 
     cd /opt/cluster
     
-    ```docker run -e LICENSE=accept --net=host --rm -t -v "$(pwd)":/installer/cluster ibmcom/cfc-installer:1.2.0 install```
+    `docker run -e LICENSE=accept --net=host --rm -t -v "$(pwd)":/installer/cluster ibmcom/cfc-installer:1.2.0 install`
 
 12. About 10 minutes later you should have a deployed IBM Spectrum Conductor for Containers implementation.
+
     Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
+    
 ![alt text](Installation/deployment-1.png "deployment 1")
+
 ![alt text](Installation/deployment-2.png "deployment 2")
+
     Login to your new implementation at <https://172.16.50.255>:8443 with userid of admin and password of admin.
 
 Appendix A
