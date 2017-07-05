@@ -56,7 +56,6 @@ Installation
 
 ![alt text](Installation/root-pwd.png "Root password")
 
-
     2.  Enable remote login as root
 
         1.  `sed -I 's/prohibit-password/yes/' /etc/ssh/sshd_config`
@@ -64,7 +63,6 @@ Installation
         2.  `systemctl restart ssh`
 
 ![alt text](Installation/remote-login.png "Remote login")
-
 
 2.  Update NTP settings to make sure time stays in sync
 
@@ -75,20 +73,22 @@ Installation
 ![alt text](Installation/ntp.png "NTP")
 
 After making configuration changes restart the NTP server with the command:
-> `sytemctl retart ntp`
-> To test the status of your NTP servers, use the command:
-> `ntpq -p`
+ >`sytemctl retart ntp`
+
+To test the status of your NTP servers, use the command:
+>`ntpq -p`
 
 ![alt text](Installation/ntpq.png "ntpq -p")
 
 
 1.  Update the vm.max\_map\_count setting to 262144:
-    ```sysctl -w vm.max_map_count=262144```
-    Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
+    `sysctl -w vm.max_map_count=262144`
+    
+2. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
     ![alt text](Installation/sysctl.png "sysctl")
     
-    To check the current value use the command:
-    ```sysctl vm.max_map_count```
+3. To check the current value use the command:
+ >   `sysctl vm.max_map_count`
 
 ![alt text](Installation/sysctl-2.png "sysctl-2")
 
