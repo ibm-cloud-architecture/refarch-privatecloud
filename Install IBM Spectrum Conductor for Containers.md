@@ -162,7 +162,7 @@ To test the status of your NTP servers, use the command:
     1.  Change the hostname
         Edit the file /etc/hostname with your favorite text editor (e.g. vim) and change the value to match the node: e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
         
-        ![alt text](Installation/hostanme.png "hostname)
+        ![alt text](Installation/hostname.png "hostname)
 
     2.  Modify /etc/network/interfaces to configure a static IP address
         In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
