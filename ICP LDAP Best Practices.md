@@ -203,8 +203,8 @@ To check the status of keystone execute “/etc/init.d/keystone status”.
 You can also check the logs from the keystone container with the
 command:
 
-`docker logs &lt;keystone container&gt;`
+`docker logs <keystone container>`
 
 To use watch the logs in real-time use the –follow parameter
 
-`docker logs &lt;keystone container&gt; --follow`
+`docker logs <keystone container> --follow`
