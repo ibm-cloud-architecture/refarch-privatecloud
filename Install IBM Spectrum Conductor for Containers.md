@@ -296,40 +296,66 @@ Appendix A
 ==========
 
 Access to cluster networks from outside the cluster.
+----------------------------------------------------
+
 IBM Spectrum Conductor for Containers was installed with calico networking. Calico runs a vRouter on each host in the cluster which manages routing for all applications and services running on that host. Calico uses BGP for internal routing, so in oder to reach services running on your cluster from outside networks you must configure your network to communicate with the calico network via BGP.
 
 In the Cloud Adoption Lab, routing is performed by a VyOS router, so the following instructions describe how to configure a VyOS router to communicate with your cfc cluster. If you are using a different router the principles will be the same by the commands may be different.
 
 It should also be noted that the BGP instructions for VyOS are skimpy at best. I am not sure if all the commands listed are strictly required, but it works when I use them as they are so I have not tried to test any kind of changes.
 
-Configuring the calico network requires use of a utlity called calicoctl which is installed by default, but is buried deep within the aufs filesystem installed by kubernetes. For convenience, you can copy this utility to a more common location such as /usr/local/bin. To find the utility you will have to use a find command:
-find / -name “calicoctl”
-![alt text](Installation/calicoctl.png "calicoctl")
+Extract the calicoctl command from docker:
 
+    `docker run --rm -v /root:/data --entrypoint=cp ibmcom/calico-ctl:v1.2.1 /calicoctl /data`
 
-Then copy the file to a directory in your path:
+Then move the file to a directory in your path:
 
 ![alt text](Installation/copy.png "copy")
 ![alt text](Installation/calicoctl-2.png "calicoctl-2")
 
-Before making these changes we will take a snapshot of our currently well-running cfc VMs as well as our VyOS router VM.
+Next, create a new resource file in your home directory called .calicorc with the following contents:
 
-To configure BGP connectivity, your external router must configured for BGP sessions between the router and each calico-enabled host (e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, cfc-worker3).
+    `export ETCD_AUTHORITY=master.cfc:4001`
+    `export ETCD_SCHEME=https`
+    `export ETCD_CA_CERT_FILE=/etc/cfc/conf/etcd/ca.pem`
+    `export ETCD_CERT_FILE=/etc/cfc/conf/etcd/client.pem`
+    `export ETCD_KEY_FILE=/etc/cfc/conf/etcd/client-key.pem`
 
-The cfc BGP AS (Autonomous System) number is 64511.
+Then, include this file in your .bashrc file by adding the following line at the bottom:
 
-One of your calico-enabled hosts (cfc-boot-master), will need to be configured for a BGP session with the router. All of the other BGP neighbors in the Calico AS will then route through this host. We will configure this on the cfc-boot-master node.
+    `. ~/.calicorc`
+
+This will ensure that your calicoctl environment is setup correctly every time you login.  To set it up for use in the current shell, execute the following on the command line:
+
+    `. ~/.calicorc`
+
+You are now ready to execute calicoctl commands.
+
+Before making any changes we will take a snapshot of our currently well-running ICP VMs as well as our VyOS router VM.
+
+To configure BGP connectivity, your external router must configured for BGP sessions between the router and each calico-enabled host (e.g. icp-boot-master, icp-proxy, icp-worker1, icp-worker2, icp-worker3).
+
+The ICP BGP AS (Autonomous System) number is 64511, by default.  You can check your AS number by running the command:
+
+    `calicoctl config get asnumber`
+
+If you need to change the BGP AS number of your installation (if this default AS conflicts with an existing BGP network or you have more than one ICP installation), you can do so with the following command:
+
+    `calicoctl config set asnumber 64515`
+
+Your master node will need to be configured for a BGP session with the router. All of the other BGP neighbors in the Calico AS will then route through the master node.
+
 The gateway address of our VyOS router is 172.16.255.250 and that will be used as the peerIP for the BGP configuration on cfc-boot-master.
 
 Create a file in the root home directory named ‘bgpPeer.yaml’ with the following contents:
 
-> apiVersion: v1
+> `apiVersion: v1
 > kind: bgpPeer
 > metadata:
-> peerIP: 172.16.255.250
-> scope: global
+>   peerIP: 172.16.255.250
+>   scope: global
 > spec:
-> asNumber: 65536
+>   asNumber: 65536`
 
 Note that the offset at the beginning of the lines under metadata and spec are spaces and not tabs.
 
@@ -339,7 +365,7 @@ export ETCD\_ENDPOINTS=http://172.16.50.255:4001
 
 Use the calicoctl utility to create the bgpPeer using the file you just created:
 
-calicoctl create -f ~/bgpPeer.yaml
+    `calicoctl create -f ~/bgpPeer.yaml`
 
 &gt;&gt; Successfully created 1 ‘bgpPeer’ resource(s)
 
@@ -347,42 +373,33 @@ When you check the calico node status you will find that now one side of the bgp
 
 ![alt text](Installation/calicoctl-node.png "calicoctl node")
 
-
 Now we have to configure the VyOS router for the other side of the BGP connection. Use the following commands to configure the router:
 
-set protocols bgp 65536 neighbor 172.16.50.255 ebgp-multihop '2'
-set protocols bgp 65536 neighbor 172.16.50.255 remote-as 64511
-set protocols bgp 65536 neighbor 172.16.50.255 update-source '172.16.255.250'
-set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-boot-master"
-
-set protocols bgp 65536 neighbor 172.16.50.254 ebgp-multihop '2'
-set protocols bgp 65536 neighbor 172.16.50.254 remote-as '64511'
-set protocols bgp 65536 neighbor 172.16.50.254 update-source '172.16.255.250'
-set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-proxy"
-
-set protocols bgp 65536 neighbor 172.16.50.253 ebgp-multihop '2'
-set protocols bgp 65536 neighbor 172.16.50.253 remote-as '64511'
-set protocols bgp 65536 neighbor 172.16.50.253 update-source '172.16.255.250'
-set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker3"
-
-set protocols bgp 65536 neighbor 172.16.50.252 ebgp-multihop '2'
-set protocols bgp 65536 neighbor 172.16.50.252 remote-as '64511'
-set protocols bgp 65536 neighbor 172.16.50.252 update-source '172.16.255.250'
-set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker2"
-
-set protocols bgp 65536 neighbor 172.16.50.251 ebgp-multihop '2'
-set protocols bgp 65536 neighbor 172.16.50.251 remote-as '64511'
-set protocols bgp 65536 neighbor 172.16.50.251 update-source '172.16.255.250'
-set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker1"
-
-set protocols bgp 65536 network "10.2.0.0/16"
-
-set protocols bgp 65536 parameters router-id '172.16.255.250'
-
-set protocols static route 10.2.0.0/16 blackhole distance '254'
-
-commit
-save
+>`set protocols bgp 65536 neighbor 172.16.50.255 ebgp-multihop '2'
+>set protocols bgp 65536 neighbor 172.16.50.255 remote-as 64511
+>set protocols bgp 65536 neighbor 172.16.50.255 update-source '172.16.255.250'
+>set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-boot-master"
+>set protocols bgp 65536 neighbor 172.16.50.254 ebgp-multihop '2'
+>set protocols bgp 65536 neighbor 172.16.50.254 remote-as '64511'
+>set protocols bgp 65536 neighbor 172.16.50.254 update-source '172.16.255.250'
+>set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-proxy"
+>set protocols bgp 65536 neighbor 172.16.50.253 ebgp-multihop '2'
+>set protocols bgp 65536 neighbor 172.16.50.253 remote-as '64511'
+>set protocols bgp 65536 neighbor 172.16.50.253 update-source '172.16.255.250'
+>set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker3"
+>set protocols bgp 65536 neighbor 172.16.50.252 ebgp-multihop '2'
+>set protocols bgp 65536 neighbor 172.16.50.252 remote-as '64511'
+>set protocols bgp 65536 neighbor 172.16.50.252 update-source '172.16.255.250'
+>set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker2"
+>set protocols bgp 65536 neighbor 172.16.50.251 ebgp-multihop '2'
+>set protocols bgp 65536 neighbor 172.16.50.251 remote-as '64511'
+>set protocols bgp 65536 neighbor 172.16.50.251 update-source '172.16.255.250'
+>set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker1"
+>set protocols bgp 65536 network "10.2.0.0/16"
+>set protocols bgp 65536 parameters router-id '172.16.255.250'
+>set protocols static route 10.2.0.0/16 blackhole distance '254'
+>commit
+>save`
 
 Now the bgpPeer connection shows as established and you should be able to reach addresses on your Calico network (10.1.0.0/16 in our example.)
 
@@ -449,10 +466,5 @@ Preparing VMs for deployment: <https://www.ibm.com/support/knowledgecenter/SS8TQ
 ENDNOTES
 
 [1] It should also be noted that snapshots take up a lot of space and each new snapshot is a delta of changes since the last snapshot or initial version. The more snapshots you have the more disk space you use and the less efficient and performant your implementation will be.
+
 Since we are at a good stage now to which we may want to revert in the future if something goes wrong, it is also not a bad idea to remove any previous interim snapshots you may have taken. As a general rule, the fewer the number of snapshots the better.
-
-[2] When I tried to configure the BGP above I got an error that the endpoint was not listening. Using the etcdctl command I found that the proper port was 4001 and not 2379 as is the default. If port 4001 does not work for you, you can find your local endpoint using etcdctl. This file is buried deep in the ausfs filesystem as was the calicoctl command. Use the same proceedure to find the location of this file and copy it some location in your path such as /usr/local/bin.
-The command to find the endpoint is etcdctl member list:
-![alt text](Installation/etcd.png "etc")
-
-Your proper endpoint is the “clientURLs” value. In oder for you bgpctl command to work you should use this value in an envvar named ETCD\_ENDPOINTS to override the default.
