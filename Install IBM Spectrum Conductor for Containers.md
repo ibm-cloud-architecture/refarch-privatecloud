@@ -109,8 +109,8 @@ To test the status of your NTP servers, use the command:
     
         `apt-key fingerprint 0EBFCD88`
         
-![alt text](Installation/fingerprint.png "fingerprint")
-
+    ![alt text](Installation/fingerprint.png "fingerprint")
+    
     6.  Setup the docker stable repository
     
         `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"`
