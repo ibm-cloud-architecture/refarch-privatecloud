@@ -52,23 +52,18 @@ Installation
     1.  Set a password for the root user
 
         1.  `sudo su -` \# provide your user password to get to the root shell
-
         2.  `passwd` \# Set the root password
         
 ![alt text](Installation/root-pwd.png "Root password")
 
     2.  Enable remote login as root
-
         1.  `sed -I 's/prohibit-password/yes/' /etc/ssh/sshd_config`
-
         2.  `systemctl restart ssh`
 
 ![alt text](Installation/remote-login.png "Remote login")
 
 2.  Update NTP settings to make sure time stays in sync
-
     1.  `apt-get install -y ntp`
-
     2.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
 ![alt text](Installation/ntp.png "NTP")
