@@ -182,7 +182,7 @@ the master node and a long string of random numbers and letters.
 To login to the keystone container and gain a shell for executing
 commands use the container name to execute the following:
 
-docker exec -it &lt;containername&gt; /bin/bash
+`docker exec -it &lt;containername&gt; /bin/bash`
 
 Executing a ‘pwd’ command will now show you to be at root (/) in the
 keystone container:
@@ -203,8 +203,8 @@ To check the status of keystone execute “/etc/init.d/keystone status”.
 You can also check the logs from the keystone container with the
 command:
 
-> docker logs &lt;keystone container&gt;
+`docker logs &lt;keystone container&gt;`
 
 To use watch the logs in real-time use the –follow parameter
 
-> docker logs &lt;keystone container&gt; --follow
+`docker logs &lt;keystone container&gt; --follow`
