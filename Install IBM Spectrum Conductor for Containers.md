@@ -55,10 +55,6 @@ Installation
         
 ![alt text](Installation/root-pwd.png "Root password")
 
-    2. Enable remote login as root
-        1. `sed -I 's/prohibit-password/yes/' /etc/ssh/sshd_config`
-        2. `systemctl restart ssh`
-
 ![alt text](Installation/remote-login.png "Remote login")
 
 2.  Update NTP settings to make sure time stays in sync
