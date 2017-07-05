@@ -349,13 +349,13 @@ The gateway address of our VyOS router is 172.16.255.250 and that will be used a
 
 Create a file in the root home directory named ‘bgpPeer.yaml’ with the following contents:
 
-> `apiVersion: v1
-> kind: bgpPeer
-> metadata:
->   peerIP: 172.16.255.250
->   scope: global
-> spec:
->   asNumber: 65536`
+`apiVersion: v1
+kind: bgpPeer
+metadata:
+  peerIP: 172.16.255.250
+  scope: global
+spec:
+  asNumber: 65536`
 
 Note that the offset at the beginning of the lines under metadata and spec are spaces and not tabs.
 
@@ -375,31 +375,31 @@ When you check the calico node status you will find that now one side of the bgp
 
 Now we have to configure the VyOS router for the other side of the BGP connection. Use the following commands to configure the router:
 
->`set protocols bgp 65536 neighbor 172.16.50.255 ebgp-multihop '2'
->set protocols bgp 65536 neighbor 172.16.50.255 remote-as 64511
->set protocols bgp 65536 neighbor 172.16.50.255 update-source '172.16.255.250'
->set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-boot-master"
->set protocols bgp 65536 neighbor 172.16.50.254 ebgp-multihop '2'
->set protocols bgp 65536 neighbor 172.16.50.254 remote-as '64511'
->set protocols bgp 65536 neighbor 172.16.50.254 update-source '172.16.255.250'
->set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-proxy"
->set protocols bgp 65536 neighbor 172.16.50.253 ebgp-multihop '2'
->set protocols bgp 65536 neighbor 172.16.50.253 remote-as '64511'
->set protocols bgp 65536 neighbor 172.16.50.253 update-source '172.16.255.250'
->set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker3"
->set protocols bgp 65536 neighbor 172.16.50.252 ebgp-multihop '2'
->set protocols bgp 65536 neighbor 172.16.50.252 remote-as '64511'
->set protocols bgp 65536 neighbor 172.16.50.252 update-source '172.16.255.250'
->set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker2"
->set protocols bgp 65536 neighbor 172.16.50.251 ebgp-multihop '2'
->set protocols bgp 65536 neighbor 172.16.50.251 remote-as '64511'
->set protocols bgp 65536 neighbor 172.16.50.251 update-source '172.16.255.250'
->set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker1"
->set protocols bgp 65536 network "10.2.0.0/16"
->set protocols bgp 65536 parameters router-id '172.16.255.250'
->set protocols static route 10.2.0.0/16 blackhole distance '254'
->commit
->save`
+`set protocols bgp 65536 neighbor 172.16.50.255 ebgp-multihop '2'`
+`set protocols bgp 65536 neighbor 172.16.50.255 remote-as 64511`
+`set protocols bgp 65536 neighbor 172.16.50.255 update-source '172.16.255.250'`
+`set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-boot-master"`
+`set protocols bgp 65536 neighbor 172.16.50.254 ebgp-multihop '2'`
+`set protocols bgp 65536 neighbor 172.16.50.254 remote-as '64511'`
+`set protocols bgp 65536 neighbor 172.16.50.254 update-source '172.16.255.250'`
+`set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-proxy"`
+`set protocols bgp 65536 neighbor 172.16.50.253 ebgp-multihop '2'`
+`set protocols bgp 65536 neighbor 172.16.50.253 remote-as '64511'`
+`set protocols bgp 65536 neighbor 172.16.50.253 update-source '172.16.255.250'`
+`set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker3"`
+`set protocols bgp 65536 neighbor 172.16.50.252 ebgp-multihop '2'`
+`set protocols bgp 65536 neighbor 172.16.50.252 remote-as '64511'`
+`set protocols bgp 65536 neighbor 172.16.50.252 update-source '172.16.255.250'`
+`set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker2"`
+`set protocols bgp 65536 neighbor 172.16.50.251 ebgp-multihop '2'`
+`set protocols bgp 65536 neighbor 172.16.50.251 remote-as '64511'`
+`set protocols bgp 65536 neighbor 172.16.50.251 update-source '172.16.255.250'`
+`set protocols bgp 65536 neighbor 172.16.50.255 description "cfc-worker1"`
+`set protocols bgp 65536 network "10.2.0.0/16"`
+`set protocols bgp 65536 parameters router-id '172.16.255.250'`
+`set protocols static route 10.2.0.0/16 blackhole distance '254'`
+`commit`
+`save``
 
 Now the bgpPeer connection shows as established and you should be able to reach addresses on your Calico network (10.1.0.0/16 in our example.)
 
