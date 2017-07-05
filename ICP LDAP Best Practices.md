@@ -182,7 +182,7 @@ the master node and a long string of random numbers and letters.
 To login to the keystone container and gain a shell for executing
 commands use the container name to execute the following:
 
-`docker exec -it &lt;containername&gt; /bin/bash`
+`docker exec -it <containername or ID> /bin/bash`
 
 Executing a ‘pwd’ command will now show you to be at root (/) in the
 keystone container:
