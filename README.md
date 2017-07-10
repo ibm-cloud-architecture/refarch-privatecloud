@@ -12,21 +12,21 @@ Docker Hub community edition: https://hub.docker.com/r/ibmcom/cfc-installer/
 
 ## Accessing IBM Cloud private (ICp) through the CLI
 
-[Accessing ICp](Accessing%20CfC%20through%20the%20CLI.md)
+[Accessing ICp](Accessing_ICp_through_CLI.md)
 
 ## Installing ICp
 
-See the instructions at: [Installing ICp](Install%20IBM%20Spectrum%20Conductor%20for%20Containers.md)
+See the instructions at: [Installing ICp](Installing_ICp_on_prem.md)
 
 ## Installing ICp on AWS
 
-See the instructions at: [Installing ICp on AWS](Installing%20CfC%20in%20AWS.md)
+See the instructions at: [Installing ICp on AWS](Installing_ICp_on_aws.md)
 
 ## Best practices 
 
 ### Storage 
 
-[Storage Best Practices](IBM%20Spectrum%20Conductor%20for%20Containers%20-%20Storage%20Best%20Practices.md)
+[Storage Best Practices](ICp-Storage_best_practice.md)
 
 See also the following article on working on storage in ICp: [Working with Storage](https://www.ibm.com/developerworks/community/blogs/fe25b4ef-ea6a-4d86-a629-6f87ccf4649e/entry/Working_with_storage?lang=en)
 
