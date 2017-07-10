@@ -1,6 +1,18 @@
-Install IBM Cloud private-ce
+Install IBM Cloud private
 =============================================
 
+## IBM Cloud private Community  Edition vs Enterprise Edition
+There are two main differences between ICp Community Edition (CE) and Enterprise Edition (EE).
+
+   * CE supports single node control plane while EE supports Highly Available Control Plane, with 3 or 5 master and proxy nodes
+   * CE offers community support while EE offers SLAs and enterprise support
+
+For instructions on installing Enterprise Edition head over here: [IBM Cloud private Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSBS6K_1.2.0)
+
+This walkthrough will focus on installing the IBM Cloud private Community Edition on VMWare.
+
+
+## Install IBM Cloud private-ce
 Assumptions:
 ------------
 
