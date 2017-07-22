@@ -80,7 +80,7 @@ Installation
 ![alt text](Installation/ntp.png "NTP")
 
 After making configuration changes restart the NTP server with the command:
- >`sytemctl retart ntp`
+ >`sytemctl restart ntp`
 
 To test the status of your NTP servers, use the command:
 >`ntpq -p`
