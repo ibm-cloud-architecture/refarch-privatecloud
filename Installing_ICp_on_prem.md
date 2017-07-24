@@ -199,12 +199,14 @@ To test the status of your NTP servers, use the command:
     3.  Copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which we are currently operating).
 
         1.  Copy to the master node (to the current node):
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-proxy`  \# Remember, master and proxy are on the same node
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-boot-master`
             
             You will now find that there is a new file called "authorized_keys" in your .ssh folder which contains the contents of id_rsa.pub.
 
         2.  Repeat for each additional server:
         
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-proxy`
+            
             `ssh-copy-id -i .ssh/id_rsa root@cfc-worker1`
             
             `ssh-copy-id -i .ssh/id_rsa root@cfc-worker2`
@@ -214,7 +216,8 @@ To test the status of your NTP servers, use the command:
 
         3.  When this is complete you should be able to ssh from the boot-master node to each of the other nodes without having to provide a password. You can test this by executing:
         
-            `ssh root@cfc-proxy`
+            
+            `ssh root@cfc-boot-master`
             
             `ssh root@cfc-worker1`
             
@@ -252,7 +255,7 @@ To test the status of your NTP servers, use the command:
         
             `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
 
-10. Configure the cfc installer
+10. Configure the ICp installer
 
     1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
     
