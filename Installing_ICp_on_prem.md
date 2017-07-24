@@ -205,11 +205,11 @@ To test the status of your NTP servers, use the command:
 
         2.  Repeat for each additional server:
         
-            `ssh-copy-id -I .ssh/id_rsa root@cfc-worker1`
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-worker1`
             
-            `ssh-copy-id -I .ssh/id_rsa root@cfc-worker2`
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-worker2`
             
-            `ssh-copy-id -I .ssh/id_rsa root@cfc-worker3`
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-worker3`
             
 
         3.  When this is complete you should be able to ssh from the boot-master node to each of the other nodes without having to provide a password. You can test this by executing:
