@@ -262,7 +262,7 @@ To test the status of your NTP servers, use the command:
         
         `chmod 400 /opt/cluster/ssh_key`
 
-    3.  Modify the /opt/cluster/conifg.yaml file to compliment your environment.
+    3.  Modify the /opt/cluster/config.yaml file to compliment your environment.
 
         1.  `mesos_enabled: false`
 
