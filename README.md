@@ -1,13 +1,14 @@
 # IBM Private cloud
+
 This project provides guidance on how to deploy IBM Private Cloud
 
 ## Announcement
 
-Announcement:http://www-01.ibm.com/common/ssi/ShowDoc.wss?docURL=/common/ssi/rep_ca/6/897/ENUS217-356/index.html&lang=en&request_locale=en
+* Announcement:http://www-01.ibm.com/common/ssi/ShowDoc.wss?docURL=/common/ssi/rep_ca/6/897/ENUS217-356/index.html&lang=en&request_locale=en
 
-Sales enablement: https://apps.na.collabserv.com/wikis/home?lang=en-us#!/wiki/W6a1c2cf32e79_46d3_a29a_8922f8ebeeeb/page/IBM%20Cloud%20private
+* Sales enablement: https://apps.na.collabserv.com/wikis/home?lang=en-us#!/wiki/W6a1c2cf32e79_46d3_a29a_8922f8ebeeeb/page/IBM%20Cloud%20private
 
-Docker Hub community edition: https://hub.docker.com/r/ibmcom/cfc-installer/
+* Docker Hub community edition: https://hub.docker.com/r/ibmcom/cfc-installer/
 
 
 ## Accessing IBM Cloud private (ICp) through the CLI
@@ -33,3 +34,7 @@ See also the following article on working on storage in ICp: [Working with Stora
 ### LDAP
 
 [LDAP Best Practices](ICP%20LDAP%20Best%20Practices.md)
+
+### DevOps
+
+[DevOps Best Practices](Implementing%20DevOps%20for%20IBM%20Cloud.private.md)
