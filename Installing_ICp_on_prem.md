@@ -291,6 +291,8 @@ To test the status of your NTP servers, use the command:
 
         7.  None of the additional options should be modified
 
+10. If you would like to configure your cluster to authenticate via LDAP see [LDAP Best practices](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/ICP%20LDAP%20Best%20Practices.md) and then return to this point.
+
 11. Deploy your environment. From the /opt/cluster directory execute:
 
     cd /opt/cluster
