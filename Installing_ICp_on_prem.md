@@ -145,7 +145,7 @@ To test the status of your NTP servers, use the command:
 
     2.  `easy_install pip`
 
-    3.  `pip install docker-py>=1.7.0`
+    3.  `pip install docker-py`
 
 4.  Shutdown your VM
 
