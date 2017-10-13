@@ -243,7 +243,7 @@ To test the status of your NTP servers, use the command:
 
     4.  Pull the cfc installer docker image:
     
-        1.  `docker pull ibmcom/cfc-installer:1.2.0`
+        1.  `docker pull ibmcom/cfc-installer:1.2.1`
         
         ![alt text](Installation/cfc-installer.png "cfc-installer")
 
@@ -253,7 +253,7 @@ To test the status of your NTP servers, use the command:
             
         3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
         
-            `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data`
+            `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.1 cp -r cluster /data`
 
 10. Configure the ICp installer
 
