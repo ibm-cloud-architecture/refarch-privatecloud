@@ -6,17 +6,21 @@ This project provides guidance on how to deploy IBM Private Cloud
 
 ![Architecture](architecture_1.2.jpeg)
 
-## Installing ICp
+## Sizing ICP
 
-* VMware: [Installing ICp](Installing_ICp_on_prem.md)
-* AWS: [Installing ICp on AWS](Installing_ICp_on_aws.md)
-* VirtualBow: [Installing ICp on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
+See the following page for recommended sizing of ICP environments: [Sizing](Sizing.md)
+
+## Installing ICP
+
+* VMware: [Installing ICP](Installing_ICp_on_prem.md)
+* AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
+* VirtualBow: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
 
 ### Deployment using TerraForm
 * Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
 * Bluemix Infrastructure (formerly SoftLayer): [Deploy ICP Cluster to SoftLayer](https://github.com/ibm-cloud-architecture/terraform-icp-softlayer)
 
-## Accessing IBM Cloud private (ICp) through the CLI
+## Accessing IBM Cloud Private (ICP) through the CLI
 
 [Accessing ICp](Accessing_ICp_through_CLI.md)
 
