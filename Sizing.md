@@ -14,7 +14,7 @@ Use it simply as a guide for your deployment, especially regarding the number of
 | Worker | 3 | 4 | 8 GB | 100 GB |
 | Proxy | 3 | 2 | 4 GB | 25 GB |
 
-# Medium ICP environment
+## Medium ICP environment
 
 | Node type | Number of nodes | CPU | Memory | Disk |
 | --- | --- | --- | --- | --- | 
@@ -22,7 +22,7 @@ Use it simply as a guide for your deployment, especially regarding the number of
 | Worker | 5 | 4 | 8 GB | 100 GB |
 | Proxy | 3 | 4 | 8 GB | 25 GB |
 
-# Large ICP environment
+## Large ICP environment
 
 | Node type | Number of nodes | CPU | Memory | Disk |
 | --- | --- | --- | --- | --- | 
