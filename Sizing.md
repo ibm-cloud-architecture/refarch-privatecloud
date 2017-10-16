@@ -10,7 +10,7 @@ Use it simply as a guide for your deployment, especially regarding the number of
 
 | Node type | Number of nodes | CPU | Memory | Disk |
 | --- | --- | --- | --- | --- | 
-| Master | 3 | 4 | 4 GB | 40 GB |
+| Master | 3 | 4 | 4 GB | 200 GB |
 | Worker | 3 | 4 | 8 GB | 100 GB |
 | Proxy | 3 | 2 | 4 GB | 25 GB |
 
@@ -18,7 +18,7 @@ Use it simply as a guide for your deployment, especially regarding the number of
 
 | Node type | Number of nodes | CPU | Memory | Disk |
 | --- | --- | --- | --- | --- | 
-| Master | 3 | 4 | 32 GB | 100 GB |
+| Master | 3 | 4 | 32 GB | 300 GB |
 | Worker | 5 | 4 | 8 GB | 100 GB |
 | Proxy | 3 | 4 | 8 GB | 25 GB |
 
@@ -26,6 +26,6 @@ Use it simply as a guide for your deployment, especially regarding the number of
 
 | Node type | Number of nodes | CPU | Memory | Disk |
 | --- | --- | --- | --- | --- | 
-| Master | 5 | 4 | 64 GB | 100 GB |
+| Master | 5 | 4 | 64 GB | 500 GB |
 | Worker | 7 | 8 | 16 GB | 100 GB |
 | Proxy | 5 | 4 | 8 GB | 25 GB |
