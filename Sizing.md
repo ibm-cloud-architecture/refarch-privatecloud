@@ -1,7 +1,5 @@
 # Sizing IBM Cloud Private
 
-# WORK IN PROGRESS. BEING REVIEWED
-
 Although each ICP deployment will have its own characteristics, this is a simple T-shirt size for ICP deployment on the VMware environment.
 
 Use it simply as a guide for your deployment, especially regarding the number of Worker nodes.
