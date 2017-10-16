@@ -12,6 +12,10 @@ This project provides guidance on how to deploy IBM Private Cloud
 * AWS: [Installing ICp on AWS](Installing_ICp_on_aws.md)
 * VirtualBow: [Installing ICp on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
 
+### Deployment using TerraForm
+* Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
+* Bluemix Infrastructure (formerly SoftLayer): [Deploy ICP Cluster to SoftLayer](https://github.com/ibm-cloud-architecture/terraform-icp-softlayer)
+
 ## Accessing IBM Cloud private (ICp) through the CLI
 
 [Accessing ICp](Accessing_ICp_through_CLI.md)
