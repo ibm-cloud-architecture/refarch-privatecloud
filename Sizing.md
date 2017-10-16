@@ -10,7 +10,7 @@ Use it simply as a guide for your deployment, especially regarding the number of
 
 | Node type | Number of nodes | CPU | Memory | Disk |
 | --- | --- | --- | --- | --- | 
-| Master | 3 | 4 | 4 GB | 200 GB |
+| Master | 3 | 4 | 8 GB | 200 GB |
 | Worker | 3 | 4 | 8 GB | 100 GB |
 | Proxy | 3 | 2 | 4 GB | 25 GB |
 
