@@ -1,6 +1,6 @@
 # IBM Private cloud
 
-This project provides guidance on how to deploy IBM Private Cloud
+This project provides prescriptive guidance on how to efficiently deploy and operate IBM Private Cloud platform in the enterprise. We document the practical approach of planning enterprise private cloud environment, setting up DevOps tool chains, achieving HA/DR, securing the platform and monitoring your private cloud. The project contains assets and best practices to help accelerating the private cloud adoption.
 
 ## Architecture
 
@@ -10,9 +10,13 @@ This project provides guidance on how to deploy IBM Private Cloud
 
 See the following page for recommended sizing of ICP environments: [Sizing](Sizing.md)
 
-## Installing ICP
+## Installing IBM Cloud Private
 
-* VMware: [Installing ICP](Installing_ICp_on_prem.md)
+IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu 16.04 LTS) and Linux on Power. We provided some guidance on installing ICP on following virtualization and cloud platforms:
+
+* VMware:
+  *  [Installing ICP with Ubuntu](Installing_ICp_on_prem.md)
+  *  [Installing ICP with RedHat Enterprise](Installing_ICp_on_prem.md)  
 * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
 * VirtualBow: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
 
@@ -25,9 +29,9 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 [Accessing ICp](Accessing_ICp_through_CLI.md)
 
 
-## Best practices 
+## Best practices
 
-### Storage 
+### Storage
 
 [Storage Best Practices](ICp-Storage_best_practice.md)
 
