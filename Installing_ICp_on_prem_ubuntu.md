@@ -60,17 +60,17 @@ Installation
 >
 > Initially, configure the server for DHCP (if available). We will assign static IP’s later. If not available assign the static IP of your boot/master server here.
 
-1. Enable root login remotely via ssh
+2. Enable root login remotely via ssh
 
     1. Set a password for the root user
         1. `sudo su -` \# provide your user password to get to the root shell
         2. `passwd` \# Set the root password
 
-![alt text](Installation/root-pwd.png "Root password")
+        ![alt text](Installation/root-pwd.png "Root password")
 
-2.  Enable remote login as root
-    1. `sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config`
-    2. `systemctl restart ssh`
+    2.  Enable remote login as root
+        1. `sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config`
+        2. `systemctl restart ssh`
 
 ![alt text](Installation/remote-login.png "Remote login")
 
