@@ -15,7 +15,7 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu 16.04 LTS) and Linux on Power. We provided some guidance on installing ICP on following virtualization and cloud platforms:
 
 * VMware:
-  *  [Installing ICP with Ubuntu](Installing_ICp_on_prem.md)
+  *  [Installing ICP with Ubuntu](Installing_ICp_on_prem_ubuntu.md)
   *  [Installing ICP with RedHat Enterprise](Installing_ICp_on_prem.md)  
 * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
 * VirtualBow: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
