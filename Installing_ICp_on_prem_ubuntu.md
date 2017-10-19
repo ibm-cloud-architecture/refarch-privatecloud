@@ -111,9 +111,11 @@ Installation
 
     >   `apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual`
 
-    3.  Install the docker repositories
+    3.  Install additional needed packages   
 
     >   `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
+
+    **NOTE**: These packages may all exist depending on what packages were included when the operating system installed. If they already exist, you will just see output indicating they already exist. If you assume they exist, however, and do not do this step and they are not there, the installation will fail.
 
     4.  Add Docker’s official GPG key
 
@@ -125,35 +127,34 @@ Installation
 
     ![alt text](Installation/fingerprint.png "fingerprint")
 
-    6.  Setup the docker stable repository
+    6.  Setup the docker stable repository and update the local cache
 
-        `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"`
+        `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"`   
+        `apt-get update`   
 
-    7.  Install docker
+    7.  Install docker   
 
-        1.  `apt-get update`
-
-        2.  `apt-get install -y docker-ce`
+        `apt-get install -y docker-ce`
 
     8.  Makes sure docker is running
 
-        1.  `docker run hello-world`
+        `docker run hello-world`   
+        This should downloaded the latest hello-world docker image version and put some text on the screen indicating a working installation.   
 
-    9.  If this doesn’t work, you will need to do some troubleshooting.
+    9.  Install python and pip
 
-3.  Install docker.py
+        `apt-get install -y python-setuptools`   
+        `easy_install pip`
 
-    1.  `apt-get install -y python-setuptools`
 
-    2.  `easy_install pip`
 
-    3.  `pip install docker-py`
 
-4.  Shutdown your VM
+6.  Create VM template and start other virtual machines.   
 
-    1.  `shutdown -h now`
+    Shutdown your VM   
+    `shutdown -h now`
 
-5.  In the VMware vCenter Web Client convert this VM to a template. We will use this template to provision any additional nodes we need in the environment including additional worker nodes as needed.
+    In the VMware vCenter Web Client, convert this VM to a template. We will use this template to provision any additional nodes we need in the environment including additional worker nodes as needed.
 
     Create new VMs from your new template for each of the nodes in the cluster:
 
@@ -167,9 +168,9 @@ Installation
 
     5.  cfc-worker3
 
-6.  If your network interface is configured for DHCP, boot all of the newly provisioned nodes and then, using the VMware console, login to each VM and reconfigure the hostname and add the appropriate static IP address.
+    If your network interface is configured for DHCP, boot all of the newly provisioned nodes and then, using the VMware console, login to each VM and reconfigure the hostname and add the appropriate static IP address.
 
-    If you do not have a dhcp server and configured the original VM with a static IP, you will need to boot each VM in turn configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
+    If you do not have a DHCP server and configured the original VM with a static IP, you will need to boot each VM in turn configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
 
     For each of your new VMs perform the following tasks to change the IP address and hostname of your servers.
 
@@ -187,7 +188,23 @@ Installation
 
         `shutdown -r now`
 
-7.  You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
+7. Pre-load the ICP Installation tarball on all cluster nodes
+    **NOTE**: ICP enterprise edition (ee) loads all ICP docker containers into all docker instances on all nodes.
+
+    The ICP tarball containing these images is >3.6GB and ansible will copy the tarball to each node in sequence and import each into their respective docker repositories. As a result, when running the installer, the total install time for ICP will run in excess of 40 minutes, the majority of that time being this process of copying and loading images.
+
+    In order to shorten the installation time, the ICP EE tarball has been copied to all cluster nodes. We will kick off import of the ICP docker containers on all nodes at the same time to shorten the overal installation time.
+
+    ICP community edition (ce) only installs the specific containers that are needed for each cluster node and it pulls those from docker hub during installation. As a result, the installation of ce takes more like 6 - 10 minutes.
+
+    With docker now installed on each node, we can to import the ICP containers into the docker repository on each node and continue to work while this is completing. This will reduce the overall install time in the final step.
+
+      `tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz -O |docker load`   
+
+    **NOTES:** This step is not strictly necessary for any node other than the master node. If the needed containers do not exist in the other nodes, the tarball will be copied to those nodes and loaded into their docker repositories. The installer will do this action serially on each node which will result in an installation time in excess of 40 minutes. Preloading the images will significantly reduce the install time. By loading these images now, we can be continuing to configure the installation while these images are loading. By preloading them we will spend less time waiting for the install to complete later. This step is not necessary when installing ICP Community Edition.   
+
+8.  Configure passwordless SSH from the master node to all other nodes   
+    You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
 
     1.  Login as to the boot-master node as root
 
