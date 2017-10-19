@@ -247,85 +247,84 @@ Installation
 
         Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
 
-9.  Next we need to download the cfc installer docker image.
+9. Prepare the installation files
+  1. Create a directory to hold installation configuration files
 
-    1.  On the boot-master node as the root user ensure your docker service is running:
-        `systemctl status docker`
+      ```
+      mkdir /opt/icp
+      cd /opt/icp
+      ```
+  2. Extract the installation configuration files
+      ```
+      docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception:2.1.0-ee cp -r cluster /data
+      ```
+      After this commond, you should have a folder /opt/icp/cluster.   
 
-        ![alt text](Installation/status-docker.png "status docker")
+	3. (optional) Configure LDAP authentication (out of scope for bootcamp)
+	4. (optional) Create one or more storage classes (out of scope for bootcamp)
+	5. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
 
-    2.  If the response shows that docker is not running you can start it with the command:
-        `systemctl start docker`
+		  ```
+		  mkdir -p  /opt/icp/cluster/images
+		  mv /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz /opt/icp/cluster/images/
+		  ```
 
-    3.  If the status is failed you will need to troubleshot the docker installation before going forward.
+	6. (optional) If using IBM*Z nodes, add the x390x tarball to /opt/icp/cluster/images
+	7. Copy the ssh key to the installation directory
 
-    4.  Pull the cfc installer docker image:
+		  ```
+		  cp ~/.ssh/id_rsa /opt/icp/cluster/ssh_key
+		  chmod 400 /opt/icp/cluster/ssh_key
+		  ```
 
-        1.  `docker pull ibmcom/cfc-installer:1.2.1`
+	8. Configure the installation
+		1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes
+		        ```
+		        [master]
+		        10.0.0.1
+		        ```
+		        ```
+		        [worker]
+		        10.0.0.3
+		        10.0.0.4
+		        10.0.0.5
+		        ```
+		        ```
+		        [proxy]
+		        10.0.0.2
+		        ```
 
-        ![alt text](Installation/cfc-installer.png "cfc-installer")
+		2. Edit the /opt/icp/cluster/config.yaml file
 
-        2.  Change directory to /opt
+				Change *service_cluster_ip_range* to prevent network conflict
 
-            `cd /opt`
+11. Deploy the ICP environment.
 
-        3.  Extract the configuration files into the local directory under the ‘cluster’ subdirectory
+    ```
+    cd /opt/icp/cluster
+    docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0-ee install
+    ```
 
-            `docker run -e LICENSE=accept --rm -v "$(pwd)":/data ibmcom/cfc-installer:1.2.1 cp -r cluster /data`
+    Several minutes later you should have a deployed IBM Cloud private implementation.
+    You can login to your new cluster with a browser attach to https://10.0.0.1:8443 with credentials admin/admin.   
+    ![ICp console](Installation/icpconsole.png "console")
 
-10. Configure the ICp installer
+12. Add a worker node to an ICP cluster
+    To dynamically add a worker node to an existing implementation, prepare the VM exactly as the original installation, update the /etc/hosts file with the IP and hostname of the new worker node and execute the install command with the -l option:
 
-    1.  Modify /opt/cluster/hosts to specify the IP addresses for the VMs in your cluster
+      ```
+      cd /opt/icp/cluster
+      docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0-s4-rc1-ee install -l <IP of worker node>,<IP of second worker node>[,...]
+      ```
 
-    2.  Copy the id_rsa file created in step 11b over the /opt/cluster/ssh_key file and ensure its permissions are set to 400.
+13. Uninstall an ICP environment.
 
-        `cp ~/.ssh/id_rsa /opt/cluster/ssh_key`
+    To uninstall ICP use the exact same container but run the uninstall command
 
-        `chmod 400 /opt/cluster/ssh_key`
-
-    3.  Modify the /opt/cluster/config.yaml file to compliment your environment.
-
-        1.  `mesos_enabled: false`
-
-        2.  `install_docker_py: false` \# We already installed this in step 7
-
-        3.  `network_type: calico`
-
-            Calico networking uses BGP for routing. Enabling routing between an existing network infrastructure and the cfc cluster requires separate configuration. See Appendix A.
-
-        4.  `network_cidr: 10.1.0.0/16`
-
-            This value must be routable within your network so it cannot overlap any existing subnet.
-
-        5.  `service_cluster_ip_range: 10.0.0.1/24`
-
-            This value does not need to be routable, but should not conflict with the network\_cidr range or anything in your existing host network.
-
-            (Interestingly, this subnet is the lowest possible subnet in the 10.x class A private IP range. The subnet starts with .1 because 10.0.0.0 is the subnet name and is not available for assignment.
-
-        6.  `cluster_domain: cluster.local`
-
-            This should be sufficient unless you have other clusters in your network. No two cluster\_domains can be the same.
-
-        7.  None of the additional options should be modified
-
-10. If you would like to configure your cluster to authenticate via LDAP see [LDAP Best practices](https://github.com/ibm-cloud-architecture/refarch-privatecloud/blob/master/ICP%20LDAP%20Best%20Practices.md) and then return to this point.
-
-11. Deploy your environment. From the /opt/cluster directory execute:
-
-    cd /opt/cluster
-
-    `docker run -e LICENSE=accept --net=host --rm -t -v "$(pwd)":/installer/cluster ibmcom/cfc-installer:1.2.0 install`
-
-12. About 10 minutes later you should have a deployed IBM Cloud private implementation.
-
-    Note that it is normal to occasionally get a “FAILED” message on the screen. This is a process waiting for another process to become available and this only means that it was not available at this check and it will sleep for a time and retry.
-
-    ![alt text](Installation/deployment-1.png "deployment 1")
-
-    ![alt text](Installation/deployment-2.png "deployment 2")
-
-    Login to your new implementation at <https://172.16.50.255>:8443 with userid of admin and password of admin.
+    ```
+    cd /opt/icp/cluster
+    docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0-ee uninstall
+    ```
 
 Appendix A
 ==========
