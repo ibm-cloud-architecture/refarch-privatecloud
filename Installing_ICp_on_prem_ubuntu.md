@@ -177,7 +177,7 @@ Installation
     1.  Change the hostname
         Edit the file /etc/hostname with your favorite text editor (e.g. vim) and change the value to match the node: e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
 
-        ![alt text](Installation/hostname.png "hostname)
+        ![alt text](Installation/hostname.png "hostname")
 
     2.  Modify /etc/network/interfaces to configure a static IP address
         In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
@@ -207,6 +207,7 @@ Installation
     You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
 
     1.  Login as to the boot-master node as root
+        `cd ~`
 
     2.  From root’s home directory execute:
         `ssh-keygen -t rsa -P ''` \# Upper case P and two single quotes for no password
@@ -218,9 +219,7 @@ Installation
     3.  Copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which we are currently operating).
 
         1.  Copy to the master node (to the current node):
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-boot-master`
-
-            You will now find that there is a new file called "authorized_keys" in your .ssh folder which contains the contents of id_rsa.pub.
+            `ssh-copy-id -i .ssh/id_rsa root@cfc-boot-master`   
 
         2.  Repeat for each additional server:
 
@@ -246,7 +245,7 @@ Installation
 
             If you cannot gain access via SSH without a password, ensure that you have enabled root login on each VM and have modified /etc/ssh/sshd\_config on each VM to allow remote login.
 
-8.  Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
+        Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
 
 9.  Next we need to download the cfc installer docker image.
 
