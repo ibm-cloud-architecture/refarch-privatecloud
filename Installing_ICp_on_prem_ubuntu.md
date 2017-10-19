@@ -72,35 +72,36 @@ Installation
         1. `sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config`
         2. `systemctl restart ssh`
 
-![alt text](Installation/remote-login.png "Remote login")
+        ![alt text](Installation/remote-login.png "Remote login")
 
-2.  Update NTP settings to make sure time stays in sync
+3.  Update NTP (Network Time Protocol) settings to make sure time stays in sync
     1.  `apt-get install -y ntp`
     2.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
-![alt text](Installation/ntp.png "NTP")
+    ![alt text](Installation/ntp.png "NTP")
 
-After making configuration changes restart the NTP server with the command:
- >`sytemctl restart ntp`
+    After making configuration changes restart the NTP server with the command:
+    >`sytemctl restart ntp`
 
-To test the status of your NTP servers, use the command:
->`ntpq -p`
+    To test the status of your NTP servers, use the command:
+    >`ntpq -p`
 
-![alt text](Installation/ntpq.png "ntpq -p")
+    ![alt text](Installation/ntpq.png "ntpq -p")
 
 
-1.  Update the vm.max\_map\_count setting to 262144:
+4.  Configure the Virtual Memory setting   
+    1. Update the vm.max\_map\_count setting to 262144:
     `sysctl -w vm.max_map_count=262144`
 
-2. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
+    2. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
     ![alt text](Installation/sysctl.png "sysctl")
 
-3. To check the current value use the command:
- >   `sysctl vm.max_map_count`
+    3. To check the current value use the command:
+    >   `sysctl vm.max_map_count`
 
-![alt text](Installation/sysctl-2.png "sysctl-2")
+    ![alt text](Installation/sysctl-2.png "sysctl-2")
 
-2.  Install docker
+5.  Install docker
 
     1. Update your ubuntu repositories
 
