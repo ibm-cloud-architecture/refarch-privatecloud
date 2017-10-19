@@ -248,37 +248,37 @@ Installation
         Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
 
 9. Prepare the installation files
-  1. Create a directory to hold installation configuration files
+    1. Create a directory to hold installation configuration files
 
       ```
       mkdir /opt/icp
       cd /opt/icp
       ```
-  2. Extract the installation configuration files
+    2. Extract the installation configuration files
       ```
       docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception:2.1.0-ee cp -r cluster /data
       ```
       After this commond, you should have a folder /opt/icp/cluster.   
 
-	3. (optional) Configure LDAP authentication (out of scope for bootcamp)
-	4. (optional) Create one or more storage classes (out of scope for bootcamp)
-	5. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
+	  3. (optional) Configure LDAP authentication (out of scope for bootcamp)
+	  4. (optional) Create one or more storage classes (out of scope for bootcamp)
+	  5. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
 
 		  ```
 		  mkdir -p  /opt/icp/cluster/images
 		  mv /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz /opt/icp/cluster/images/
 		  ```
 
-	6. (optional) If using IBM*Z nodes, add the x390x tarball to /opt/icp/cluster/images
-	7. Copy the ssh key to the installation directory
+	  6. (optional) If using IBM*Z nodes, add the x390x tarball to /opt/icp/cluster/images
+	  7. Copy the ssh key to the installation directory
 
 		  ```
 		  cp ~/.ssh/id_rsa /opt/icp/cluster/ssh_key
 		  chmod 400 /opt/icp/cluster/ssh_key
 		  ```
 
-	8. Configure the installation
-		1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes
+	  8. Configure the installation
+		   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes
 		        ```
 		        [master]
 		        10.0.0.1
@@ -294,7 +294,7 @@ Installation
 		        10.0.0.2
 		        ```
 
-		2. Edit the /opt/icp/cluster/config.yaml file
+		   2. Edit the /opt/icp/cluster/config.yaml file
 
 				Change *service_cluster_ip_range* to prevent network conflict
 
