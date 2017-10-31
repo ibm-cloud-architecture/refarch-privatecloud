@@ -16,7 +16,7 @@ IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu
 
 * VMware:
   *  [Installing ICP with Ubuntu](Installing_ICp_on_prem_ubuntu.md)
-  *  [Installing ICP with RedHat Enterprise](Installing_ICp_on_prem.md)  
+  *  [Installing ICP with RedHat Enterprise](Installing_ICp_on_prem_rhel.md)  
 * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
 * VirtualBow: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
 
