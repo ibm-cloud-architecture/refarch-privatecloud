@@ -1,7 +1,5 @@
 # Installing ICP CloudFoundry
 
-**Important:** *At the time of this writing, installation of CF is very unstable, but the installer will pick back up where it left off if it fails.  Many times, the failure is either waiting for a service to become available or an unexpected closing of a socket or something.  I have found that when an installation error occurs it is best to just immediately retry the install and see if it gets past the place where it initially failed.  If it does not then you should follow the troubleshooting steps at the end of this tutorial.  If it works and progresses then it should be okay.  I found I had to restart the install 5 or 6 times before it finally completed.*
-
 ## vCenter Preparations
 1. (optional) Create a new Cluster for CloudFoundry<br>
   ```
