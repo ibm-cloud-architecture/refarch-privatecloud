@@ -412,12 +412,12 @@
 2. Install the certificate key for the api server
   * Linux
     ```
-    cat star_bluemix.csplab.local.crt >> /etc/ssl/certs/ca-certificates.crt
+    cat rootCA.pem >> /etc/ssl/certs/ca-certificates.crt
     ```
 
   * Mac
     ```
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain star_bluemix.csplab.local.crt
+    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain rootCA.pem
     ```
 
 2. Configure your cf client's local
