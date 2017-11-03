@@ -40,7 +40,7 @@ This section provides a big picture summary of the installation process.
 
 * It is a really good idea that all machines used for ICP have access to a yum repository in order to install various RHEL packages that are pre-requisites for ICP.  Many data centers have a Red Hat Satellite server available.
 
-* It is a really good idea for all machines to access to the public Internet.  The Docker yum repository makes it convenient to install the latest version of Docker CE. Docker Hub in particular is convenient for access to commonly available Docker images.
+* It is a really good idea for all the machines in the ICP cluster to have access to the public Internet.  The public Docker yum repository makes it convenient to install the latest version of Docker CE. Docker Hub is convenient for access to commonly available Docker images.
 
 ## The ICP installation in a nutshell:
 1. Customize RHEL for Docker and ICP.
