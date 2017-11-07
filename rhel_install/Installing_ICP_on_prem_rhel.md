@@ -44,15 +44,17 @@ This section provides a big picture summary of the installation process.
 
 ## The ICP installation in a nutshell:
 1. Customize RHEL for Docker and ICP.
-2. Install Docker on the Boot-Master.
+2. Install Docker on the boot-master.
 3. Set up RSA based ssh login from the Boot-Master to all nodes in the cluster.
-4. Run the ICP inception on the boot-master.
+4. Run the ICP inception installer on the boot-master.
 
 Some other steps may need to be taken depending on specific circumstances:
-* Configure access to yum repositories.
+* Configure access to RHEL yum repositories.
 * Configure /etc/hosts files on all cluster members if DNS is not available to resolve host names and IP addresses.
 * Update RHEL to the latest patch level.
 * Install NTP.
+* Install Docker on each cluster member VM in addition to the boot-master VM. (This gives you full control over what version of Docker is installed, but more importantly, Docker on each VM is needed for the next step.)
+* Use Docker on each cluster member VM to pre-load the ICP Docker images rather than let the inception installation load the ICP Docker images.  (It turns out to be expedient to copy the ICP image tar-ball to each cluster member VM and then load the local Docker registry from that tar-ball rather than waiting for the inception installer to do that part of the installation.)
 
 # Basic RHEL configuration
 
@@ -60,7 +62,7 @@ The sub-sections in this section describe some basic RHEL configuration required
 
 If you are creating your own virtual machine, you can do all these steps on your initial VM before cloning it.
 
-If you are using VMs that were deployed for you, then it is likely the VMs are already configured as described in these sub-sections.  You may want to confirm that all the VMs that are going to be part of the ICP cluster have been configured as described in these sub-sections.
+If you are using VMs that were deployed for you, then it is likely the VMs are already configured as described in these sub-sections.  You should confirm with your VM provider or by doing the basic checks described below, that all the VMs that are going to be part of the ICP cluster have been configured as described in these sub-sections.
 
 ## Configure network interface to start on boot
 
@@ -80,9 +82,11 @@ The network interface configuration files are in `/etc/sysconfig/network-scripts
 
 4.	If desired, test by rebooting:
 
+    ```shell
     shutdown -r now
+    ```
 
-When the VM comes back up the network interface should be UP/RUNNING. The ifconfig command includes the status of each interface.
+When the VM comes back up the network interface should be UP/RUNNING. The `ifconfig` command includes the status of each interface.
 
 ## Configure the host name
 This section describes the configuration of the host name for RHEL 7 VMs.
@@ -184,7 +188,9 @@ NTP is needed to keep the time synchronized with the rest of the world.  All of 
 
 1.	Install NTP
 
-        yum -y install ntp
+    ```
+    yum -y install ntp
+    ```
 
 2.	Check the NTP configuration in `/etc/ntp.conf`
 
@@ -197,29 +203,28 @@ See the Red Hat documentation, [Configure NTP](https://access.redhat.com/documen
 	server 2.rhel.pool.ntp.org iburst
 	server 3.rhel.pool.ntp.org iburst
 
-3.	Enable the NTP daemon.  (This will make sure ntpd starts up when the machine is booted.)
+- Enable the NTP daemon.  (This will make sure ntpd starts up when the machine is booted.)
 
-*NOTE*: The name of the service is **ntpd**, not ntp.  (Go figure.)
+    *NOTE*: The name of the service is **ntpd**, not ntp.  (Go figure.)
 
-	systemctl enable ntpd
+        systemctl enable ntpd
 
-4.	Start the NTP service.
+- Start the NTP service.
 
-	systemctl start ntpd
+        systemctl start ntpd
 
-5.	Check the NTP service status.
+- Check the NTP service status.
 
-	systemctl status ntpd
+        systemctl status ntpd
 
-* If you need to stop the NTP service:
+- If you need to stop the NTP service:
 
-	systemctl stop ntpd
+	    systemctl stop ntpd
 
-* To get a list of peer servers in use:
+- To get a list of peer servers in use:
 
-	ntpq -p
-
-NOTE: Leave NTPD started and enabled (so that it starts at boot time).
+	    ntpq -p
+*NOTE*: Leave NTPD started and enabled (so that it starts at boot time).
 
 # Special RHEL configuration
 
@@ -229,11 +234,13 @@ The sub-sections in this section describe RHEL configuration that is not typical
 
 Docker requires that the vm.max_map_count be substantially greater than the default.  This section describes the steps to setting the `vm.max_map_count` to an appropriate number.
 
+*NOTE*: Do not confuse the `sysctl` command with the `systemctl` command. The command for getting and setting system parameters is `sysctl` not `systemctl`.
+
 To make an immediate (but ephemeral) change to the `vm.max_map_count` system parameter:
 
     sysctl -w vm.max_map_count=262144
 
-NOTE: The above command does not persist the setting to any configuration file.
+*NOTE*: The above command does not persist the setting to any configuration file, thus the vm.max_map_count will revert to its default value on reboot.
 
 In order to have the `vm.max_map_count` carry over through a reboot, edit the `/etc/sysctl.conf` file and add a line to define the value:
 
@@ -247,7 +254,7 @@ If you want to see the value of a system control variable just use: `sysctl <nam
 
 RHEL system parameters can be configured in several places with a well-defined precedence.  The `/etc/sysctl.conf` file is intended for use by the "local" system administrator.  Parameter settings in `/etc/sysctl.conf` have the highest precedence with respect to the value settings.  Other locations where system configuration parameters are read in order of precedence are: `/etc/sysctl.d/*.conf`, `/run/sysctl.d/*.conf` and `/usr/lib/sysctl.d/*.conf`. There are other locations for system configuration parameters as well. See the man pages for sysctl and sysctl.d for more details.
 
-NOTE: It is recommended that configuration parameter file names have a leading 2-digit number followed by a dash in order to clearly indicate the ordering in which the files should be processed at the time the machine is booted.  (The files are processed in the lexical ordering of their names.)
+*NOTE*: It is recommended that configuration parameter file names have a leading 2-digit number followed by a dash in order to clearly indicate the ordering in which the files should be processed at the time the machine is booted.  (The files are processed in the lexical ordering of their names.)
 
 The following observations apply to a default RHEL image. The specific VM you are using may be configured differently.
 
