@@ -38,7 +38,7 @@ This section provides a big picture summary of the installation process.
 
 * System requirements: The ICP v2.1 Knowledge Center section [Hardware Requirements and Recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/hardware_reqs.html), has a table describing the system requirements for each of the types of nodes in an ICP instance. The installation described in this document is a "multi-node cluster".
 
-* It is a really good idea that all machines used for ICP have access to a yum repository in order to install various RHEL packages that are pre-requisites for ICP.  Many data centers have a Red Hat Satellite server available.
+* It is a really good idea that all machines used for ICP have access to the RHEL yum repositories (os, optional and extras) in order to install various RHEL packages that are pre-requisites for ICP.  Many data centers have a Red Hat Satellite server available.
 
 * It is a really good idea for all the machines in the ICP cluster to have access to the public Internet.  The public Docker yum repository makes it convenient to install the latest version of Docker CE. Docker Hub is convenient for access to commonly available Docker images.
 
@@ -48,11 +48,12 @@ This section provides a big picture summary of the installation process.
 3. Set up RSA based ssh login from the Boot-Master to all nodes in the cluster.
 4. Run the ICP inception installer on the boot-master.
 
-Some other steps may need to be taken depending on specific circumstances:
+Some other steps may need to be taken depending on specific circumstances and requirements:
 * Configure access to RHEL yum repositories.
-* Configure /etc/hosts files on all cluster members if DNS is not available to resolve host names and IP addresses.
+* Configure `/etc/hosts` files on all cluster members if DNS is not available to resolve host names and IP addresses.
 * Update RHEL to the latest patch level.
 * Install NTP.
+* Install Python Docker modules to support the convenient use of Docker APIs in Python scripts.
 * Install Docker on each cluster member VM in addition to the boot-master VM. (This gives you full control over what version of Docker is installed, but more importantly, Docker on each VM is needed for the next step.)
 * Use Docker on each cluster member VM to pre-load the ICP Docker images rather than let the inception installation load the ICP Docker images.  (It turns out to be expedient to copy the ICP image tar-ball to each cluster member VM and then load the local Docker registry from that tar-ball rather than waiting for the inception installer to do that part of the installation.)
 
@@ -110,7 +111,7 @@ See the man pages for hostnamectl for more information.
 Additional notes on host name:
 1.	The host name is stored in the `/etc/hostname` file.  (NOTE: This file should only have the text of the host name on a single line with no newline character.)
 
-2.	There may be a HOSTNAME directive in the /etc/sysconfig/network file.
+2.	There may be a HOSTNAME directive in the `/etc/sysconfig/network` file.
 
 3.	A reboot is needed to have the host name change take effect: `shutdown -r now`
 
@@ -119,7 +120,7 @@ Additional notes on host name:
 
 *NOTE:* For RHEL v7.x, by default root can login via ssh using a password.
 
-The configuration for ssh is in /etc/ssh/sshd_config.  You will notice that PermitRootLogin is commented out.  However, UsePAM is set to yes.  A PAM configuration file for sshd is in /etc/pam.d. Configuration of the PAM plugin for sshd is beyond the scope of this document.
+The configuration for ssh is in `/etc/ssh/sshd_config`.  You will notice that `PermitRootLogin` is commented out.  However, `UsePAM` is set to yes.  A PAM configuration file for `sshd` is in `/etc/pam.d`. Configuration of the PAM plugin for `sshd` is beyond the scope of this document.
 
 ## Yum repository configuration
 
@@ -166,6 +167,22 @@ Yum caches its repository information as a performance enhancement. If you want 
     yum clean all
 
 Once you have the desired yum repositories configured, you can proceed with any RHEL configuration that requires additional packages (rpms) to be installed.
+
+At some point while using yum, you may see "Given file does not exist" errors such as:
+```
+rhel-optional/updateinfo       FAILED                                          
+ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid1>-updateinfo.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
+Trying other mirror.
+rhel-optional/primary          FAILED                                          
+ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid2>-primary.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
+Trying other mirror.
+ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid2>-primary.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
+Trying other mirror.
+ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid2>-primary.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
+```
+If you inspect the yum repository, you will notice that the `<uuid1>-updateinfo.xml.gz` and `<uuid2>-primary.xml.gz` files have a new UUID.
+
+A `yum clean all` will likely clean up such errors.
 
 ## Update RHEL
 This is an optional step and may not be necessary depending on the virtual machine that has been provided to you.
@@ -226,21 +243,33 @@ See the Red Hat documentation, [Configure NTP](https://access.redhat.com/documen
 	    ntpq -p
 *NOTE*: Leave NTPD started and enabled (so that it starts at boot time).
 
+## Configure /etc/hosts
+
+This section describes the steps to add entries to the `/etc/hosts` file of each cluster member for all the hosts in the cluster.
+
+*NOTE*: This section can be skipped if DNS is being used for host name resolution.  You can use `nslookup` on the IP addresses of a sampling of cluster members to determine if there are DNS entries for the cluster member VMs.  If not, then you need to configure `/etc/hosts`.
+
+*NOTE*: The "minimal" RHEL install does not include bind-utils, which is the RPM that contains the `nslookup` command.  If you are using a minimal RHEL image, then you need to install bind-utils if you want to use `nslookup`.  (`yum -y install bind-utils`)
+
+- For each VM in the cluster, edit `/etc/hosts` and add and entry for each VM in the cluster.
+
+In some circumstances you can edit `/etc/hosts` once on the boot-master and then `scp` the hosts file to the other members of the cluster. This expedient is only feasible if the all VMs in the cluster are freshly deployed VMs and they all have the same content in `/etc/hosts` when they are initially deployed, e.g., the default content.  
+
 # Special RHEL configuration
 
 The sub-sections in this section describe RHEL configuration that is not typical.  Even on a VM provided to you, you will very likely need to take the steps described in these sub-sections in order to prepare the machine to be a member of an ICP cluster.
 
-## vm.max\_map\_count
+## vm.max_map_count
 
-Docker requires that the vm.max_map_count be substantially greater than the default.  This section describes the steps to setting the `vm.max_map_count` to an appropriate number.
+The map_max_count determines the maximum number of memory map areas a process can have. Docker requires that the max_map_count be substantially greater than the default (65530).  This section describes the steps to setting the `vm.max_map_count` to an appropriate number.
 
 *NOTE*: Do not confuse the `sysctl` command with the `systemctl` command. The command for getting and setting system parameters is `sysctl` not `systemctl`.
 
-To make an immediate (but ephemeral) change to the `vm.max_map_count` system parameter:
+To make an immediate change to the `vm.max_map_count` system parameter:
 
     sysctl -w vm.max_map_count=262144
 
-*NOTE*: The above command does not persist the setting to any configuration file, thus the vm.max_map_count will revert to its default value on reboot.
+*NOTE*: The above command writes the value of max_map_count to the file `/proc/sys/vm/max_map_count`. However, the `vm.max_map_count` will revert to its default value on reboot.
 
 In order to have the `vm.max_map_count` carry over through a reboot, edit the `/etc/sysctl.conf` file and add a line to define the value:
 
@@ -267,27 +296,30 @@ The following observations apply to a default RHEL image. The specific VM you ar
 
 * On a default RHEL image, none of the above files has anything in it having to do with `vm.max_map_count`.
 
-* On a default RHEL image, there is nothing in `/run/sysctl.d/`  (The sysctl.d directory doesn't exist.)
+* On a default RHEL image, there is nothing in `/run/sysctl.d/`  (The sysctl.d directory does not exist.)
 The `/etc/sysctl.d` has only the file, `99-sysctl.conf`, but that file has nothing in it except the preface comments.
 
 ## Delete the /var/lib/mysql directory
 
-If the `/var/lib/mysql` directory exists on any of the ICP cluster VMs, the install will fail on that VM. At least on some RHEL 7 installations, it seems mysql gets a directory in /var/lib even if it isn't used for anything.  
+If the `/var/lib/mysql` directory exists on any of the ICP cluster VMs, the install will fail on that VM. At least on some RHEL 7 installations, it seems mysql gets a directory in `/var/lib` even if it is not used for anything.  
 
 * On all VMs in the cluster/cloud, make sure there is no `mysql` directory in `/var/lib`, i.e.,
 
+    ```
     rmdir /var/lib/mysql
+    ```
 
 # Installing docker community edition using a yum repository
 
-You have two options for intalling Docker:
-1. Install Docker only on the boot-master macchine and let Docker be installed on all of the other cluster members as part of the ICP installation.
-2. Install Docker on the boot-master and all of the cluster members.  This install guide uses this option because it tends to be faster to install Docker on each machine.  It also allows for a pre-install of the ICP images in the Docker registry which is another trick to speed up the ICP installation.  
+You have two options for installing Docker:
+1. Install Docker only on the boot-master machine and let Docker be installed on all of the other cluster members as part of the ICP installation.
+
+2. Install Docker on the boot-master and all of the cluster members.  This install guide uses this option because it tends to be faster to install Docker on each machine.  Once Docker is installed on each machine, the ICP Docker images can be loaded into the local Docker registry on each machine, which is another trick to speed up the ICP installation.  
 
 
 This section describes the steps to install Docker Community Edition on RHEL v7 using a yum repository. If you have access to the Internet and can get to **download.docker.com** you can use the yum repository defined there.  Otherwise, it is assumed you have access to a yum repository with a recent version of Docker Community Edition available.  
 
-Docker Community Edition is identical in behavior to Docker Enterprise Edition.  IBM Cloud Private is supported on Docker Community Edition or older versions of Docker before the differentiation occurred between Docker editions.  For notes on installing Docker Enterprise Edition, see the section "Installing docker enterprise edition".
+Docker Community Edition is identical in behavior to Docker Enterprise Edition.  IBM Cloud Private is supported on Docker Community Edition, or older versions of Docker before the differentiation occurred between Docker editions.  The installation of Docker Enterprise Edition is beyond the scope of this document.
 
 A typical RHEL yum repository may have the docker RPMs, but they may not be the current version.  It is recommended that the docker version available at download.docker.com be used.
 
@@ -295,38 +327,49 @@ NOTE: This installation scenario assumes Internet connectivity and access to **d
 
 The Docker documentation, [*Get Docker CE for CentOS*](https://docs.docker.com/engine/installation/linux/docker-ce/centos/) has detailed information on [Docker Community Edition installation](https://docs.docker.com/engine/installation/linux/docker-ce/centos/). The instructions here are derived from the Docker documentation.
 
-*NOTE*: The yum-config-manager utility is part of the yum-utils RPM.  If your machine doesn't have yum-config-manager then you need to install yum-utils.  (A RHEL "minimal install" does not include yum-utils.)
+*NOTE*: The yum-config-manager utility is part of the yum-utils RPM.  If your machine doesn't have yum-config-manager then you need to install yum-utils (`yum -y install yum-utils`). (A RHEL "minimal install" does not include yum-utils. Yum-utils has some Python related pre-reqs that also get installed.)
 
-1.	Set up the docker yum repository
+-	Set up the docker yum repository
 
-	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    ```
+    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    ```
 
-You should see output similar to this:
+    You should see output similar to this:
 
-	Loaded plugins: langpacks, product-id
-	adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
-	grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
-	repo saved to /etc/yum.repos.d/docker-ce.repo
+    ```
+    Loaded plugins: langpacks, product-id
+	  adding repo from: https://download.docker.com/linux/centos/docker-ce.repo
+	  grabbing file https://download.docker.com/linux/centos/docker-ce.repo to /etc/yum.repos.d/docker-ce.repo
+	  repo saved to /etc/yum.repos.d/docker-ce.repo
+    ```
 
-2.	Install docker CE.
+-	Install Docker CE.
 
-        yum -y install docker-ce
+    ```
+    yum -y install docker-ce
+    ```
 
 *NOTE*: The docker-ce install has a pre-req of container-selinux.  If there is no container-selinux in your yom repositories the above command will fail.  (The container-selinux package is in the RHEL "extras" repo.)
 
-A work-around to the above install is described here: [https://github.com/docker/for-linux/issues/20If](https://github.com/docker/for-linux/issues/20If) The following command was taken from the work-aournd.
+A work-around to the above install is described here: [https://github.com/docker/for-linux/issues/20If](https://github.com/docker/for-linux/issues/20If) The following command was taken from the work-aournd:
 
-        yum -y install --setopt=obsoletes=0 docker-ce-17.03.2.ce-1.el7.centos.x86_64 \
-        docker-ce-selinux-17.03.2.ce-1.el7.centos.noarch
+```
+yum -y install --setopt=obsoletes=0 docker-ce-17.03.2.ce-1.el7.centos.x86_64 docker-ce-selinux-17.03.2.ce-1.el7.centos.noarch
+```
 
-3.	Start and enable the docker daemon
+- Start and enable the docker daemon.
 
-	systemctl start docker
-	systemctl enable docker
+	```
+  systemctl start docker
+  systemctl enable docker
+  ```
 
-4.	Run the usual docker run hello-world to confirm the installation.
+-	Run the usual `docker run hello-world` to confirm the installation.
 
-	docker run hello-world
+	```
+  docker run hello-world
+  ```
 
 The main thing to check for in the output from hello-world:
 
@@ -335,7 +378,7 @@ The main thing to check for in the output from hello-world:
 
 You shouldn't see any errors when running the docker hello-world smoke test.
 
-## Things that can go wrong with docker install
+## Things that can go wrong with Docker install
 
 1.	Your RHEL install doesn't have a `container-selinux` version greater than 2.9.  See [https://stackoverflow.com/questions/45272827/docker-ce-on-rhel-requires-container-selinux-2-9](https://stackoverflow.com/questions/45272827/docker-ce-on-rhel-requires-container-selinux-2-9)
 
@@ -367,26 +410,24 @@ That should complete the Docker installation.
 
 To finish things off, start and enable docker and run the hello-world smoke test as described in the above section.
 
-# Install docker.py and other supporting Python tools
+# Install Python Docker support
 
-Along with docker itself, the docker Python module is needed.  
+This section describes the steps for installing Python Docker support modules.  The Docker modules that get installed allow all the usual Docker commands to be used within a Python script.
 
-*NOTE*: Usually the docker.py module is installed when docker itself is installed.
+Installing the Python Docker support modules is optional.  If you don't intend to use Python for scripting of Docker operations, then this section can be skipped.
 
-You can confirm that docker.py is installed with:
+*NOTE*: Python has a `docker` package and a `docker-py` package. They do not appear to be equivalent or synonyms for the same thing. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa.
 
-    ls -l /usr/lib/python2.7/site-packages/sos/plugins/docker.py
+In order to install the Python Docker support modules, pip needs to be installed.  (Pip is the Python package manager.) In order to install pip, the python-setuptools package needs to be installed.
 
-If the docker.py module is not present in your Python plugins then you need to install it.
-
-- Install Python setup tools (Python setuptools should already be installed.)
+- Install Python setup tools. (Python setuptools may already be installed.)
 
         yum -y install python-setuptools
         Loaded plugins: langpacks, product-id, search-disabled-repos, subscription-manager
         Package python-setuptools-0.9.8-4.el7.noarch already installed and latest version
         Nothing to do
 
-- Install pip
+- Install pip.
 
         easy_install pip
         Searching for pip
@@ -402,27 +443,47 @@ If the docker.py module is not present in your Python plugins then you need to i
         Processing dependencies for pip
         Finished processing dependencies for pip
 
-- Install docker.py
+- Install Python Docker support modules.
 
-	pip install docker-py>=1.7.0
+	```
+  pip install docker
+  ```
 
-Docker.py gets put in:
+After the install of docker you should see the following directories:
 
-		/usr/lib/python2.7/site-packages/sos/plugins/docker.py
+    # ls -l /usr/lib/python2.7/site-packages/docker*
+    /usr/lib/python2.7/site-packages/docker:
+    api   auth.py   client.py   constants.py   errors.py   __init__.py   models      tls.py   transport  utils       version.pyc
+    auth  auth.pyc  client.pyc  constants.pyc  errors.pyc  __init__.pyc  ssladapter  tls.pyc  types      version.py
+
+    /usr/lib/python2.7/site-packages/docker-2.5.1.dist-info:
+    DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
+
+    /usr/lib/python2.7/site-packages/docker_py-1.10.6.dist-info:
+    DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
+
+    /usr/lib/python2.7/site-packages/dockerpycreds:
+    constants.py  constants.pyc  errors.py  errors.pyc  __init__.py  __init__.pyc  store.py  store.pyc  version.py  version.pyc
+
+    /usr/lib/python2.7/site-packages/docker_pycreds-0.2.1.dist-info:
+    DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
+
 
 # MountFlags in docker.service
 
 The MountFlags setting needs to be done on all machines in the cluster/cloud.  
 
-It is assumed that docker has been installed.  (You won't see a docker.service file in /lib/systemd/system if docker has not been installed.)
+It is assumed that docker has been installed.  (You won't see a `docker.service` file in `/lib/systemd/system` if docker has not been installed.)
 
-1.	Edit the docker.service file in /lib/systemd/system
+1.	Edit the file: `/lib/systemd/system/docker.service `
 
 2.	To the Service section, add the line:
 
-	MountFlags=shared
+	```
+  MountFlags=shared
+  ```
 
-Here is the Service section of docker.service after the MountFlags property has been added at the end of the section.
+Here is the Service section of `docker.service` after the `MountFlags` property has been added at the end of the section.
 
 	[Service]
 	Type=notify
@@ -473,10 +534,10 @@ To stop docker:
 
 The "boot master" VM needs to have root access via ssh to the other members of the cloud.
 
-*NOTE*: In the description below it is assumed that DNS is in use and the host names for the ICP cluster VMs are registered in the DNS.  If DNS is not in use, then the /etc/hosts files on each of the ICP cluster VMs must have been set up to map host names to IP addresses.  Hence, host names are used in the samples. (The ssh-copy-id command requires the use of host names.)
+*NOTE*: In the description below, it is assumed that DNS is in use and the host names for the ICP cluster VMs are registered in the DNS.  If DNS is not in use, then the `/etc/hosts` files on each of the ICP cluster VMs must have been set up to map host names to IP addresses.  Hence, host names are used in the samples. (The ssh-copy-id command requires the use of host names.)
 
 *NOTE*: Substitute your actual host names In the sample commands in this section.
-For the IPC KC instructions to do this work, see "Sharing SSH keys among cluster nodes": https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/ssh_keys.html
+For the ICP KC instructions to do this work, see "Sharing SSH keys among cluster nodes": https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/ssh_keys.html
 
 - Login to the boot-master node as root
 
@@ -486,11 +547,14 @@ For the IPC KC instructions to do this work, see "Sharing SSH keys among cluster
 
     Upper case P and two single quotes for no password.
 
-    Accept the default location of:
+    When prompted, hit Enter/Return to accept the default location for the new key file:
 
-        # /root/.ssh/id_rsa
+        Generating public/private rsa key pair.
+        Enter file in which to save the key (/root/.ssh/id_rsa):
+        Your identification has been saved in /root/.ssh/id_rsa.
+        Your public key has been saved in /root/.ssh/id_rsa.pub.
+        ...
 
-    for the new key file.
 
 - Now, executing a directory listing on /root/.ssh should show two files: id_rsa, id_rsa.pub. (A known_hosts file may also be present.)
 
@@ -499,18 +563,17 @@ For the IPC KC instructions to do this work, see "Sharing SSH keys among cluster
 	    -rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
 	    -rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
 
-- From root's home directory, copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which you are currently operating).
+- Using the `ssh-copy-id` command from root's home directory, copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which you are currently operating).
 
 *NOTE*: The copy of the SSH ID to other hosts requires the use of the target host name in the ssh-copy-id command.  Do not use an IP address, you will not be able to get past the authentication step when you attempt to enter the password for root on the target host.
 
-In the command below <master> is used as a placeholder for the actual host name.
+In the command below `<master>` is used as a placeholder for the actual boot-master fully qualified host name (FQDN).
 
-    # ssh-copy-id -i ./.ssh/id_rsa root@<master>
+    # ssh-copy-id -i ./.ssh/id_rsa.pub root@<master>
 
-You will be prompted to confirm that you want to connect to the <master>.
-Then you will be prompted for root's password on <master>, which is the target for this first passwordless ssh configuration.
+You will be prompted to confirm that you want to connect to the `<master>`. Then you will be prompted for root's password on `<master>`, which is the target for this first passwordless ssh configuration.
 
-*NOTE*: If you are not prompted to confirm that you wan to connect to the target machine and for the root password of the target machine, then make sure the target machine has a .ssh directory in /root.  The permissions on the .ssh directory should be 700. Also make sure you can ping the target host by host name.  (DNS or /etc/hosts on the boot-master needs to be configured to allow the target host name to be resolved.)
+*NOTE*: If you are not prompted to confirm that you want to connect to the target machine, and for the root password of the target machine, then make sure the target machine has a .ssh directory in /root.  The permissions on the .ssh directory should be 700. Also make sure you can ping the target host by host name.  (DNS or `/etc/hosts` on the boot-master needs to be configured to allow the target host name to be resolved.)
 
 - Now try logging into the machine, with: `ssh root@<master>` and check to make sure that only the key(s) you wanted were added.
 
@@ -525,11 +588,11 @@ At this point you should see two additional files in the .ssh directory:
 
 -	Repeat for each additional server in the cluster/cloud.  (As above, you will need to answer yes to add the ECDSA key for each host to the known_hosts file and provide the root password of the target host.)
 
-In the commands below, `<proxy>` and `<worker_##>` is used as a placeholder for the actual host names for machines in the cluster.
+In the commands below, `<proxy>` and `<worker_##>` is used as a placeholder for the fully qualified host names (FQDN) for machines in the cluster.
 
-	# ssh-copy-id -i ./.ssh/id_rsa root@<proxy>
-	# ssh-copy-id -i ./.ssh/id_rsa root@<worker_01>
-	# ssh-copy-id -i ./.ssh/id_rsa root@<worker_02>
+	# ssh-copy-id -i ./.ssh/id_rsa.pub root@<proxy>
+	# ssh-copy-id -i ./.ssh/id_rsa.pub root@<worker_01>
+	# ssh-copy-id -i ./.ssh/id_rsa.pub root@<worker_02>
 	etc
 
 - When this is complete, you should be able to ssh from the boot-master node to each of the other nodes as root without having to provide a password. You can test this by executing and ssh from the boot-master host to any of the other members of the ICP cluster:
@@ -558,7 +621,7 @@ This is the start of the description of the steps to install IBM Cloud Private.
 
 2. If you are using VMs provided to you, then you should have completed all the steps to getting Docker running on at least the boot-master machine. The install process includes installing Docker on each cluster member.  As an expedient we recommend pre-installing Docker on each cluster member.  (See the *Copy and load ICP docker image tar ball to all cluster VMs* section below for details.)
 
-3. DNS or the /etc/hosts file on each VM should be configured with the proper entries so that each VM can resolve the address of the other members of the cluster/cloud.
+3. DNS or the `/etc/hosts` file on each VM should be configured with the proper entries so that each VM can resolve the address of the other members of the cluster/cloud.
 
 4. SSH needs to have been set up such that the "boot master" VM can ssh to each of the other VMs in the cluster/cloud as root without using a password.
 
@@ -590,48 +653,53 @@ This section has some steps that need to be taken on the boot master before the 
 *NOTE*: In these instructions, the root directory of the installation is referred to as `<ICP_HOME>`.  A common convention is to install ICP in a directory that includes the ICP version in the directory name.
 
 - (On the boot-master) Extract the ICP boot meta-data to the `<ICP_HOME>/cluster` directory:
+    ```
+    # cd <ICP_HOME>
+    # docker run -v $(pwd):/data -e LICENSE=accept ibmcom/icp-inception:2.1.0-ee cp -r cluster /data  
+    ```
 
-        # cd <ICP_HOME>
-        # docker run -v $(pwd):/data -e LICENSE=accept ibmcom/icp-inception:2.1.0-ee cp -r cluster /data  
-
-The above command creates a directory named `cluster` in `<ICP_HOME>`.  The `cluster` directory has the following contents:
-
-        # ls -l cluster
-        -rw-r--r--. 1 root root 3998 Oct 30 06:37 config.yaml
-        -rw-r--r--. 1 root root   88 Oct 30 06:37 hosts
-        drwxr-xr-x. 4 root root   39 Oct 30 06:37 misc
-        -r--------. 1 root root    1 Oct 30 06:37 ssh_key
-
+    The above command creates a directory named `cluster` in `<ICP_HOME>`.  The `cluster` directory has the following contents:
+    ```
+    # ls -l cluster
+    -rw-r--r--. 1 root root 3998 Oct 30 06:37 config.yaml
+    -rw-r--r--. 1 root root   88 Oct 30 06:37 hosts
+    drwxr-xr-x. 4 root root   39 Oct 30 06:37 misc
+    -r--------. 1 root root    1 Oct 30 06:37 ssh_key
+    ```
 - Add the IP address of all the cluster/cloud members to the `hosts` file in `<ICP_HOME>/cluster`.
 
-NOTE: The ICP hosts file must use IP addresses.  Host names are not used.  
+    NOTE: The ICP hosts file must use IP addresses.  Host names are not used.  
 
 - Copy the ssh key file to the <ICP_HOME>/cluster. (This overwrites the empty ssh_key file already there.)
 
-    \# cp ~/.ssh/id_rsa ssh_key
-    cp: overwrite ‘ssh_key’? y
-    #
+  ```
+  # cp ~/.ssh/id_rsa ssh_key
+  cp: overwrite ‘ssh_key’? y
+  ```
 
 - Check the permissions on the ssh_key file and make sure they are read-only for the owner (root). If necessary, change the permissions on the ssh_key file in `<ICP_HOME>/cluster` to "read-only" by owner, i.e., root.
 
-Check the access:
-
-    # ls -l ssh_key
+- Check the access:
+  ```
+  # ls -l ssh_key
     -r--------. 1 root root 1675 Jun 30 13:46 ssh_key
+  ```
 
-If the access is not read-only by owner, then change it:
+- If the access is not read-only by owner, then change it:
+  ```
+  # chmod 400 ssh_key
+  ```
 
-    # chmod 400 ssh_key
-
-Check again to make sure you changed it correctly.
+- Check again to make sure you changed it correctly.
 
 
 - Copy/move the "image" archive (`ibm-cloud-private-x86_64-2.1.0.tar.gz`) to the images directory in `<ICP_HOME>/cluster`. (You first need to create the images directory.) In the command below it is assumed the image archive is located initially in `<ICP_HOME>`.
 
-From `<ICP_HOME>/cluster`:
-
+    From `<ICP_HOME>/cluster`:
+    ```
     # mkdir images
     # mv `<ICP_HOME>/ibm-cloud-private-x86_64-2.1.0.tar.gz` images
+    ```
 
 Working with the config.yaml file is described in the next section.
 
@@ -643,15 +711,14 @@ For a simple sandbox deployment, the content of config.yaml can remain as is.
 
 Things that can be left as-is for a small sandbox environment:
 
-1. network_type calico
-2.	network_cidr: 10.1.0.0/16
-3.	service_cluster_ip_range: 10.0.0.1/24
-4.	cluster_domain: cluster.local
-5.	Everything else in config.yaml is usually left as is.  
+- network_type calico
+- network_cidr: 10.1.0.0/16
+- service_cluster_ip_range: 10.0.0.1/24
+- For a simple cluster, everything else in config.yaml remains commented out.  
 
 There are many parameters that may be set in config.yaml.  It is a good idea to read through the file to become familiar with the options.  
 
-##Other things that you may need to check
+## Other things that you may need to check
 
 This section has a collection of items that have led to a failure in the installation process. This is a work in progress and is a place to keep track of this sort of stuff that seems a bit random.
 
@@ -675,6 +742,8 @@ It is expedient to pre-load the Docker registry on each VM that is a member of t
 
         tar -xvf ibm-cloud-private-x86_64-2.1.0-beta-2.tar.gz -O | docker load
 
+3. On all but the boot-master machine, the ICP image tar file can be removed once the docker load completes.  On the boot-master machine the ICP image tar file gets moved to an images directory in `<ICP_HOME>/cluster`.
+
 *NOTE*: If you are building an ICP virtual machine, you can run the extract and load on the base VM image so that all cloned VMs have the docker registry pre-loaded with the ICP images.
 
 ## Run the ICP install command
@@ -685,9 +754,9 @@ Docker is used to run the install for all members of the cluster/cloud.  The com
 
 *NOTE*: It is OK to run this command multiple times to get things installed on all members of the cluster/cloud should problems show up with a particular cluster/cloud member.  At least for basic problems, the error messages are very clear about where the problems are, e.g., network connectivity, firewall issues, docker not running.
 
-*NOTE*: During the installation all information messages go to stdout/stderr.  If you want to capture a log of the installation process, you need to direct output to a file.  The docker command line below uses `tee` to capture the log and also allow it to be visible in the shell window. The log file will have escape character sequences in it for color coding the text output, but it is readable.
+*NOTE*: During the installation all information messages go to stdout/stderr.  If you want to capture a log of the installation process, you need to direct output to a file.  The docker command line below uses `tee` to capture the log and also allow it to be visible in the shell window. A logs directory in `<ICP_HOME>/cluster>` was created to hold the log files. The log file will have escape character sequences in it for color coding the text output, but it is readable.
 
-    # docker run --net=host -t -e LICENSE=accept -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0-ee install -v | tee /tmp/install-1.log
+    # docker run --net=host -t -e LICENSE=accept -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0-ee install -v | tee logs/install-1.log
 
 A common convention (not shown here) is to include a date stamp in the file name of the install log that gets written to /tmp (in this case) as well as a log number (in this case 1).  The log number can be incremented each time the command is rerun if you want to save each log file.
 
@@ -695,19 +764,27 @@ NOTE: If you need to get more detail for installation problem determination purp
 
     # docker run -e LICENSE=accept --net=host --rm -t -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0-ee install -vvv | tee icp_install-2.log
 
-- When the install completes, grep/search the install log for "failure" to determine if there were any failures.  
+- When the install completes, you want to see all "ok" and no "failed" in the recap.  
+```
+PLAY RECAP *********************************************************************
+xxx.xx.xxx.50              : ok=109  changed=36   unreachable=0    failed=0   
+xxx.xx.xxx.52              : ok=109  changed=36   unreachable=0    failed=0   
+xxx.xx.xxx.57              : ok=137  changed=36   unreachable=0    failed=0   
+xxx.xx.xxx.60              : ok=163  changed=55   unreachable=0    failed=0   
+localhost                  : ok=216  changed=114  unreachable=0    failed=0   
+```
 
-- Problem determination is based on the installation log.  The error messages are relatively clear.
+- Problem determination is based on the installation log.  The error messages are relatively clear. If the recap contains a non-zero failed count for any of the cluster members or something is unreachable, then grep/search the install log for "failure" to determine begin the problem determination process.
 
 -	Assuming the install went correctly move on to some basic "smoke tests" described in the section below.
 
--	Once the installation completes successfully, enable the firewall on each member VM.
+-	Once the installation completes successfully and you have performed some basic tests, the firewall on each cluster member will need to be configured to open ports as described in the ICP Knowledge Center section, [Default ports.](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/required_ports.html) Port 8443 on the master needs to be open to get to the ICP console.
 
 ## Start and enable the firewalld on all cluster members
 
 You may want to hold off on this step until some basic smoke tests have been executed.  See the "Basic ICP smoke tests" section below.
 
-After the install completes, start and enable firewalld on each cluster/cloud member.
+After the install completes, configure firewall rules on each cluster member according to the ICP Knowledge Center section, [Default ports.](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/required_ports.html).  Then start and enable firewalld on each cluster/cloud member.
 
 # Simple ICP "smoke" tests
 
