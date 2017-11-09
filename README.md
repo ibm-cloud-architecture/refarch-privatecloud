@@ -28,6 +28,11 @@ IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu
 
 [Accessing ICp](Accessing_ICp_through_CLI.md)
 
+## High Availability and Resiliency
+
+  [Federated ICP clusters](resiliency/federated_icp_clusters.md)
+
+
 
 ## Best practices
 
