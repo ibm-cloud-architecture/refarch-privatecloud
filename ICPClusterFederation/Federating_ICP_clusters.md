@@ -4,6 +4,8 @@ Federating ICP v2.1 Clusters
 
 This is a guide for federating two or more ICP v2.1 clusters.
 
+The guide here also references the approach documented by at [Kubernetes Federation for on-premises clusters](https://github.com/ufcg-lsd/k8s-onpremise-federation)
+
 TBD - Some of the documentation sources on Kubernetes cluster federation makes a distinction that the clusters to be federated are on-premises as opposed to deployed in a public cloud.  It would be good to document why that matters.
 
 The information in this guide is based on federating on-premises ICP clusters.  ICP is running Kubernetes.  The federation of ICP clusters is essentially the federation of Kubernetes clusters.
@@ -152,9 +154,26 @@ CURRENT   NAME               CLUSTER    AUTHINFO        NAMESPACE
 
 ## Setup the CoreDNS
 
+ICP runs in a non-cloud datacenter where the typical cloud services such as DNS and loadBalance services are not available. To provide the DNS provider required by kubernetes federation, we will use CoreDNS.
+
 ### Label the nodes
 
+Kubernetes federated clusters uses region and zone based service discovery. Thus we need to add the region and zone labels for all the nodes in each cluster.
+
+```
+# Adding region "us" and zone "east" labels in all nodes of fc01.icp
+kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us --context fc01.icp-context
+kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=east --context fc01.icp-context
+
+# Adding region "us" and zone "west" labels in all nodes of fc01.icp
+kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us --context fc02.icp-context
+kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west --context fc02.icp-context
+```
+
 ### Deploy the etcd-operator
+
+CoreDNS runs as a kubernetes component, itself needs persistent tier. We followed the approach documented by at [Kubernetes Federation for on-premises clusters](https://github.com/ufcg-lsd/k8s-onpremise-federation), which creates a separate etcd deployment for CoreDNS.
+
 
 ### Deploy CoreDNS
 
