@@ -18,18 +18,27 @@ fc02-bootmaster01
 
 The ICP home directory on the bootmaster VM is referred to as `ICP_HOME` in this document.  (The actual directory may appear in some code samples, and it is: `/opt/icp`.)
 
-# Getting started
+# Prepare the federation environments
 This section describes some preliminary steps required to get prepared to do the federation.
 
-## Install kubectl
+## Install kubectl and kubefed
 
-You need kubectl for much of the configuration work.  On a machine where ICP has been installed, you can simply copy the kubectl executable from the Kubernetes container.
+You need kubectl and kubefed cli for much of the configuration work.  On a machine where ICP has been installed (recommend the ICP bootmaster node), run following command:
 
 ```
-docker run -e LICENSE=accept --net=host -v /usr/local/bin:/data ibmcom/kubernetes:v1.7.3-ee cp /kubectl /data
+# Linux
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/kubernetes-client-linux-amd64.tar.gz
+tar -xzvf kubernetes-client-linux-amd64.tar.gz
 ```
 
-The above command copies the kubectl executable to /usr/local/bin.
+Copy the extracted binaries to one of the directories in your $PATH and set the executable permission on those binaries.
+
+```
+sudo cp kubernetes/client/bin/kubefed /usr/local/bin
+sudo chmod +x /usr/local/bin/kubefed
+sudo cp kubernetes/client/bin/kubectl /usr/local/bin
+sudo chmod +x /usr/local/bin/kubectl
+```
 
 You can run something simple from the command line like `kubectl version`, to confirm that kubectl is available in your shell.
 ```
@@ -83,7 +92,7 @@ kubectl config view > fc01-kubeconfig.yml
 ```
 Then on the other boot-master host:
 ```
-kubectl config view > fc01-kubeconfig.yml
+kubectl config view > fc02-kubeconfig.yml
 ```
 
 ## Merge the kubeconfig files from all clusters
@@ -106,7 +115,7 @@ clusters:
   name: fc01.icp
 - cluster:
     insecure-skip-tls-verify: true
-    server: https://10.11.12.1:8001
+    server: https://10.11.12.2:8001
   name: fc02.icp
 contexts:
 - context:
@@ -141,7 +150,22 @@ CURRENT   NAME               CLUSTER    AUTHINFO        NAMESPACE
 
 ```
 
-## Label the nodes
+## Setup the CoreDNS
+
+### Label the nodes
+
+### Deploy the etcd-operator
+
+### Deploy CoreDNS
+
+
+## Initialize the Federation Control Plane
+
+## Join ICP Clusters
+
+## Setting up Load Balancer
+
+## Deploy What's for Diner reference application to validate
 
 
 
