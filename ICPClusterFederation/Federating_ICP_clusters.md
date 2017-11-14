@@ -59,7 +59,7 @@ To set up a Kubernetes context for use with the cluster in ICP do the following:
 - Click on your user name in the upper right corner of the console window.  (See figure below.)
 ![Configure Kubectl Client from ICP Console](images/01_ConfigureKubectlClientFromICPConsole.png)
 - A pop-up window should appear with the kubectl commands listed that are needed to configure a kubectl context for your ICP cluster.  (See figure below.)
-![Getting Kubeconfig from ICP Console](images/02_GettingKubeconfigFromICPConsole.png)
+![Getting Kubeconfig from ICP Console](images/02_GettingKubeconfigFromICPConsole.png)   
 You can copy the command block into the clipboard by clicking in the icon in the upper right corner of the kubeconfig pop-up window that looks like two overlapping sheets of paper.  (See figure above.)
 
 - Paste the the kubectl commands into a shell and they will execute.  At that point you will have a context established for the Kubernetes cluster for the ICP instance where you were logged in.
@@ -174,13 +174,176 @@ kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west --context 
 
 CoreDNS runs as a kubernetes component, itself needs persistent tier. We followed the approach documented by at [Kubernetes Federation for on-premises clusters](https://github.com/ufcg-lsd/k8s-onpremise-federation), which creates a separate etcd deployment for CoreDNS.
 
+Under the `federation` folder, clone the following github project:
+```
+git clone https://github.com/ufcg-lsd/k8s-onpremise-federation
+```
+
+Navigate into the federation folder, then install the etcd-operator service:
+
+```
+# RBAC
+kubectl apply -f etcd-operator/rbac.yaml
+serviceaccount "etcd-operator" created
+clusterrole "etcd-operator" created
+clusterrolebinding "etcd-operator" created
+
+# Deployment
+kubectl apply -f etcd-operator/deployment.yaml
+deployment "etcd-operator" created
+
+# Wait the Pod status of etcd-operator to be running before creating the etcd-cluster
+kubectl apply -f etcd-operator/cluster.yaml
+etcdcluster "etcd-cluster" created
+
+```
+
+Make sure you have the `etcd-cluster-client` running at port 2379
+```
+kubectl get svc etcd-cluster-client
+```
+ Run the following commands below to test your etcd-cluster-client endpoint
+
+ ```
+ kubectl run --rm -i --tty fun --image quay.io/coreos/etcd --restart=Never -- /bin/sh
+
+ / # ETCDCTL_API=3 etcdctl --endpoints http://etcd-cluster-client.default:2379 put foo bar
+OK
+/ # ETCDCTL_API=3 etcdctl --endpoints http://etcd-cluster-client.default:2379 get foo
+foo
+bar
+/ # ETCDCTL_API=3 etcdctl --endpoints http://etcd-cluster-client.default:2379 del foo
+1
+exit
+ ```
+
 
 ### Deploy CoreDNS
 
+This guide uses the [CoreDNS helm charts](https://github.com/kubernetes/charts/tree/master/stable/coredns) to deploy the CoreDNS as DNS provider of federation.
+
+Navigate back to the `federation` folder and create a file for CoreDNS chart:
+
+```
+cat <<EOF >  coredns-chart-values.yaml
+isClusterService: false
+serviceType: "NodePort"
+middleware:
+  kubernetes:
+    enabled: false
+  etcd:
+    enabled: true
+    zones:
+    - "fc-federated.com."
+    endpoint: "http://etcd-cluster-client.default:2379"
+EOF
+```
+
+Then deploy the CoreDNS chart:
+```
+helm install --name coredns -f  coredns-chart-values.yaml  stable/coredns
+```
+You should see the installation message:
+```
+NOTES:
+
+CoreDNS is now running in the cluster.
+It can be accessed using the below endpoint
+  export NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services coredns-coredns)
+  export NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "$NODE_IP:$NODE_PORT"
+
+It can be tested with the following:
+
+1. Launch a Pod with DNS tools:
+
+kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+
+2. Query the DNS server:
+
+/ # host kubernetes
+```
 
 ## Initialize the Federation Control Plane
 
+We'll be using `kubefed` for most of the operation here. Make sure you have installed kubefed as documented earlier.
+
+Create coredns-provider.conf file under the current (federation) directory
+```
+cat <<EOF > coredns-provider.conf
+[Global]
+etcd-endpoints = http://etcd-cluster-client.default:2379
+zones = fc-federated.com.
+coredns-endpoints = 172.16.254.59:30669
+EOF
+
+```
+
+Notes:
+
+* The zones field must have the same value of CoreDNS chart config
+* coredns-endpoints is the endpoint to access coredns server. CoreDNS was deployed with NodePort type, so the endpoints is composed by <ip-of-icp-proxy-nodes>:<port-of-service>.
+
+Now, initialize the Federation Control Plane
+
+```
+kubefed init fc-federated-cluster \
+    --host-cluster-context="fc01.icp-context" \
+    --dns-provider="coredns" \
+    --dns-zone-name="fc-federated.com." \
+    --api-server-advertise-address=172.16.254.64 \
+    --api-server-service-type='NodePort' \
+    --dns-provider-config="coredns-provider.conf" \
+    --etcd-persistent-storage=false
+```
+
+NOTE:
+
+* I used the ICP master node IP address for the api-server-advertise-address field
+
+You should see the execution result similar as following:
+```
+Creating a namespace federation-system for federation system components... done
+Creating federation control plane service... done
+Creating federation control plane objects (credentials, persistent volume claim)... done
+Creating federation component deployments... done
+Updating kubeconfig... done
+Waiting for federation control plane to come up......................... done
+Federation API server is running at: 172.16.254.64:30130
+```
+
+Note that this creates a namespace `federation-system` in the host-cluster, and drops a federated api-server , a persistent volume claim (for etcd), and controller manager which programs DNS.
+
+Now you should have a new context as following:
+
+```
+[root@fc01-bootmaster01 federation]# kubectl config get-contexts
+CURRENT   NAME                   CLUSTER                AUTHINFO               NAMESPACE
+          fc-federated-cluster   fc-federated-cluster   fc-federated-cluster   
+*         fc01.icp-context       fc01.icp               fc01.icp-user          default
+          fc02.icp-context       fc02.icp               fc02.icp-user          default
+
+```
+
+
 ## Join ICP Clusters
+
+switch to use the new context:
+
+```
+kubectl config use-context fc-federated-cluster
+```
+
+Join the clusters to the federation
+```
+# join fc01 cluster to the federated cluster
+kubefed join fc01-context --host-cluster-context=fc01.icp-context
+
+# join fc02 cluster to the federated cluster
+kubefed join fc02-context --host-cluster-context=fc01.icp-context
+
+```
+
 
 ## Setting up Load Balancer
 
