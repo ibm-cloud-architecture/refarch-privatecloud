@@ -147,8 +147,8 @@ preferences: {}
 [root@fc01-bootmaster01 federation]# export KUBECONFIG=./fc-kubeconfig.yml
 [root@fc01-bootmaster01 federation]# kubectl config get-contexts
 CURRENT   NAME               CLUSTER    AUTHINFO        NAMESPACE
-*         fc01.icp-context   fc01.icp   fc01.icp-user   kube-system
-          fc02.icp-context   fc02.icp   fc02.icp-user   default
+*         fc01-context        fc01      fc01.icp-user   default
+          fc02-context        fc02      fc02.icp-user   default
 
 ```
 
@@ -161,13 +161,13 @@ ICP runs in a non-cloud datacenter where the typical cloud services such as DNS 
 Kubernetes federated clusters uses region and zone based service discovery. Thus we need to add the region and zone labels for all the nodes in each cluster.
 
 ```
-# Adding region "us" and zone "east" labels in all nodes of fc01.icp
-kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us --context fc01.icp-context
-kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=east --context fc01.icp-context
+# Adding region "us" and zone "east" labels in all nodes of fc01
+kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us --context fc01-context
+kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=east --context fc01-context
 
 # Adding region "us" and zone "west" labels in all nodes of fc01.icp
-kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us --context fc02.icp-context
-kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west --context fc02.icp-context
+kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us --context fc02-context
+kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west --context fc02-context
 ```
 
 ### Deploy the etcd-operator
@@ -288,13 +288,13 @@ Now, initialize the Federation Control Plane
 
 ```
 kubefed init fc-federated-cluster \
-    --host-cluster-context="fc01.icp-context" \
+    --host-cluster-context="fc01-context" \
     --dns-provider="coredns" \
     --dns-zone-name="fc-federated.com." \
     --api-server-advertise-address=172.16.254.64 \
     --api-server-service-type='NodePort' \
     --dns-provider-config="coredns-provider.conf" \
-    --etcd-persistent-storage=false
+    --etcd-persistent-storage=true
 ```
 
 NOTE:
@@ -337,15 +337,59 @@ kubectl config use-context fc-federated-cluster
 Join the clusters to the federation
 ```
 # join fc01 cluster to the federated cluster
-kubefed join fc01-context --host-cluster-context=fc01.icp-context
+kubefed join fc01-context --host-cluster-context=fc01-context
 
 # join fc02 cluster to the federated cluster
-kubefed join fc02-context --host-cluster-context=fc01.icp-context
+kubefed join fc02-context --host-cluster-context=fc01-context
 
 ```
+Now, you can check the federated cluster:
 
+```
+[root@fc01-bootmaster01 federation]# kubectl get clusters
+NAME           STATUS    AGE
+fc01-context   Ready     6m
+fc02-context   Ready     2m
+```
 
 ## Setting up Load Balancer
+
+ICP deployment doesn't currectly have a loadBalancer type for federated api server. We'll need some ways to create services with `LoadBalancer` type for the federated service discovery. Here we uses [keepalived-cloud-provider](https://github.com/munnerz/keepalived-cloud-provider).
+
+we need create the service account called `keepalived` and grant superuser access to it.
+
+```
+kubectl create sa keepalived -n kube-system --context fc01-context
+kubectl create sa keepalived -n kube-system --context fc02-context
+
+kubectl create clusterrolebinding keepalived \
+  --clusterrole=cluster-admin \
+  --serviceaccount=kube-system:keepalived \
+  --context=fc01-context
+
+kubectl create clusterrolebinding keepalived \
+  --clusterrole=cluster-admin \
+  --serviceaccount=kube-system:keepalived \
+  --context=fc02-context
+```
+
+Now we can create the kube-keepalive-vip and keepalive-cloud-provider:
+
+```
+# Creating kube-keealived-vip for each context
+kubectl apply -f keepalived-vip/ --context fc01-context
+kubectl apply -f keepalived-vip/ --context fc02-context
+
+# Creating keealived-cloud-provider for each context
+kubectl apply -f keepalived-cloud-provider/ --context fc01-context
+# Change CIDR to 10.210.2.100/26
+kubectl apply -f keepalived-cloud-provider/ --context fc02-context
+```
+
+### Configure the kube-controller-manager
+
+
+
 
 ## Deploy What's for Diner reference application to validate
 
