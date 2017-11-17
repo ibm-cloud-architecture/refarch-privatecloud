@@ -453,7 +453,7 @@ spec:
           args:
           - --services-configmap=kube-system/vip-configmap
           - --watch-all-namespaces=true
-          - --vrid 51
+          - --vrid=51
           # unicast uses the ip of the nodes instead of multicast
           # this is useful if running in cloud providers (like AWS)
           #- --use-unicast=true
@@ -612,6 +612,35 @@ nginx.default.fc-federated-cluster.svc.fc-federated.com. 30 IN A 10.210.1.65
 ;; WHEN: Fri Nov 17 01:15:38 UTC 2017
 ;; MSG SIZE  rcvd: 128
 
+```
+
+
+```
+dig @172.16.254.59 -p 30743 nginx.default.fc-federated-cluster.svc.east.us.fc-federated.com
+
+dnstools# dig @172.16.254.59 -p 30743 nginx.default.fc-federated-cluster.svc.eas
+t.us.fc-federated.com
+
+; <<>> DiG 9.11.1-P1 <<>> @172.16.254.59 -p 30743 nginx.default.fc-federated-cluster.svc.east.us.fc-federated.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 3341
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 1, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: f1aa7935cf9ebd07 (echoed)
+;; QUESTION SECTION:
+;nginx.default.fc-federated-cluster.svc.east.us.fc-federated.com. IN A
+
+;; ANSWER SECTION:
+nginx.default.fc-federated-cluster.svc.east.us.fc-federated.com. 30 IN A 10.250.0.3
+
+;; Query time: 2 msec
+;; SERVER: 172.16.254.59#30743(172.16.254.59)
+;; WHEN: Fri Nov 17 14:25:15 UTC 2017
+;; MSG SIZE  rcvd: 120
 ```
 
 ## Setup the DNS server
