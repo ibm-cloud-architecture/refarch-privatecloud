@@ -179,7 +179,7 @@ Under the `federation` folder, clone the following github project:
 git clone https://github.com/ufcg-lsd/k8s-onpremise-federation
 ```
 
-Navigate into the federation folder, then install the etcd-operator service:
+Navigate into the k8s-onpremise-federation folder, then install the etcd-operator service:
 
 ```
 # RBAC
@@ -300,6 +300,7 @@ kubefed init fc-federated-cluster \
 NOTE:
 
 * I used the ICP master node IP address for the api-server-advertise-address field
+* Make sure your hosting cluster has Dynamic Persistent Volume enabled and available storage
 
 You should see the execution result similar as following:
 ```
@@ -358,42 +359,274 @@ ICP deployment doesn't currectly have a loadBalancer type for federated api serv
 
 we need create the service account called `keepalived` and grant superuser access to it.
 
-```
-kubectl create sa keepalived -n kube-system --context fc01-context
-kubectl create sa keepalived -n kube-system --context fc02-context
+### Aquire CIDR subnet
+Work with your admin to assign you a CIDR subnet.  should also set up a gateway IP on the subnet (typically network address +1)
 
-kubectl create clusterrolebinding keepalived \
-  --clusterrole=cluster-admin \
-  --serviceaccount=kube-system:keepalived \
-  --context=fc01-context
+### Create a service account and cluster role binding
 
-kubectl create clusterrolebinding keepalived \
-  --clusterrole=cluster-admin \
-  --serviceaccount=kube-system:keepalived \
-  --context=fc02-context
-```
-
-Now we can create the kube-keepalive-vip and keepalive-cloud-provider:
+keepalived will use the following service account and role binding before deployment.
+Note: The following procedure have to be executed on all the clusters under each context.
 
 ```
-# Creating kube-keealived-vip for each context
-kubectl apply -f keepalived-vip/ --context fc01-context
-kubectl apply -f keepalived-vip/ --context fc02-context
-
-# Creating keealived-cloud-provider for each context
-kubectl apply -f keepalived-cloud-provider/ --context fc01-context
-# Change CIDR to 10.210.2.100/26
-kubectl apply -f keepalived-cloud-provider/ --context fc02-context
+# create service account
 ```
 
-### Configure the kube-controller-manager
+Create a cluster role that has access to most of the kubernetes components
+```
+echo 'apiVersion: rbac.authorization.k8s.io/v1alpha1
+kind: ClusterRole
+metadata:
+  name: kube-keepalived-vip
+rules:
+- apiGroups: [""]
+  resources:
+  - pods
+  - nodes
+  - endpoints
+  - services
+  - configmaps
+  verbs: ["get", "list", "watch"]' | kubectl create -f -
+```
+
+Bind the service account to the ClusterRole you created above:
+
+```
+echo "apiVersion: rbac.authorization.k8s.io/v1alpha1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-keepalived-vip
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-keepalived-vip
+subjects:
+- kind: ServiceAccount
+  name: kube-keepalived-vip
+  namespace: kube-system" | kubectl create -f -
+```
+also, for ICP, make sure the kube-keepalived-vip ServiceAccount can launch privileged containers by running following command:
+```
+kubectl create clusterrolebinding kube-keepalived-vip-privileged --serviceaccount=kube-system:kube-keepalived-vip --clusterrole=privileged
+```
+
+### Install the keepalived-vip Daemonset
+
+Ideally, this should be limited to the ICP proxy node only.
+
+```
+echo "apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: kube-keepalived-vip
+  namespace: kube-system
+spec:
+  template:
+    metadata:
+      labels:
+        name: kube-keepalived-vip
+    spec:
+      hostNetwork: true
+      serviceAccount: kube-keepalived-vip
+      containers:
+        - image: gcr.io/google_containers/kube-keepalived-vip:0.11
+          name: kube-keepalived-vip
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /lib/modules
+              name: modules
+              readOnly: true
+            - mountPath: /dev
+              name: dev
+          # use downward API
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          # to use unicast
+          args:
+          - --services-configmap=kube-system/vip-configmap
+          - --watch-all-namespaces=true
+          - --vrid 51
+          # unicast uses the ip of the nodes instead of multicast
+          # this is useful if running in cloud providers (like AWS)
+          #- --use-unicast=true
+          # vrrp version can be set to 2.  Default 3.
+          #- --vrrp-version=2
+      volumes:
+        - name: modules
+          hostPath:
+            path: /lib/modules
+        - name: dev
+          hostPath:
+            path: /dev
+      nodeSelector:
+        beta.kubernetes.io/arch: amd64" | kubectl create -f -
+```
+
+Now, let's create the ConfigMap to store the VIP information later:
+```
+echo "apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vip-configmap
+  namespace: kube-system
+data: " | kubectl create -f -
+```
+You can see what's in the ConfigMap:
+```
+kubectl get cm vip-configmap -o yaml --namespace kube-system
+```
+
+### Deploy the keepalived-cloud-provider
+
+make sure you set the CIDR correctly.  i.e. in the lab we used 10.250.0.0/24 for fc01 cluster and 10.250.1.0/24 for fc02 cluster.
+
+```
+echo 'apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: keepalived-cloud-provider
+  name: keepalived-cloud-provider
+  namespace: kube-system
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: keepalived-cloud-provider
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+        scheduler.alpha.kubernetes.io/tolerations: "[{\"key\":\"CriticalAddonsOnly\", \"operator\":\"Exists\"}]"
+      labels:
+        app: keepalived-cloud-provider
+    spec:
+      containers:
+      - name: keepalived-cloud-provider
+        image: jkwong/keepalived-cloud-provider:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KEEPALIVED_NAMESPACE
+          value: kube-system
+        - name: KEEPALIVED_CONFIG_MAP
+          value: vip-configmap
+        - name: KEEPALIVED_SERVICE_CIDR
+          value: 10.250.1.0/24 # pick a CIDR that is explicitly reserved for keepalived
+        - name: KEEPALIVED_SERVICE_RESERVED
+          value: 10.250.1.1 # router address for my CIDR
+        volumeMounts:
+        - name: certs
+          mountPath: /etc/ssl/certs
+        resources:
+          requests:
+            cpu: 200m
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 10252
+            host: 127.0.0.1
+          initialDelaySeconds: 15
+          timeoutSeconds: 15
+          failureThreshold: 8
+      volumes:
+      - name: certs
+        hostPath:
+          path: /etc/ssl/certs' | kubectl create -f -
+```
 
 
 
+## Validate the Federation Setup
 
-## Deploy What's for Diner reference application to validate
+We'll use simple NGINX to validate our setup, both the kubernetes federation and the load Balancer
+
+Switch to federated kubernetes context:
+```
+kubectl config use-context fc-federated-cluster
+```
+Create default namespace for the federeated control plane:
+```
+kubectl create ns default
+```
+
+Create a nginx deployment and scale to 4 pods:
+```
+kubectl --context=fc-federated-cluster create deployment nginx --image=nginx && \
+  kubectl --context=fc-federated-cluster scale deployment nginx --replicas=4
+```
+
+Expose the deployment as a federeated service with type as `LoadBalancer`
+```
+kubectl expose deployment nginx --port=80 --type=LoadBalancer
+```
+
+You should see the external VIP associated with the service now:
+```
+kubectl describe services nginx
+```
+
+You can test the NGINX deployment by lanuch browser and point to the VIP assigned to the service above:
+http://{{vip}}/
+
+Let's test the DNS lookup for the service:
+```
+kubectl config use-context fc01-context
+kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+dig @172.16.254.59 -p 30743 nginx.default.fc-federated-cluster.svc.fc-federated.com
+```
+
+You should see the DNS answer with the correct DNS qualified name as we specified:
+```
+dnstools# dig @172.16.254.59 -p 30743 nginx.default.fc-federated-cluster.svc.fc-federated.com
+
+; <<>> DiG 9.11.1-P1 <<>> @172.16.254.59 -p 30743 nginx.default.fc-federated-cluster.svc.fc-federated.com
+; (1 server found)
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 36245
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 2, AUTHORITY: 0, ADDITIONAL: 1
+
+;; OPT PSEUDOSECTION:
+; EDNS: version: 0, flags:; udp: 4096
+; COOKIE: b1f9988e7a6c5a96 (echoed)
+;; QUESTION SECTION:
+;nginx.default.fc-federated-cluster.svc.fc-federated.com. IN A
+
+;; ANSWER SECTION:
+nginx.default.fc-federated-cluster.svc.fc-federated.com. 30 IN A 10.250.0.2
+nginx.default.fc-federated-cluster.svc.fc-federated.com. 30 IN A 10.210.1.65
+
+;; Query time: 3 msec
+;; SERVER: 172.16.254.59#30743(172.16.254.59)
+;; WHEN: Fri Nov 17 01:15:38 UTC 2017
+;; MSG SIZE  rcvd: 128
+
+```
+
+## Setup the DNS server
 
 
+
+## Delete the Federation Control Plane
+
+Proper cleanup of federation control plane is not fully implemented in this beta release of kubefed. However, for the time being, deleting the federation system namespace should remove all the resources except the persistent storage volume dynamically provisioned for the federation control plane’s etcd. You can delete the federation namespace by running the following command:
+
+```
+kubectl delete ns federation-system
+```
+
+Note: Make sure you run this command under the host cluster context.
 
 # References
 - [Kubernetes Federation for on-premises clusters](https://github.com/ufcg-lsd/k8s-onpremise-federation) This document may prove to be useful. Jeff Kwong referenced it and I found it helpful as background.
