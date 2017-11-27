@@ -6,7 +6,8 @@ This is a guide for federating two or more ICP v2.1 clusters.
 
 The guide here also references the approach documented by at [Kubernetes Federation for on-premises clusters](https://github.com/ufcg-lsd/k8s-onpremise-federation)
 
-TBD - Some of the documentation sources on Kubernetes cluster federation makes a distinction that the clusters to be federated are on-premises as opposed to deployed in a public cloud.  It would be good to document why that matters.
+Here is the federation topology:
+![icp_federation.png](images/icp_federation.png)
 
 The information in this guide is based on federating on-premises ICP clusters.  ICP is running Kubernetes.  The federation of ICP clusters is essentially the federation of Kubernetes clusters.
 
