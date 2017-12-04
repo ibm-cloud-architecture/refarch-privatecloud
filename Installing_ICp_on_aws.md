@@ -613,7 +613,7 @@ Open “PuTTYgen”, click the “Load” button and navigate to the .pem file
 you saved when you created your EC2 instances.
 
 To find .pem files you will need to change the filetype at the bottom
-left of the selection windo to “All Files (\*.\*)”.
+left of the selection windo to “All Files (*.*)”.
 
 PuTTYgen will import the .pem file and convert it to its own internal
 format (.ppk).
