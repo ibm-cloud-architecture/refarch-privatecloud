@@ -278,7 +278,7 @@ shell execute the command “sudo su –“.
 
     f.  Setup the docker stable repository
     
-        add-apt-repository "deb \[arch=amd64\] https://download.docker.com/linux/ubuntu \$(lsb\_release -cs) stable"
+        add-apt-repository "deb \[arch=amd64\] https://download.docker.com/linux/ubuntu \$(lsb_release -cs) stable"
 
     g.  Install docker
 
