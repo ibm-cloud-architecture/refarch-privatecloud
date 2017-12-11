@@ -9,7 +9,7 @@ The term "cluster" is used to mean the VMs that are under the control of a given
 
 This instruction guide assumes the VMs to be used for the ICP instance are provided to you by some providing entity.
 
-Root access must be available to the person doing the ICP installation for all of the ICP machines (VMs) that will be members of the ICP cluster.  An ICP installation as non-root is beyond the scope of this document.
+Root access, either directly or through sudo, must be available to the person doing the ICP installation for all of the ICP machines (VMs) that will be members of the ICP cluster.  If sudo is used, it is recommended that passwordless sudo is configured.  Otherwise, the cluster configuration file (config.yml) will need the sudoer's password specified.  An ICP installation as non-root is beyond the scope of this document.
 
 IBM Cloud Private is built on Docker and Kubernetes.  Cloud Foundry may also be part of an ICP instance.  The installation and deployment of Cloud Foundry is outside the scope of this guide.  
 
@@ -185,7 +185,9 @@ If you inspect the yum repository, you will notice that the `<uuid1>-updateinfo.
 A `yum clean all` will likely clean up such errors.
 
 ## Update RHEL
-This is an optional step and may not be necessary depending on the virtual machine that has been provided to you.
+This section describes the steps to update RHEL.
+
+*NOTE*: This is an optional step and may not be necessary depending on the virtual machine that has been provided to you.  You may also not be permitted to do a full update, as that may move your RHEL to a version that is not yet supported by your operations team.  For example, if the VM is running RHEL 7.3 a full update will result in RHEL 7.4.
 
 If you are building a VM from scratch, then you should do a full RHEL update to pick up updates since the release of the RHEL image you are using for the initial install.
 
@@ -202,6 +204,8 @@ This step is only needed if you are building a virtual machine.  NTP will be ins
 NTP is needed to keep the time synchronized with the rest of the world.  All of the VMs in the ICP cluster will need to share a common notion of time, and the usual approach to keeping time is to use NTP.  
 
 *NOTE*: If you are using virtual machines provided to you, it is very likely NTP is already installed and enabled for startup at machine boot.
+
+*NOTE*: If you are using virtual machines provided to you, and NTP is not installed and in use, the VMs may be using some other time provider, such as the hypervisor.  Check with your provider to determine if it is necessary to install NTP.
 
 1.	Install NTP
 
@@ -254,6 +258,25 @@ This section describes the steps to add entries to the `/etc/hosts` file of each
 - For each VM in the cluster, edit `/etc/hosts` and add and entry for each VM in the cluster.
 
 In some circumstances you can edit `/etc/hosts` once on the boot-master and then `scp` the hosts file to the other members of the cluster. This expedient is only feasible if the all VMs in the cluster are freshly deployed VMs and they all have the same content in `/etc/hosts` when they are initially deployed, e.g., the default content.  
+
+## Check the file system sizing
+
+The file system size minimum requirements are described in the ICP v2.1 Knowledge Center section, ![Hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/hardware_reqs.html)(See Table 3). The "important" note following the table suggests mounting `/var/lib/etcd`, `/var/lib/registry` and `/opt/ibm/cfc` on separate paths associated with larger disks.
+
+The file system requirements as described in the ICP v2.1 KC documentation are reproduced in the following table:
+
+| **Location**         |  **Minimum Disk Space**  |
+|---------------------:|-------------------------:|
+| `/var/lib/docker`    | >40 GB (This may not be enough.)                  |
+| `/var/lib/etcd`      | >1 GB                    |
+| `/var/lib/registry`  | Large enough to host the Docker images you expect to load into the local registry. Docker images for ICP itself are on the order of 8 GB.|
+| `/opt/ibm/cfc`       | >100 GB                  |
+| `/var/lib/kubelet`   | >10 GB w/o Vulnerbility Advisor  |
+| `/var/lib/kubelet`   | >100 GB w/ Vulnerability Advisor |
+
+*NOTE*: See the section in the ICP v2.1 Knowledge Center, ![Specifying a default Docker storage directory by using bind mount](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/docker_dir.html)
+
+The RHEL 7 documentation for ![Mounting a file system](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/sect-using_the_mount_command-mounting) provides detailed information about the mount command.
 
 # Special RHEL configuration
 
@@ -416,7 +439,7 @@ This section describes the steps for installing Python Docker support modules.  
 
 Installing the Python Docker support modules is optional.  If you don't intend to use Python for scripting of Docker operations, then this section can be skipped.
 
-*NOTE*: Python has a `docker` package and a `docker-py` package. They do not appear to be equivalent or synonyms for the same thing. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa.
+*NOTE*: Python has a `docker` package and a `docker-py` package. The documentation givese the impression they are synonomous.  However, in comparing the effects of doing the install of docker vs docker-py, they do not appear to be equivalent. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa. More investigation is needed.
 
 In order to install the Python Docker support modules, pip needs to be installed.  (Pip is the Python package manager.) In order to install pip, the python-setuptools package needs to be installed.
 
@@ -449,7 +472,7 @@ In order to install the Python Docker support modules, pip needs to be installed
   pip install docker
   ```
 
-After the install of docker you should see the following directories:
+After the install of the Python Docker support modules you should see the following directories:
 
     # ls -l /usr/lib/python2.7/site-packages/docker*
     /usr/lib/python2.7/site-packages/docker:
@@ -468,6 +491,9 @@ After the install of docker you should see the following directories:
     /usr/lib/python2.7/site-packages/docker_pycreds-0.2.1.dist-info:
     DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
 
+## Things that can go wrong with the Python Docker support installation
+
+- Pip needs access to the public Internet to get the modules.  Public access to the Internet may not be available in all contexts.  In such cases, you need to configure a private pip repo.
 
 # MountFlags in docker.service
 
@@ -568,8 +594,9 @@ For the ICP KC instructions to do this work, see "Sharing SSH keys among cluster
 *NOTE*: The copy of the SSH ID to other hosts requires the use of the target host name in the ssh-copy-id command.  Do not use an IP address, you will not be able to get past the authentication step when you attempt to enter the password for root on the target host.
 
 In the command below `<master>` is used as a placeholder for the actual boot-master fully qualified host name (FQDN).
-
+```
     # ssh-copy-id -i ./.ssh/id_rsa.pub root@<master>
+```
 
 You will be prompted to confirm that you want to connect to the `<master>`. Then you will be prompted for root's password on `<master>`, which is the target for this first passwordless ssh configuration.
 
@@ -652,6 +679,11 @@ This section has some steps that need to be taken on the boot master before the 
 
 *NOTE*: In these instructions, the root directory of the installation is referred to as `<ICP_HOME>`.  A common convention is to install ICP in a directory that includes the ICP version in the directory name.
 
+- It is assumed that Docker is installed and running on the boot-master machine.
+- It is assumed that the ICP images archive has been loaded into the Docker registry on the boot-master machine.
+```
+tar -xf ibm-cloud-private-x86_64-2.1.0.tar.gz -O | docker load
+```
 - (On the boot-master) Extract the ICP boot meta-data to the `<ICP_HOME>/cluster` directory:
     ```
     # cd <ICP_HOME>
@@ -727,7 +759,9 @@ This section has a collection of items that have led to a failure in the install
 You may want to double check the following on each VM that is a member of the cluster:
 - The network interface on each VM is started.
 - The firewall on each VM is disabled.
-- If you pre-installed Docker on each VM, then check that Docker is running on each VM.  
+- If you pre-installed Docker on each VM, then check that Docker is running on each VM.
+- Docker must be installed and running on the boot-master VM.
+- The ICP docker images must be loaded into the Docker registry on the boot-master VM.  
 
 
 ## Copy and load ICP docker image tar ball to all cluster VMs
@@ -736,19 +770,26 @@ This section assumes that Docker is pre-installed on all of the cluster member V
 
 It is expedient to pre-load the Docker registry on each VM that is a member of the ICP cluster.  The installation process run from the boot-master machine will recognize that the Docker registry is up-to-date on the other cluster member machines and skip the step of copying and loading the image tar ball to the Docker registry on the given machine.  The gain in the time it takes to load the registry is achieved because you can open as many shells as needed to do the copy and load operations concurrently.
 
-1. Copy the ICP image tar ball to all machines.  (You can open multiple shells on the boot-master machine and start an `scp` of the image tar ball to each machine in the cluster.)
+- Copy the ICP image tar ball to all machines.  (You can open multiple shells on the boot-master machine and start an `scp` of the image tar ball to each machine in the cluster.)
 
-2. Open a shell on each VM in the cluster and extract the docker images and load them into the docker registry:
+- Open a shell on each VM in the cluster and extract the docker images and load them into the docker registry:
 
+```
         tar -xvf ibm-cloud-private-x86_64-2.1.0-beta-2.tar.gz -O | docker load
+```
+    If you run out of file system space during the above command, use `df -h` to view file system utilization.  You can use `df -ih` to view inode utilization. Make sure the file systems are adequately provisioned as described in the "*Check the file system sizing*" section above.
 
-3. On all but the boot-master machine, the ICP image tar file can be removed once the docker load completes.  On the boot-master machine the ICP image tar file gets moved to an images directory in `<ICP_HOME>/cluster`.
+- On all but the boot-master machine, the ICP image tar file can be removed once the docker load completes.  On the boot-master machine the ICP image tar file gets moved to an images directory in `<ICP_HOME>/cluster`.
 
 *NOTE*: If you are building an ICP virtual machine, you can run the extract and load on the base VM image so that all cloned VMs have the docker registry pre-loaded with the ICP images.
 
 ## Run the ICP install command
 
 Docker is used to run the install for all members of the cluster/cloud.  The command is shown below after some introductory notes. (This takes some time depending on the number of machines in the cluster.  If you haven't pre-loaded the Docker images used by ICP, the image file gets copied to each VM and the images get loaded as part of the installation.) Run the install from `<ICP_HOME>/cluster` directory.
+
+*NOTE*: It is assumed Docker is installed on the boot-master VM.
+
+*NOTE*: It is assumed the ICP v2.1 images have been loaded into the local docker registry on the boot-master VM.
 
 *NOTE*: In the docker commands below, $(pwd) is the current working directory of the shell where the command is run, i.e. `<ICP_HOME>/cluster`.  It is assumed there are no space characters in the current working directory path.  (It is a really bad idea to use space characters in directory and file names.)  If you happen to have space characters in the current working directory path, then surround the $(pwd) with double quotes.
 
