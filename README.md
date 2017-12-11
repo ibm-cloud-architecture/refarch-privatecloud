@@ -30,9 +30,11 @@ IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu
 
 ## High Availability and Resiliency
 
-  [Federated ICP clusters](resiliency/federated_icp_clusters.md)
+  [Federated ICP clusters](Resiliency/Federating_ICP_clusters.md)   
+  NOTE: This is an early experiential guide on how to federate multiple ICP clusters with the Kubernetes federation control plane utility. Not recommended for production usage.
 
-
+  [Setup Highly Available ICP Cluster](Resiliency/Configure_HA_ICP_cluster.md)   
+  Guide and best practice on install and configure a highly available ICP clusters with multiple master nodes, multiple proxy nodes and management nodes.   
 
 ## Best practices
 
