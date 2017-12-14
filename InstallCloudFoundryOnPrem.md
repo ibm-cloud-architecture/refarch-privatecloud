@@ -301,11 +301,11 @@
 
   * Under *bluemix_apps_domain_cert_rsa_key* paste the contents of star_mybluemix.csplab.local.key
 
-  * Under *bluemix_env_domain_cert* paste the contents of star_mybluemix.csplab.local.crt
+  * Under *bluemix_env_domain_cert* paste the contents of star_bluemix.csplab.local.crt
 
   * Under *bluemix_env_domain_cert_ca* paste the contents of rootCA.pem
 
-  * Under *bluemix_env_domain_cert_rsa_key* paste the contents of star_mybluemix.csplab.local.key
+  * Under *bluemix_env_domain_cert_rsa_key* paste the contents of star_bluemix.csplab.local.key
 
   **Important:** Any folders, resource pools, datacenters, etc. specified in the uiconfig.yml file must exist on the target vCenter server prior to installation and the user specified as the vmware username must have authority to create virtual machines and deploy vApps to these objects.  That user must also have the authority to write to the specified datastores.
 
