@@ -7,7 +7,7 @@ Assumptions
 1)  Security
 
     a.  The only node that needs an internet facing address is the
-        master node. The default port for access to the CfC console is
+        master node. The default port for access to the ICP console is
         8443 and this port must be open in order for users to access
         the console. For security reasons, all non-master nodes will not
         have a permanent external (internet facing) address.
@@ -37,12 +37,12 @@ Assumptions
     \
     See Appendix A for more information.
 
-3)  This tutorial will walk through creating an IBM Spectrum Conductor
-    for Containers (CfC) instance on AWS made up of a single node for
-    boot and master (hereafter referred to as the “master node” but also
+3)  This tutorial will walk through creating an IBM Cloud Private (ICP)
+    instance on AWS made up of a single node for boot
+    and master (hereafter referred to as the “master node” but also
     fulfilling the role of boot node), one node for the proxy node, and
-    three worker nodes. The nodes will be named cfc-boot-master,
-    cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
+    three worker nodes. The nodes will be named icp-boot-master,
+    icp-proxy, icp-worker1, icp-worker2, and icp-worker3, respectively.
 
 Creation of Nodes
 -----------------
@@ -176,7 +176,7 @@ to each instance.
 
 ![](AWS/InstanceDashboard.png)
 
-You are now ready to prepare your environment for CfC installation.
+You are now ready to prepare your environment for ICP installation.
 
 Preparing your environment for ICP installation
 -----------------------------------------------
@@ -209,8 +209,8 @@ shell execute the command “sudo su –“.
     Make note of the private IP address of each instance.
 
 1)  Change the hostname of each node to represent the function. The
-    instance you named cfc-boot-master should also have a hostname of
-    cfc-boot-master, and so on.
+    instance you named icp-boot-master should also have a hostname of
+    icp-boot-master, and so on.
     
     To change the hostname execute the “hostname <newhostname>”
     command.
@@ -343,7 +343,7 @@ shell execute the command “sudo su –“.
         
         ![](AWS/NoPassword.png)
 
-Your instances are now configured and ready to install CfC
+Your instances are now configured and ready to install ICP
 
 Install IBM Spectrum Conductor for Containers
 ---------------------------------------------
@@ -360,9 +360,9 @@ Install IBM Spectrum Conductor for Containers
     
         systemctl start docker
 
-2)  Pull the CfC installer docker image from the repository\
+2)  Pull the ICP installer docker image from the repository\
     
-        docker pull ibmcom/cfc-installer:1.2.0
+        docker pull ibmcom/icp-inception:2.1.0.1
     
     ![](AWS/CfCInstaller.png)
 
@@ -371,8 +371,8 @@ Install IBM Spectrum Conductor for Containers
         cd /opt
 
 4)  Extract the configuration files
-    
-        docker run -e LICENSE=accept -–rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
+
+        docker run -e LICENSE=accept -v “$(pwd)”:/data ibmcom/icp-inception:2.1.0.1 cp -r cluster /data
     
     You should now have a subdirectory under /opt named “cluster”
 
@@ -412,11 +412,11 @@ Install IBM Spectrum Conductor for Containers
 
     1.  **IMPORTANT**: Make sure to launch the deployment from the /opt directory
         
-        cd /opt
+        cd /opt/cluster
 
     2.  Launch the installer
     
-            docker run -e LICENSE=accept –net=host –rm -t -v "$(pwd)/cluster":/installer/cluster ibmcom/cfc-installer:1.2.0 install
+        docker run -e LICENSE=accept --net=host -t -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0.1 install
 
     3.  About 10 minutes later your environment is installed.
 
@@ -446,8 +446,8 @@ Install IBM Spectrum Conductor for Containers
 Installing an NFS server for persistent storage
 -----------------------------------------------
 
-Now that you have a working CfC environment, you will need persistent
-storage. In this tutorial we will create an NFS server to be used by CfC
+Now that you have a working ICP environment, you will need persistent
+storage. In this tutorial we will create an NFS server to be used by ICP
 for this purpose.
 
 Following the same directions as above, create a new instance.
@@ -480,17 +480,17 @@ nodes in the cluster to the NFS server, specifying the internal
 On the “7. Review” tab, click the Launch button and choose your existing
 SSH keys to deploy your new instance.
 
-When the Instance is provisioned name your new instance “cfc-nfs” and
+When the Instance is provisioned name your new instance “icp-nfs” and
 using the same procedure as before, assign it an elastic IP address.
 
 SSH to your new instance using the elastic IP you just assigned and the
 SSH key you specified when you launched the instance and use the “sudo
 su –“ command to get a root shell.
 
-Using the same procedure as before, change the hostname to “cfc-nfs” and
+Using the same procedure as before, change the hostname to “icp-nfs” and
 update the /etc/hosts file to add the IP addresses of all nodes.
 
-If you would like to refer to this node from the CfC console then login
+If you would like to refer to this node from the ICP console then login
 to each node in the cluster and add the internal IP address of the NFS
 server to the hosts file of each. Otherwise, you can refer to it via its
 internal IP address.
@@ -575,10 +575,10 @@ server
 
 ![](AWS/Ufw.png)
 
-Your new NFS server is now available for use in your new CfC
+Your new NFS server is now available for use in your new ICP
 environment.
 
-To make this storage available login to the CfC console as the admin
+To make this storage available login to the ICP console as the admin
 user and click on the menu icon at the top left and select
 Infrastructure -&gt; Storage then click the “Create New Storage” button.
 
