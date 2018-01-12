@@ -52,7 +52,7 @@
 
 4. Copy CF tarball to /opt and untar to /opt/cf<br>
   ```
-  mkdir -P /opt/cf
+  mkdir -p /opt/cf
   cd /opt/cf
   gunzip -c /opt/<tarball.tar.gz> |tar -xvf -
   ```
@@ -140,7 +140,8 @@
   * **|tee launch.log 2>&1:** Copy everything from stdout and stderr to a file named launch.log in the current directory for later troubleshooting as needed.
 
 2. Configure your deployment
-  * Copy the text below into a file called uiconfig-csplab.yml
+  * **NOTE:** The JSON configuration file is no longer supported. Even though you see a uiconfig.json file in the data artifacts for the installation, do not use it.  Only YAML is supported.
+  * Copy the content below or the content from the KC into a file that will be used for defining the CF configuration.  You can use uiconfig.yml for the file name, or some name that is more meaningful to the particular deployment.
   * The same YAML content is available in the ICP/CF Knowledge Center section, [Installing IBM Cloud Private Cloud Foundry](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/cloud_foundry/installing/install_cf.html)
   * NOTE: The YAML content in the KC is missing the `address_range` attribute.
 
@@ -199,7 +200,7 @@
 
   * Under *bluemix_env_domain_cert_rsa_key* paste the contents of star_mybluemix.csplab.local.key
 
-  **Important:** Any folders, resource pools, datacenters, etc. specified in the uiconfig.yml file must exist on the target vCenter server prior to installation and the user specified as the vmware username must have authority to create virtual machines and deploy vApps to these objects.  That user must also have the authority to write to the specified datastores.
+  **Important:** Any folders, resource pools, datacenters, etc. specified in the uiconfig.yml file must exist on the target vCenter server prior to installation and the user specified as the vmware username must have authority to create virtual machines and deploy vApps to these objects.  The vmware username must have "read" access to the vCenter in order to monitor status of various tasks.  That user must also have the authority to write to the specified datastores. (**NOTE:** The disk_path directory does not need to be created in the datastores.  Whether or not the template_path and vm_path needs to be created is an open question.)
 
   * **main_user_name:** The username that should be used to login to the CF UI as the administrator (will be created in the environment). e.g. "cfadmin"
 
@@ -217,7 +218,7 @@
 
   * **vmware_address:** IP address of the VMware vCenter Server e.g. "10.1.212.26"
 
-  * **vmware_username:** Value username on the vCenter Server with permissions to create VMs on the <CloudFoundry> Cluster, on the <CF_DS> datastore, and using the <CF_Net> network. e.g. "cfadmin"
+  * **vmware_username:** Value username on the vCenter Server with permissions to create VMs on the <CloudFoundry> Cluster, on the <CF_DS> datastore, and using the <CF_Net> network. e.g. "cfadmin". The vmware_username needs read access to the vCenter itself to be able to monitor the status of various deployment operations such as disk creation for the director VM.
 
   * **vmware_password:** Password for vmware_username.  e.g. "SuperS3cretPassw0rd"
 
@@ -231,7 +232,7 @@
 
   * **template_folder:** (optional) Name of vSphere folder where stemcell VMs (templates) should be stored. e.g. "Templates"
 
-  * **disk_path:** The subdirectory on the datastore where VM persistent disks should be stored. e.g. "/icp-cf-210/Disks".  This directory must exist.  If it does not, you must create it.  e.g. In the vCenter web client browse the specified datastore in *persistent_datastore_pattern* and create the *icp-cf-210* folder and then under that create the *Disks* folder.
+  * **disk_path:** The subdirectory on the datastore where VM persistent disks should be stored. e.g. "/icp-cf-210/Disks".  This directory does not need to exist.  It will be created if it does not exist.
 
   * **datastore_pattern:** A pattern describing which datastore hosts the virtual machines. e.g. "CF_DS"
 
@@ -250,6 +251,10 @@
 
 From the CF_HOME directory (e.g., `/opt/cf`), you should see a `cm` (config manager) executable.
 
+**NOTE:** For ICP-CF v2.1.0.1 these state variables no long exist.  Use the developer_mode: true attribute in the uiconfig file instead.
+
+In ICP-CF v2.1.0.0, before each run of launch_deployment.sh you need to set the state variables as described below depending on whether you want a development (POC) or production deployment.  (The development deployment is scaled back and does not support high availability.)
+
 To set up a POC use the following `cm` commands:
 
   `./cm state -s cfpoc set --status READY  # Install POC instance`
@@ -267,7 +272,7 @@ To set up a POC use the following `cm` commands:
 
   ```
   cd /opt/cf
-  ./launch_deployment.sh -c uiconfig.json |tee deploy.log
+  ./launch_deployment.sh -c mycfdeployment.yml |tee deploy.log
   ```
 
   * **-c:** Config file to use for this deployment
@@ -278,7 +283,7 @@ An "error" may be reported that the gateway is inaccessible.  If you can ping th
 
 ## Configure the DNS
 
-  Create an `A` Record in the DNS pointing to hte IP address of your ha_proxy (which was defined in your uiconfig-csplab.yml file) with a hostname of \*.bluemix.csplab.local and another for \*.bluemix.csplab.local
+  Create an `A` Record in the DNS pointing to the IP address of your ha_proxy (which was defined in your uiconfig-csplab.yml file) with a hostname of \*.bluemix.csplab.local and another for \*.bluemix.csplab.local. The DNS entries can be set to allow subdomains.
 
   In Microsoft Active Directory:
   * Highlight the domain (csplab.local in our example)
@@ -293,6 +298,13 @@ An "error" may be reported that the gateway is inaccessible.  If you can ping th
 
   **Important:** Deploying the buildpacks requires the access to the api server and should not be completed prior to making the DNS changes described above.
 
+  **NOTE:** It is recommended that the create_buildpacks.sh script be used for this step.  The other option is to do:
+  ```
+  ./cm state -s buildpacks set --status READY
+  relaunch the launch_deployment.sh
+  ```
+
+  The recommended approach:
   ```
   cd /opt/cf
   ./create_buildpacks.sh
@@ -392,6 +404,8 @@ connect to inception container
 export BOSH_INIT_LOG_LEVEL=DEBUG
 bosh-init deploy /data/gen-vmware_micro_boshinit.yml
 ```
+
+It is not uncommon for the director VM disk creation to fail with a timeout.  Normally disk creation happens in a relatively short time, e.g., about 10 seconds.  If you see disk creation taking a long time as indicated by many dots in the stdout log, then there is a problem.  The root cause of this problem is that the vmware_user specified for admin access the the CF cluster must also have read to vCenter in order to monitor the status of the disk deployment.
 
 # Using CloudFoundry
 1. First, you much install the CloudFoundry client (cf) version 6.13 https://github.com/cloudfoundry/cli/releases/tag/v6.13.0
