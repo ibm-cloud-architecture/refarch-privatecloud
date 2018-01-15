@@ -18,7 +18,7 @@ IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu
   *  [Installing ICP with Ubuntu](Installing_ICp_on_prem_ubuntu.md)
   *  [Installing ICP with RedHat Enterprise](rhel_install/Installing_ICP_on_prem_rhel.md)  
 * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
-* VirtualBow: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
+* VirtualBox: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
 
 ### Deployment using TerraForm
 * Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
@@ -47,6 +47,7 @@ See also the following article on working on storage in ICp: [Working with Stora
 ### LDAP
 
 [LDAP Best Practices](ICP%20LDAP%20Best%20Practices.md)
+[Install OpenLDAP for ICP Integration](InstallAndConfigureOpenLDAP.md)
 
 ### DevOps
 
