@@ -13,21 +13,21 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 ## Installing IBM Cloud Private
 
 # Installing the Kubernetes Environment
-IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu 16.04 LTS) and Linux on Power. We provided some guidance on installing ICP on following virtualization and cloud platforms:
+  IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu 16.04 LTS) and Linux on Power. We provided some guidance on installing ICP on following virtualization and cloud platforms:
 
-* VMware:
-  *  [Installing ICP with Ubuntu](Installing_ICp_on_prem_ubuntu.md)
-  *  [Installing ICP with RedHat Enterprise](rhel_install/Installing_ICP_on_prem_rhel.md)  
-* AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
-* VirtualBox: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
+  * VMware:
+    *  [Installing ICP with Ubuntu](Installing_ICp_on_prem_ubuntu.md)
+    *  [Installing ICP with RedHat Enterprise](rhel_install/Installing_ICP_on_prem_rhel.md)  
+  * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
+  * VirtualBox: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
 
-### Deployment using TerraForm
-* Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
-* Bluemix Infrastructure (formerly SoftLayer): [Deploy ICP Cluster to SoftLayer](https://github.com/ibm-cloud-architecture/terraform-icp-softlayer)
+  ### Deployment using TerraForm
+  * Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
+  * Bluemix Infrastructure (formerly SoftLayer): [Deploy ICP Cluster to SoftLayer](https://github.com/ibm-cloud-architecture/terraform-icp-softlayer)
 
-## Accessing IBM Cloud Private (ICP) through the CLI
+  ## Accessing IBM Cloud Private (ICP) through the CLI
+    [Accessing ICp](Accessing_ICp_through_CLI.md)
 
-[Accessing ICp](Accessing_ICp_through_CLI.md)
 # Installing the Cloud Foundry Environment
   [Installing ICP Cloud Foundry on-prem](InstallCloudFoundryOnPrem.md)
 
