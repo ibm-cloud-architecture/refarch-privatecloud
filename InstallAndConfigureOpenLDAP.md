@@ -1,4 +1,4 @@
-# Installing OpenLDAP to support ICP authentication
+# Installing OpenLDAP for ICP authentication
 
 ## Considerations
 
