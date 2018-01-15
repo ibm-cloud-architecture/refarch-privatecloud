@@ -32,6 +32,7 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
   [Installing ICP Cloud Foundry on-prem](InstallCloudFoundryOnPrem.md)
 
 ## High Availability and Resiliency
+  [General High Availability Considerations](HighAvailabilityConsiderations.md)
 
   [Federated ICP clusters](Resiliency/Federating_ICP_clusters.md)   
   NOTE: This is an early experiential guide on how to federate multiple ICP clusters with the Kubernetes federation control plane utility. Not recommended for production usage.
