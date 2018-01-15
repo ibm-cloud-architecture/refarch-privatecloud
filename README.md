@@ -46,7 +46,6 @@ See also the following article on working on storage in ICp: [Working with Stora
 
 ### LDAP
 
-[LDAP Best Practices](ICP%20LDAP%20Best%20Practices.md)
 [Install OpenLDAP for ICP Integration](InstallAndConfigureOpenLDAP.md)
 
 ### DevOps
