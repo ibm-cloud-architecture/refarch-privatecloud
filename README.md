@@ -12,6 +12,7 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 
 ## Installing IBM Cloud Private
 
+# Installing the Kubernetes Environment
 IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu 16.04 LTS) and Linux on Power. We provided some guidance on installing ICP on following virtualization and cloud platforms:
 
 * VMware:
@@ -27,6 +28,8 @@ IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu
 ## Accessing IBM Cloud Private (ICP) through the CLI
 
 [Accessing ICp](Accessing_ICp_through_CLI.md)
+# Installing the Cloud Foundry Environment
+  [Installing ICP Cloud Foundry on-prem](InstallCloudFoundryOnPrem.md)
 
 ## High Availability and Resiliency
 
