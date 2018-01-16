@@ -1,7 +1,7 @@
 Install IBM Cloud Private v2.1 on Red Hat Enterprise Linux v7
 =============================================
 # Introduction
-This is a guide to creating a small IBM Cloud Private (ICP) cluster on RHEL v7.x.  It is intended to enhance the installation instructions available in the [ICP Knowledge Center (KC)](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/kc_welcome_containers.html).
+This is a guide to creating an IBM Cloud Private (ICP) cluster on RHEL v7.x.  It is intended to enhance the installation instructions available in the [ICP Knowledge Center (KC)](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/kc_welcome_containers.html).
 
 The phrase "ICP instance" is used in this document to refer to an installation of ICP.
 
@@ -11,9 +11,20 @@ This instruction guide assumes the VMs to be used for the ICP instance are provi
 
 Root access, either directly or through sudo, must be available to the person doing the ICP installation for all of the ICP machines (VMs) that will be members of the ICP cluster.  If sudo is used, it is recommended that passwordless sudo is configured.  Otherwise, the cluster configuration file (config.yml) will need the sudoer's password specified.  An ICP installation as non-root is beyond the scope of this document.
 
-IBM Cloud Private is built on Docker and Kubernetes.  Cloud Foundry may also be part of an ICP instance.  The installation and deployment of Cloud Foundry is outside the scope of this guide.  
+IBM Cloud Private is built on Docker and Kubernetes.  
 
-IBM Cloud Private has certain components (the "master" and "proxy" nodes, for example) that may be deployed as singletons in a simple installation as described in this guide. An installation that includes redundancy of all components is beyond the scope of this guide.
+IBM Cloud Private Cloud Foundry (ICP-CF) is packaged as part of the IBM Cloud Private product.  However, ICP-CF has a completely separate installation process. In addition ICP-CF is a completely separate run-time environment that has no direct integration points or any dependencies on ICP itself. The installation and deployment of IBM Cloud Private Cloud Foundry is outside the scope of this guide.  
+
+IBM Cloud Private has certain components (the "master" and "proxy" nodes, for example) that may be deployed as singletons in a simple, "sandbox" installation.  A production installation should include three (3) or five (5) master nodes and (3) proxy nodes.  A simple installation of ICP will combine the boot, master and "management" components into a single node.  A production installation will separate the management nodes from the master nodes to provide sufficient resources to each and avoid resource contention.  A simple ICP installation may use a singleton NFS server to provide a shared, persistent storage service to all of the worker nodes.  A production ICP installation will use something more sophisticated such as GlusterFS or IBM Spectrum Storage for persistent storage.  (This guide provides a reference to a GlusterFS install guide.)
+
+| Deployment | Sandbox Instance     | Production Instance                                    |
+|------------|----------------------|--------------------------------------------------------|
+|  Boot      | Combined w/ Master   | Possibly separate, but usually combined with Master01  |
+|  Master    | 1                    | 3 or 5 (odd number required to support quorum voting ) |
+|  Proxy     | 1                    | 3                                                      |
+|  Worker    | 1 to 3               | Typically, 5 or more                                   |
+|  Management| Combined w/Master    | 2 or 3                                                 |
+|  File Store| Singleton NFS server | GlusterFS (independent server cluster of 3 nodes)      |
 
 The installation described in this document uses Docker CE.  Installing Docker EE is outside the scope of this document.
 
@@ -42,13 +53,30 @@ This section provides a big picture summary of the installation process.
 
 * It is a really good idea for all the machines in the ICP cluster to have access to the public Internet.  The public Docker yum repository makes it convenient to install the latest version of Docker CE. Docker Hub is convenient for access to commonly available Docker images.
 
-## The ICP installation in a nutshell:
+* The details of an "air-gap" install are not covered completely in this document.  Needless to say, doing an air-gap installation is more challenging due to the inconvenience of pulling together all of the RPMs and other artifacts needed to do an installation.
+
+## The simple, "sandbox" ICP installation in a nutshell:
+See the ICP Knowledge Center section, [Installing an IBM Cloud Private Enterprise environment](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/install_app_mod.html)
+
 1. Customize RHEL for Docker and ICP.
 2. Install Docker on the boot-master.
 3. Set up RSA based ssh login from the Boot-Master to all nodes in the cluster.
 4. Run the ICP inception installer on the boot-master.
 
-Some other steps may need to be taken depending on specific circumstances and requirements:
+## A production ICP installation in a nutshell:
+See the ICP Knowledge Center section, [Installing an IBM Cloud Private Enterprise HA environment](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/install_app_mod_HA.html)
+
+1. Customize RHEL for Docker and ICP.
+2. Install Docker on the boot-master.
+3. Set up RSA based ssh login from the Boot-Master to all nodes in the cluster.
+4. Run the ICP inception installer on the boot-master.
+5. Install GlusterFS server on the GlusterFS nodes.
+6. Install GlusterFS client on all ICP cluster members.
+7. Install Heketi for storeage administration.
+8. Configure the shared Docker repository and audit log for the master nodes.
+9. Configure LDAP registry from authentication and role based access control.
+
+## Some other steps may need to be taken depending on specific circumstances and requirements:
 * Configure access to RHEL yum repositories.
 * Configure `/etc/hosts` files on all cluster members if DNS is not available to resolve host names and IP addresses.
 * Update RHEL to the latest patch level.
@@ -56,6 +84,9 @@ Some other steps may need to be taken depending on specific circumstances and re
 * Install Python Docker modules to support the convenient use of Docker APIs in Python scripts.
 * Install Docker on each cluster member VM in addition to the boot-master VM. (This gives you full control over what version of Docker is installed, but more importantly, Docker on each VM is needed for the next step.)
 * Use Docker on each cluster member VM to pre-load the ICP Docker images rather than let the inception installation load the ICP Docker images.  (It turns out to be expedient to copy the ICP image tar-ball to each cluster member VM and then load the local Docker registry from that tar-ball rather than waiting for the inception installer to do that part of the installation.)
+* Install `kubectl` on the boot-master node.  `Kubectl` is useful for interacting with the ICP cluster.
+* Install `helm` on the boot or boot-master node.  Helm is useful for installing additional software on the cluster.
+* Install Ansible on the boot or boot-master node.  Ansible is very useful for administration when dealing with more than an handful of machines.
 
 # Basic RHEL configuration
 
@@ -83,10 +114,9 @@ The network interface configuration files are in `/etc/sysconfig/network-scripts
 
 4.	If desired, test by rebooting:
 
-    ```shell
+    ```
     shutdown -r now
     ```
-
 When the VM comes back up the network interface should be UP/RUNNING. The `ifconfig` command includes the status of each interface.
 
 ## Configure the host name
@@ -102,11 +132,12 @@ Some sample "toy" host names: `bootmaster`, `proxy`, `worker01`, etc.
 
 There are a couple of different places where the host name is specified.
 
-For RHEL 7 the host name can be set using the `hostnamectl` command.
+For RHEL 7 the host name can be set using the `hostnamectl` command. For example:
+```
+hostnamectl set-hostname bootmaster01.site.org.com
+```
 
-    hostnamectl set-hostname bootmaster01.site.org.com
-
-See the man pages for hostnamectl for more information.
+See the man pages for `hostnamectl` for more information.
 
 Additional notes on host name:
 1.	The host name is stored in the `/etc/hostname` file.  (NOTE: This file should only have the text of the host name on a single line with no newline character.)
@@ -130,17 +161,18 @@ The configuration for ssh is in `/etc/ssh/sshd_config`.  You will notice that `P
 
 You need to set up the repos for yum to be able to install additional packages and get OS updates.
 
-The yum repo definition files are in `/etc/yum.repos.d/`. Any file in that directory with a .repo extension will be treated as a repo definition.
+The yum repo definition files are in `/etc/yum.repos.d/`. Any file in that directory with a `.repo` extension will be treated as a repo definition.
 
 Each file may have multiple repositories defined.
 
 Each repo definition typically has at least 5 attributes:
-
-    [rhel-os]
-    name=Red Hat Enterprise Linux at my site
-    enabled=1
-    gpgcheck=0
-    baseurl=<protocol>://<userid>:<password>@<repo_host>/<repo_path>
+```
+[rhel-os]
+name=Red Hat Enterprise Linux at my site
+enabled=1
+gpgcheck=0
+baseurl=<protocol>://<userid>:<password>@<repo_host>/<repo_path>
+```
 
 The `<protocol>` could be ftp or http(s) for remote repos, or file for a local repo.
 
@@ -148,7 +180,7 @@ If the repository requires a `<userid>` and `<password>`, that is included in th
 
 See the Red Hat documentation [Configuring Yum and Yum Repositories](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sec-configuring_yum_and_yum_repositories) for more details.
 
-The <repo_path> needs to point to a directory with a `repodata` sub-directory where a file named `repomd.xml` is found.  If you need to explore a repository to determine the <repo_path>, something like Filezilla is very handy to use for exploration.  You can also confirm your user ID and password in getting to the repo.  (See figure below.)
+The `<repo_path>` needs to point to a directory with a `repodata` sub-directory where a file named `repomd.xml` is found.  If you need to explore a repository to determine the <repo_path>, something like Filezilla is very handy to use for exploration.  You can also confirm your user ID and password in getting to the repo.  (See figure below.)
 
 ![Sample Yum Repository Directory Structure](images/YumRepoDirectoryStructure.png)
 
@@ -159,13 +191,13 @@ You may need to explore a given collection of yum repositories in order to figur
 Depending on how DNS is configured, you may need to add an entry in the `/etc/hosts` file for the `<repo_host>`.
 
 Once you have configured the yum repository you can do a quick test to confirm the configuration file is correct:
-
-    yum repolist
-
+```
+yum repolist
+```
 Yum caches its repository information as a performance enhancement. If you want to "clean" the cache to make sure you are not using stale information about yum repositories, use:
-
-    yum clean all
-
+```
+yum clean all
+```
 Once you have the desired yum repositories configured, you can proceed with any RHEL configuration that requires additional packages (rpms) to be installed.
 
 At some point while using yum, you may see "Given file does not exist" errors such as:
@@ -199,9 +231,7 @@ It is assumed you have configured your VM with yum repositories.
 
 ## Install NTP
 
-This step is only needed if you are building a virtual machine.  NTP will be installed on a VM provided to you.
-
-NTP is needed to keep the time synchronized with the rest of the world.  All of the VMs in the ICP cluster will need to share a common notion of time, and the usual approach to keeping time is to use NTP.  
+Some mechanism is needed on each VM to keep the time synchronized with the rest of the world.  All of the VMs in the ICP cluster will need to share a common notion of time, and the usual approach to keeping time is to use NTP.  
 
 *NOTE*: If you are using virtual machines provided to you, it is very likely NTP is already installed and enabled for startup at machine boot.
 
@@ -218,33 +248,39 @@ NTP is needed to keep the time synchronized with the rest of the world.  All of 
 See the Red Hat documentation, [Configure NTP](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/s1-configure_ntp), for more detailed guidance.
 
 *NOTE*: The default `/etc/ntp.conf` content is likely sufficient.  You may want to add one or more local time providers to the list of servers provided by Red Hat:
-
-	server 0.rhel.pool.ntp.org iburst
-	server 1.rhel.pool.ntp.org iburst
-	server 2.rhel.pool.ntp.org iburst
-	server 3.rhel.pool.ntp.org iburst
-
+```
+server 0.rhel.pool.ntp.org iburst
+server 1.rhel.pool.ntp.org iburst
+server 2.rhel.pool.ntp.org iburst
+server 3.rhel.pool.ntp.org iburst
+```
 - Enable the NTP daemon.  (This will make sure ntpd starts up when the machine is booted.)
 
     *NOTE*: The name of the service is **ntpd**, not ntp.  (Go figure.)
-
-        systemctl enable ntpd
+    ```
+    systemctl enable ntpd
+    ```
 
 - Start the NTP service.
-
-        systemctl start ntpd
+    ```
+    systemctl start ntpd
+    ```
 
 - Check the NTP service status.
-
-        systemctl status ntpd
+    ```
+    systemctl status ntpd
+    ```
 
 - If you need to stop the NTP service:
-
-	    systemctl stop ntpd
+    ```
+	  systemctl stop ntpd
+    ```
 
 - To get a list of peer servers in use:
+    ```
+	  ntpq -p
+    ```
 
-	    ntpq -p
 *NOTE*: Leave NTPD started and enabled (so that it starts at boot time).
 
 ## Configure /etc/hosts
@@ -255,13 +291,17 @@ This section describes the steps to add entries to the `/etc/hosts` file of each
 
 *NOTE*: The "minimal" RHEL install does not include bind-utils, which is the RPM that contains the `nslookup` command.  If you are using a minimal RHEL image, then you need to install bind-utils if you want to use `nslookup`.  (`yum -y install bind-utils`)
 
-- For each VM in the cluster, edit `/etc/hosts` and add and entry for each VM in the cluster.
+- For each VM in the cluster, edit `/etc/hosts` and add an entry for each VM in the cluster.
 
 In some circumstances you can edit `/etc/hosts` once on the boot-master and then `scp` the hosts file to the other members of the cluster. This expedient is only feasible if the all VMs in the cluster are freshly deployed VMs and they all have the same content in `/etc/hosts` when they are initially deployed, e.g., the default content.  
 
 ## Check the file system sizing
 
 The file system size minimum requirements are described in the ICP v2.1 Knowledge Center section, ![Hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/hardware_reqs.html)(See Table 3). The "important" note following the table suggests mounting `/var/lib/etcd`, `/var/lib/registry` and `/opt/ibm/cfc` on separate paths associated with larger disks.
+
+*NOTE*: Do not use `/opt/ibm/cfc` as a file system mount point.  The ICP uninstall has a step that deletes the `/opt/ibm/cfc` directory.  If that directory is a mount point for a file system, the delete operation will fail.  Use either `/opt` or `/opt/ibm` as the mount point for the file system.
+
+*TDB*: What mount point should be used for `/var/lib/etcd`, `/var/lib/registry` and the other ICP related content in `/var/lib`? (The safe thing to do is mount the file system at `/var` or `/var/lib`.)
 
 The file system requirements as described in the ICP v2.1 KC documentation are reproduced in the following table:
 
@@ -286,22 +326,26 @@ The sub-sections in this section describe RHEL configuration that is not typical
 
 The map_max_count determines the maximum number of memory map areas a process can have. Docker requires that the max_map_count be substantially greater than the default (65530).  This section describes the steps to setting the `vm.max_map_count` to an appropriate number.
 
-*NOTE*: Do not confuse the `sysctl` command with the `systemctl` command. The command for getting and setting system parameters is `sysctl` not `systemctl`.
+*NOTE*: Do not confuse the `sysctl` command with the `systemctl` command. The command for getting and setting system (kernel) parameters is `sysctl` not `systemctl`.
 
 To make an immediate change to the `vm.max_map_count` system parameter:
-
-    sysctl -w vm.max_map_count=262144
+```
+sysctl -w vm.max_map_count=262144
+```
 
 *NOTE*: The above command writes the value of max_map_count to the file `/proc/sys/vm/max_map_count`. However, the `vm.max_map_count` will revert to its default value on reboot.
 
-In order to have the `vm.max_map_count` carry over through a reboot, edit the `/etc/sysctl.conf` file and add a line to define the value:
+*NOTE*: Consult your system administrator to determine the preferred place to persist the value of `vm.max_map_count`.
 
-    vm.max_map_count=262144
+In order to have the `vm.max_map_count` carry over through a reboot, edit the `/etc/sysctl.conf` file and add a line to define the value:
+```
+vm.max_map_count=262144
+```
 
 If you want to see the value of a system control variable just use: `sysctl <name>`, e.g.,
-
-	sysctl vm.max_map_count
-
+```
+sysctl vm.max_map_count
+```
 ### Some background on RHEL system parameters
 
 RHEL system parameters can be configured in several places with a well-defined precedence.  The `/etc/sysctl.conf` file is intended for use by the "local" system administrator.  Parameter settings in `/etc/sysctl.conf` have the highest precedence with respect to the value settings.  Other locations where system configuration parameters are read in order of precedence are: `/etc/sysctl.d/*.conf`, `/run/sysctl.d/*.conf` and `/usr/lib/sysctl.d/*.conf`. There are other locations for system configuration parameters as well. See the man pages for sysctl and sysctl.d for more details.
@@ -310,13 +354,13 @@ RHEL system parameters can be configured in several places with a well-defined p
 
 The following observations apply to a default RHEL image. The specific VM you are using may be configured differently.
 
-* On a default RHEL image, the `/etc/sysctl.conf` file has nothing in it, and comments in `/etc/sysctrl.conf` refer to using files in `/usr/lib/sysctl.d`.  
+* On a default RHEL image, the `/etc/sysctl.conf` file has nothing in it, and comments in `/etc/sysctl.conf` refer to using files in `/usr/lib/sysctl.d`.  
 
 * On a default RHEL image, `/usr/lib/sysctl.d` has three files:
-
-	ls /usr/lib/sysctl.d/
-	00-system.conf  50-default.conf  60-libvirtd.conf
-
+    ```
+	  ls /usr/lib/sysctl.d/
+	  00-system.conf  50-default.conf  60-libvirtd.conf
+    ```
 * On a default RHEL image, none of the above files has anything in it having to do with `vm.max_map_count`.
 
 * On a default RHEL image, there is nothing in `/run/sysctl.d/`  (The sysctl.d directory does not exist.)
@@ -346,7 +390,7 @@ Docker Community Edition is identical in behavior to Docker Enterprise Edition. 
 
 A typical RHEL yum repository may have the docker RPMs, but they may not be the current version.  It is recommended that the docker version available at download.docker.com be used.
 
-NOTE: This installation scenario assumes Internet connectivity and access to **docker.com**.
+*NOTE*: This installation scenario assumes Internet connectivity and access to **docker.com**.
 
 The Docker documentation, [*Get Docker CE for CentOS*](https://docs.docker.com/engine/installation/linux/docker-ce/centos/) has detailed information on [Docker Community Edition installation](https://docs.docker.com/engine/installation/linux/docker-ce/centos/). The instructions here are derived from the Docker documentation.
 
@@ -437,9 +481,11 @@ To finish things off, start and enable docker and run the hello-world smoke test
 
 This section describes the steps for installing Python Docker support modules.  The Docker modules that get installed allow all the usual Docker commands to be used within a Python script.
 
+*NOTE:* It is definitely not necessary to install pip as a pre-requisite to installing ICP.  It may not even be necessary to install the python-setuptools, but that has not been confirmed.
+
 Installing the Python Docker support modules is optional.  If you don't intend to use Python for scripting of Docker operations, then this section can be skipped.
 
-*NOTE*: Python has a `docker` package and a `docker-py` package. The documentation givese the impression they are synonomous.  However, in comparing the effects of doing the install of docker vs docker-py, they do not appear to be equivalent. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa. More investigation is needed.
+*NOTE*: Python has a `docker` package and a `docker-py` package. The documentation gives the impression they are synonymous.  However, in comparing the effects of doing the install of docker vs docker-py, they do not appear to be equivalent. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa. More investigation is needed.
 
 In order to install the Python Docker support modules, pip needs to be installed.  (Pip is the Python package manager.) In order to install pip, the python-setuptools package needs to be installed.
 
@@ -563,28 +609,29 @@ The "boot master" VM needs to have root access via ssh to the other members of t
 *NOTE*: In the description below, it is assumed that DNS is in use and the host names for the ICP cluster VMs are registered in the DNS.  If DNS is not in use, then the `/etc/hosts` files on each of the ICP cluster VMs must have been set up to map host names to IP addresses.  Hence, host names are used in the samples. (The ssh-copy-id command requires the use of host names.)
 
 *NOTE*: Substitute your actual host names In the sample commands in this section.
-For the ICP KC instructions to do this work, see "Sharing SSH keys among cluster nodes": https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/ssh_keys.html
+For the ICP KC instructions to do this work, see [Sharing SSH keys among cluster nodes](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/ssh_keys.html)
 
 - Login to the boot-master node as root
 
 - On the boot-master, as root, from root’s home directory (/root) execute:
-
-        # ssh-keygen -t rsa -P ''
-
-    Upper case P and two single quotes for no password.
-
-    When prompted, hit Enter/Return to accept the default location for the new key file:
-
-        Generating public/private rsa key pair.
-        Enter file in which to save the key (/root/.ssh/id_rsa):
-        Your identification has been saved in /root/.ssh/id_rsa.
-        Your public key has been saved in /root/.ssh/id_rsa.pub.
-        ...
-
+```
+# ssh-keygen -b 4096 -f ~/.ssh/id_rsa -N ""
+```
+The above command requires no responses to prompts.
+You should see something like:
+```
+Generating public/private rsa key pair.
+Your identification has been saved in /root/.ssh/id_rsa.
+Your public key has been saved in /root/.ssh/id_rsa.pub.
+The key fingerprint is:
+REDACTED root@REDACTED
+The key's randomart image is:
+REDACTED
+```
 
 - Now, executing a directory listing on /root/.ssh should show two files: id_rsa, id_rsa.pub. (A known_hosts file may also be present.)
 
-	    # ls -l ./.ssh
+	    # ls -l ~/.ssh
 	    total 8
 	    -rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
 	    -rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
@@ -595,7 +642,7 @@ For the ICP KC instructions to do this work, see "Sharing SSH keys among cluster
 
 In the command below `<master>` is used as a placeholder for the actual boot-master fully qualified host name (FQDN).
 ```
-    # ssh-copy-id -i ./.ssh/id_rsa.pub root@<master>
+    # ssh-copy-id -i ~/.ssh/id_rsa.pub root@<master>
 ```
 
 You will be prompted to confirm that you want to connect to the `<master>`. Then you will be prompted for root's password on `<master>`, which is the target for this first passwordless ssh configuration.
@@ -605,14 +652,14 @@ You will be prompted to confirm that you want to connect to the `<master>`. Then
 - Now try logging into the machine, with: `ssh root@<master>` and check to make sure that only the key(s) you wanted were added.
 
 At this point you should see two additional files in the .ssh directory:
-
-	# ls -l .ssh
-	total 16
-	-rw-------. 1 root root  402 Jun 30 12:17 authorized_keys
-	-rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
-	-rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
-	-rw-r--r--. 1 root root  191 Jun 30 12:17 known_hosts
-
+```
+# ls -l ~/.ssh
+  total 16
+  -rw-------. 1 root root  402 Jun 30 12:17 authorized_keys
+  -rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
+  -rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
+  -rw-r--r--. 1 root root  191 Jun 30 12:17 known_hosts
+```
 -	Repeat for each additional server in the cluster/cloud.  (As above, you will need to answer yes to add the ECDSA key for each host to the known_hosts file and provide the root password of the target host.)
 
 In the commands below, `<proxy>` and `<worker_##>` is used as a placeholder for the fully qualified host names (FQDN) for machines in the cluster.
@@ -643,7 +690,7 @@ If you cannot gain access via SSH without a password, check the known_hosts and 
 
 This is the start of the description of the steps to install IBM Cloud Private.
 
-## Prerequisite steps
+## Prerequisite steps to Install IBM Cloud Private v2.1
 1. If you are building you own VM, you should have already created a clone of the ICP base VM for each VM in the cluster.  At a minimum, this would be the boot-master, the proxy and a couple of worker nodes.
 
 2. If you are using VMs provided to you, then you should have completed all the steps to getting Docker running on at least the boot-master machine. The install process includes installing Docker on each cluster member.  As an expedient we recommend pre-installing Docker on each cluster member.  (See the *Copy and load ICP docker image tar ball to all cluster VMs* section below for details.)
@@ -894,6 +941,58 @@ The docker command is simple:
     docker images
 
 Once ICP is loaded into the local docker repository, there are a lot of images. You will likely want to grep for some string that is part of the image of interest to cut down the amount of output from a full docker images list.
+
+# Installing Ansible
+Ansible is very useful for administration of a collection of machines such as an ICP cluster.  We recommend installing it to ease general administration of the ICP cluster.  
+
+See the Ansible documentation for [installation instructions](http://docs.ansible.com/ansible/latest/intro_installation.html#id26). The installation instructions are very detailed and complete for virtually every platform.
+
+Your RHEL yum repository is likely to have the Ansible RPM in the "extras" directory.  
+
+If you have access to the public Internet you can get Ansible RPMs via yum, here: https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/.
+
+To add the public Ansible yum repo do:
+```
+yum-config-manager --add-repo https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/
+```
+The above command should add a repo to `/etc/yum.repos.d/` that will be named something like: `releases.ansible.com_ansible_rpm_release_epel-7-x86_64_.repo`
+```
+# ls /etc/yum.repos.d/
+docker-ce.repo  redhat.repo  releases.ansible.com_ansible_rpm_release_epel-7-x86_64_.repo  rhel.repo
+```
+Yum will not access the public Ansible repository unless you install its public key.  The public key did not appear to be available anywhere obvious at the Ansible releases site.  The simple thing to do is edit the repo file and set `gpgcheck=0`.
+```
+[releases.ansible.com_ansible_rpm_release_epel-7-x86_64_]
+name=added from: https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/
+baseurl=https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/
+gpgcheck=0
+enabled=1
+```
+
+## Configuring Ansible
+This section describes some very basic steps required to get Ansible configured to the point where you can start to do things with it.
+
+The Ansible documentation is very good.  Use it to find answers to your questions.  The [Getting Started](http://docs.ansible.com/ansible/latest/intro_getting_started.html) describes what you need to do to get started. The [Introduction to Ad-Hoc Commands](http://docs.ansible.com/ansible/latest/intro_adhoc.html) provides a quick overview on running ad hoc commands through Ansible.
+
+Some things to decide when using Ansible:
+- The machine (or machines) to be an Ansible "control machine", e.g., administrator desktop, a "staging" or "jump" server, the ICP "boot" server.  See the Ansible documentation for [Control Machine Requirements](http://docs.ansible.com/ansible/latest/intro_installation.html#control-machine-requirements). If you use your ICP boot server (boot/master0) as an Ansible control server, it already has things set up for root to be able to run Ansible commands to all other nodes in the ICP cluster.
+- What user to set up on the control machine(s) and all of the managed nodes that will be used by Ansible to access the managed nodes via SSH using SSH keys. It is recommended (but not required) that the SSH authentication use keys. (We refer to this user as the "*Ansible user*".) The Ansible user needs to be able to use sudo without providing a password to run commands that require root privileges.
+
+The primary configuration tasks to get started:
+- Make sure each managed node has the Ansible user ID defined. The Ansible user will need to be able to use passwordless sudo to get root privileges.
+- Use `ssh-copy-id` (or something that does the equivalent) to get the public key (`id_rsa.pub`) of the Ansible user on each Ansible control machine in the SSH `authorized_users` file for the Ansible user on each managed node.
+- Set up the Ansible `hosts` (in `/etc/ansible` by default) file to defined the managed nodes.
+
+*NOTE:* Use fully qualified domain names (FQDN) for the hosts when using the `ssh-copy-id` command or whatever you use to get the Ansible user's SSH key spread around to the managed nodes. If you use the short host name, you will likely get *The authenticity of host 'myhost.mysite.com (xxx.xxx.x.xx)' can't be established.* errors when you try something even as simple as an Ansible ping. Check the SSH `known_hosts` file for the Ansible user on the Ansible control machine to confirm that that the FQDN, and the IP address is listed with the host key if you are not sure about what will be recognized.
+
+*NOTE:* A simple way to provide the Ansible user with passwordless sudo privileges to run any command is to add the Ansible user to the wheel group.  For RHEL the command, `usermod -G wheel <ansible_user>` will add the `<ansible_user>` to the wheel group.  You will likely need to edit the `/etc/sudoers` file (using `visudo`) to comment out the default `wheel` entry and uncomment the `NOPASSWD` `wheel` entry.  See sample below:
+```
+## Allows people in group wheel to run all commands
+# %wheel        ALL=(ALL)       ALL
+
+## Same thing without a password
+%wheel  ALL=(ALL)       NOPASSWD: ALL
+```
 
 # RHEL 7 network interface overview
 This section describes some basic information about networking for RHEL 7.
