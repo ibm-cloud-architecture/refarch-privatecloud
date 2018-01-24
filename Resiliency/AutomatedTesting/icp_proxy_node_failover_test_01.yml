@@ -1,0 +1,180 @@
+---
+# Description:
+#   Using the proxy virtual host (proxy_vhost) as the pointer to the current
+#   primary proxy, stop docker on that VM.  Stopping docker simulates the
+#   failure of the primary proxy.
+#   When docker is stopped on the current primary proxy, one of the other proxy
+#   nodes should become the primary.
+#   At that point a test of the BlueCompute application is used to determine that
+#   requests are properly routed to the application via the proxy.
+#
+# INPUTS:
+#   vars:
+#     proxy_nodes  - a regex string or group name that defines the proxy nodes
+#                    Be careful not to use a string that picks up the
+#                    the proxy virtual host.
+#     proxy_vip    - the IP address used for the proxy VIP
+#     proxy_vhost  - The virtual hostname of the proxy.  This is the host name
+#                    mapped to the proxy VIP.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#     The default inventory is in /etc/ansible/hosts.  The example invocation
+#     below uses the default inventory.
+#
+# Root privilege is needed to start/stop docker.
+# In this playbook, the tasks where root is needed include the "become" option.
+# It is assumed the user running the script can be elevated to root on the target
+# hosts without providing a password.
+#
+# Sample invocation (all on one line):
+#   ansible-playbook icp_proxy_node_failover_test_01.yml
+#                   --extra-vars "proxy_nodes=proxy0* proxy_vip=172.16.12.124 proxy_vhost=proxy.mycluster.mysite.local"
+#
+# NOTES:
+#   The "become" option needs to be specified with the tasks where it is needed,
+#   e.g., where docker is started or stopped.  We can't use --become on the command
+#   line because that leads to problems running things on the control host where
+#   an elevation of privilege is not actually needed.
+
+
+- hosts: "{{ proxy_nodes }}"
+
+  tasks:
+    - name: Ensure docker service started.
+      service: name=docker state=started
+      become: True
+
+      # NOTE: This task and the associated debug below are here for info purposes only.
+    - name: Is proxy VIP assigned?
+      # Using the | to wc simplifies the result of the script in stdout and avoids
+      # alarming failures in the Ansible output when running the playbook.
+      shell: ip addr | grep "{{ proxy_vip|quote }}" | wc -l
+      # Note: The shell_result.stdout is type string which is important for testing in conditional.
+      register: shell_result
+      changed_when: False
+
+    - debug:
+        msg: "{{ ansible_nodename }} has the proxy VIP assigned to one of its NICs."
+      when: shell_result.stdout == "1"
+
+  # Copy app web page content to a local file before dropping the primary proxy
+  # server to compare (using diff) to same web page content after dropping the
+  # primary proxy server.
+- hosts: localhost
+  tasks:
+    - name: Smoke test that a proxy is working properly before failover test
+      uri:
+        url: https://{{ proxy_vhost }}/bluecompute
+        validate_certs: False
+        return_content: Yes
+      register: app_webpage
+      changed_when: False
+
+    - local_action: copy content={{ app_webpage.content }} dest=./app_webpage_before.out
+
+  # Stop docker on the current ICP proxy node to simulate a proxy node failure.
+- hosts: "{{ proxy_vhost }}"
+  tasks:
+    - name: Get current primary ICP proxy hostname
+      shell: hostname
+      register: proxy_hostname
+      changed_when: False
+
+    - debug:
+        msg: The original ICP primary proxy host is {{ proxy_hostname.stdout }}
+
+    - name: Stop docker on current ICP primary proxy "{{ ansible_nodename }}"
+      service: name=docker state=stopped
+      become: True
+
+  # Cleanup the user's ~/.ssh/known_hosts file because the host associated with
+  # the proxy virtual host and host associated with the proxy VIP has changed.
+  # I found this approach to working with the SSH known_hosts here:
+  # https://serverfault.com/questions/132970/can-i-automatically-add-a-new-host-to-known-hosts
+- hosts: localhost
+  tasks:
+      # Get the localhost hostname, just for fun.
+    - name: Get hostname
+      shell: hostname
+      register: control_host
+      changed_when: False
+
+    - debug:
+        msg: The Ansible control host name is {{ control_host.stdout }}
+
+    - name: Remove {{ proxy_vhost }} entry in user's SSH known_hosts.
+      shell: ssh-keygen -R {{ proxy_vhost }} -f ~/.ssh/known_hosts
+
+    - name: Remove {{ proxy_vip }} entry in user's SSH known_hosts.
+      shell: ssh-keygen -R {{ proxy_vip }} -f ~/.ssh/known_hosts
+
+    - name: Remove {{ proxy_vhost }},{{ proxy_vip }} entry in user's SSH known_hosts.
+      shell: ssh-keygen -R {{ proxy_vhost }},{{ proxy_vip }} -f ~/.ssh/known_hosts
+
+    - name: Add the new {{ proxy_vhost }},{{ proxy_vip }} entry in user's SSH known_hosts.
+      shell: ssh-keyscan -H {{ proxy_vhost }},{{ proxy_vip }} >> ~/.ssh/known_hosts
+
+    - name: Add the new {{ proxy_vhost }} entry to the user's SSH known_hosts.
+      shell: ssh-keyscan -H {{ proxy_vhost }} >> ~/.ssh/known_hosts
+
+    - name: Add the new proxy_vip entry to the user's SSH knonwn_hosts.
+      shell: ssh-keyscan -H {{ proxy_vip }} >> ~/.ssh/known_hosts
+
+  # For information purposes emit the current proxy host.
+  # NOTE: This fails or results in a prompt to add a key if known_hosts is not cleaned up.
+- hosts: "{{ proxy_vhost }}"
+  tasks:
+    - name: Get current ICP proxy hostname
+      shell: hostname
+      register: proxy_hostname
+      changed_when: False
+
+    - debug:
+        msg: The current ICP proxy host is {{ proxy_hostname.stdout }}
+
+  # Then run a simple "smoke test" to confirm an ICP proxy failover has occurred.
+- hosts: localhost
+  tasks:
+    - name: Smoke test that a proxy is working properly after failover test
+      uri:
+        url: https://{{ proxy_vhost }}/bluecompute
+        validate_certs: False
+        return_content: Yes
+      register: app_webpage
+      changed_when: False
+
+    - local_action: copy content={{ app_webpage.content }} dest=./app_webpage_after.out
+
+    # NOTE: For some unknown reason the wc -l emits a value (should be 0) with space
+    # characters in front of it and that makes diff_result difficult to check.
+    # Hence, the pipe to the tr command to trim out the spaces.
+    - name: Compare app_webpage before and after proxy failover
+      shell: diff ./app_webpage_before.out ./app_webpage_after.out | wc -l | tr -d ' '
+      register: diff_result
+      changed_when: False
+      ignore_errors: True
+
+    - name: diff of app_webpage_before.out app_webpage_after.out results in non-zero differences.
+      fail: msg="FAILURE, Web page content before and after simulated proxy failure is different."
+      when: diff_result.stdout != "0"
+
+    - name: diff of app_webpage_before.out app_webpage_after.out results in zero differences.
+      debug:
+        msg: "SUCCESS, Web page content before and after simulated proxy failure is identical."
+      when: diff_result.stdout == "0"
+
+
+
+  # Make sure docker is running on all proxy nodes.
+  # Essentially, restart docker on the original primary proxy node.
+- hosts: "{{ proxy_nodes }}"
+  tasks:
+    - name: Ensure docker service restarted.
+      service: name=docker state=started
+      become: True
+
+...

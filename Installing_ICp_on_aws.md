@@ -278,7 +278,7 @@ shell execute the command “sudo su –“.
 
     f.  Setup the docker stable repository
     
-        add-apt-repository "deb \[arch=amd64\] https://download.docker.com/linux/ubuntu \$(lsb\_release -cs) stable"
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
     g.  Install docker
 
@@ -311,25 +311,25 @@ shell execute the command “sudo su –“.
         
     ![](AWS/DefaultLocation.png)
 
-    2.  Update the /root/.ssh/authorized\_keys file on each node
+    2.  Update the /root/.ssh/authorized_keys file on each node
         (master, proxy, and all worker nodes) with the value of
-        /root/.ssh/id\_rsa.pub on the master node. Note that there will
+        /root/.ssh/id_rsa.pub on the master node. Note that there will
         already be a file there with existing content from AWS. Replace
         the contents of this file with the contents from the
-        \~/.ssh/id\_rsa.pub file on the master node.
+        ~/.ssh/id_rsa.pub file on the master node.
         
-        On the master node, cat the value of /root/.ssh/id\_rsa.pub to
+        On the master node, cat the value of /root/.ssh/id_rsa.pub to
         the screen and copy it to the clipboard (Note that some of the
         text here is intentionally obscured).
         
         ![](AWS/IdRsa.png)
         
         Paste that value into each other node’s
-        /root/.ssh/authorized\_keys file, replacing the existing
+        /root/.ssh/authorized_keys file, replacing the existing
         contents.
         
         On the master node, you can just change to root’s .ssh directory
-        and copy the id\_rsa.pub file over the authorized\_keys file.
+        and copy the id_rsa.pub file over the authorized_keys file.
         
             cd ~/.ssh
             cp id_rsa.pub authorized_keys
@@ -372,7 +372,7 @@ Install IBM Spectrum Conductor for Containers
 
 4)  Extract the configuration files
     
-        docker run -e LICENSE=accept -–rm -v “\$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
+        docker run -e LICENSE=accept -–rm -v “$(pwd)”:/data ibmcom/cfc-installer:1.2.0 cp -r cluster /data
     
     You should now have a subdirectory under /opt named “cluster”
 
@@ -386,15 +386,15 @@ Install IBM Spectrum Conductor for Containers
         
         ![](AWS/ClusterHosts.png)
 
-    2.  Copy the value of /root/.ssh/id\_rsa over the ssh\_keys file and
-        make sure the file permissions for the ssh\_key file is 400.
+    2.  Copy the value of /root/.ssh/id_rsa over the ssh_keys file and
+        make sure the file permissions for the ssh_key file is 400.
         
-            cp /root/.ssh/id\_rsa /opt/cluster/ssh_key
+            cp /root/.ssh/id_rsa /opt/cluster/ssh_key
             chmod 400 /opt/cluster/ssh_key
 
     3.  Make any needed changes to the config.yml file. For our purposes
         we will leave these values at their defaults. However, if either
-        of the *network\_cidr* or *service\_cluster\_ip\_range* values
+        of the *network_cidr* or *service_cluster_ip_range* values
         conflict with any network defined in your environment, they must
         be changed. Since the only defined network in our AWS EC2
         environment is 172.16.0.0/20, we have no conflicts with either
@@ -421,7 +421,7 @@ Install IBM Spectrum Conductor for Containers
     3.  About 10 minutes later your environment is installed.
 
     4.  Login with https to the external IP address of your master node
-        on port 8443. E.g. https:// 1.2.3.413.58.36.247:8443. The
+        on port 8443. E.g. https:// 1.2.3.4:8443. The
         default userid is “admin” (without the quotes), and the default
         password is “admin” (without the quotes).
         
@@ -613,7 +613,7 @@ Open “PuTTYgen”, click the “Load” button and navigate to the .pem file
 you saved when you created your EC2 instances.
 
 To find .pem files you will need to change the filetype at the bottom
-left of the selection windo to “All Files (\*.\*)”.
+left of the selection windo to “All Files (*.*)”.
 
 PuTTYgen will import the .pem file and convert it to its own internal
 format (.ppk).

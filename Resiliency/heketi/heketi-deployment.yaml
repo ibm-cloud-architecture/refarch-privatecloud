@@ -1,0 +1,90 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: heketi
+  labels:
+    glusterfs: heketi-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      glusterfs: heketi-pod
+      name: heketi
+  template:
+    metadata:
+      name: heketi
+      labels:
+        glusterfs: heketi-pod
+        name: heketi
+    spec:
+      serviceAccount: heketi-service-account
+      serviceAccountName: heketi-service-account
+      containers:
+      - name: heketi
+        image: heketi/heketi:dev
+        imagePullPolicy: Always
+
+        env:
+        - name: HEKETI_EXECUTOR
+          value: ssh
+        - name: HEKETI_FSTAB
+          value: /var/lib/heketi/fstab
+        - name: HEKETI_SNAPSHOT_LIMIT
+          value: "14"
+        - name: HEKETI_KUBE_GLUSTER_DAEMONSET
+          value: "n"
+        volumeMounts:
+        - mountPath: /backupdb
+          name: heketi-db-secret
+        - mountPath: /var/lib/heketi
+          name: db
+        - mountPath: /etc/heketi
+          name: config
+        - mountPath: /etc/heketi-ssh
+          name: ssh-key
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /hello
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /hello
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 3
+      volumes:
+      - name: db
+        emptyDir:
+          sizeLimit: "0"
+      - name: heketi-db-secret
+        secret:
+          defaultMode: 420
+          secretName: heketi-db-backup
+      - name: ssh-key
+        secret:
+          defaultMode: 256
+          items:
+          - key: id_rsa
+            path: myprivate_key
+          secretName: heketi-ssh-key
+      - name: config
+        configMap:
+          name: heketi-config
+          defaultMode: 420
+          items:
+          - key: heketi.json
+            path: heketi.json
+

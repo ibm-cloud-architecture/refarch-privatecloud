@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: heketi
+  labels:
+    deploy-heketi: support
+    glusterfs: heketi-service
+spec:
+  type: ClusterIP
+  selector:
+    name: heketi
+  ports:
+  - name: heketi
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+

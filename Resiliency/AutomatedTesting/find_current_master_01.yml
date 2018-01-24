@@ -1,0 +1,51 @@
+---
+# INPUTS:
+#   vars:
+#     master_hosts - a string that defines the master hosts (It is best to use
+#                    a regular expression that does not include the master virtual
+#                    host name.)
+#     master_vip   - the IP address used for the master VIP
+#     master_vhost - the virtual host name of the ICP master, i.e the name
+#                    assigned to the master VIP.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#
+# Sample invocation (all on one line):
+#   ansible-playbook find_current_master_01.yml
+#         --extra-vars "master_hosts=master0* master_vip=172.16.123.45 master_vip=icp-master.mycluster.mysite.local"
+#
+
+- hosts: "{{ master_hosts }}"
+  tasks:
+    - fail: msg="This play requires master_hosts and master_vip to be defined."
+      when: master_hosts is undefined or master_vip is undefined
+
+      # It may be that multiple hosts have the master VIP assigned to a NIC.
+      # That situation occurs after a failover and is temporary until something
+      # comes in and cleans up the master VIP on the NIC of the master for which
+      # the failover is simulated by stopping docker.
+    - name: Is master VIP assigned?
+      shell: ip addr | grep "{{ master_vip|quote }}" | wc -l
+      register: shell_result
+      changed_when: False
+
+    - debug:
+        msg: "{{ ansible_nodename }} has the master VIP assigned to one of its NICs."
+      when: shell_result.stdout == "1"
+
+  # A more reliable way to figure out the ICP master host
+- hosts: "{{ master_vhost }}"
+  tasks:
+    - name: Get current ICP master hostname
+      shell: hostname
+      register: master_hostname
+      changed_when: False
+
+    - debug:
+        msg: The current ICP master is {{ master_hostname.stdout }}
+
+...

@@ -1,0 +1,111 @@
+---
+# Description:
+#   Simulate a failure of a given worker node by stopping docker on the given
+#   worker node.
+#   When docker is stopped on one of the worker nodes, the other worker nodes
+#   should continue to operate correctly and all deployed applications should
+#   continue to operate correctly.
+#   The BlueCompute application is used to determine if the remaining worker
+#   nodes are properly supported a deployed application.
+#
+# INPUTS:
+#   vars:
+#     worker_node  - The name of a single worker node in the inventory that
+#                    This will be the node where docker is stopped.  This can 
+#                    be a regex pattern, but the intent is that the pattern resolves
+#                    to a single node.  Docker will be stopped on all nodes that
+#                    match the pattern, which may not be the intent of the test.
+#     proxy_vhost  - The virtual host name of the proxy.  This is the host name
+#                    mapped to the proxy VIP.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#     The default inventory is in /etc/ansible/hosts.  The example invocation
+#     below uses the default inventory.
+#
+# Root privilege is needed to start/stop docker.
+# In this playbook, the tasks where root is needed include the "become" option.
+# It is assumed the user running the script can be elevated to root on the target
+# hosts without providing a password.
+#
+# Sample invocation (all on one line):
+#   ansible-playbook icp_worker_node_failover_test_01.yml
+#                   --extra-vars "worker_node=worker01* proxy_vhost=proxy.mycluster.mysite.local"
+#
+# NOTES:
+#   The "become" option needs to be specified with the tasks where it is needed,
+#   e.g., where docker is started or stopped.  We can't use --become on the command
+#   line because that leads to problems running things on the control host where
+#   an elevation of privilege is not actually needed.
+
+  # Copy app web page content to a local file before dropping each worker node.
+  # This is the baseline content to use for comparison as each worker node is
+  # dropped.
+- hosts: localhost
+  tasks:
+    - name: Remove app web page files
+      file:
+        path: ./app_webpage_*.out
+        state: absent
+
+    - name: Get baseline application web page content.
+      uri:
+        url: https://{{ proxy_vhost }}/bluecompute
+        validate_certs: False
+        return_content: Yes
+      register: app_webpage
+      changed_when: False
+
+    - local_action: copy content={{ app_webpage.content }} dest=./app_webpage_before.out
+
+- hosts: "{{ worker_node }}"
+  tasks:
+    - name: Stop docker on current worker "{{ ansible_nodename }}"
+      service: name=docker state=stopped
+      become: True
+
+
+  # Then run a simple "smoke test" to confirm worker node failure had no impact.
+- hosts: localhost
+  tasks:
+    - name: Smoke test that application is still working after {{ worker_node }} failure
+      uri:
+        url: https://{{ proxy_vhost }}/bluecompute
+        validate_certs: False
+        return_content: Yes
+      register: app_webpage
+      changed_when: False
+
+    - local_action: copy content={{ app_webpage.content }} dest=./app_webpage_after.out
+
+    # NOTE: For some unknown reason the wc -l emits a value (should be 0) with space
+    # characters in front of it and that makes diff_result difficult to check.
+    # Hence, the pipe to the tr command to trim out the spaces.
+    - name: Compare app_webpage before and after proxy failover
+      shell: diff ./app_webpage_before.out ./app_webpage_after.out | wc -l | tr -d ' '
+      register: diff_result
+      changed_when: False
+      ignore_errors: True
+
+    - name: diff of app_webpage_before.out app_webpage_after.out results in non-zero differences.
+      fail: msg="FAILURE, Web page content before and after simulated {{ worker_node }} failure is different."
+      when: diff_result.stdout != "0"
+
+    - name: diff of app_webpage_before.out app_webpage_after.out results in zero differences.
+      debug:
+        msg: "SUCCESS, Web page content before and after simulated {{ worker_node }} failure is identical."
+      when: diff_result.stdout == "0"
+
+
+
+  # Restart docker on the worker node.
+- hosts: "{{ worker_node }}"
+  tasks:
+    - name: Ensure docker service restarted.
+      service: name=docker state=started
+      become: True
+
+...

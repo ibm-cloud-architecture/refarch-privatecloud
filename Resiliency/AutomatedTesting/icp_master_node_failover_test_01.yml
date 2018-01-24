@@ -1,0 +1,171 @@
+---
+# Description:
+#   Using the master virtual host as the pointer to the current primary master
+#   node, stop docker on that node.  Stopping docker simulates a failure of
+#   the node.
+#   When docker is stopped on the primary master, one of the other master
+#   nodes should become the primary.
+#   A simple kubectl get deployments is then run.  The kubectl client is using
+#   the master VIP as its endpoint, which at the time the test is run is mapped
+#   to the new primary master.  The deployments should be dumped out as part of
+#   a debug statement.  (TBD: Is there a way to get a nicely formatted output of
+#   the kubectl command?)
+#
+# INPUTS:
+#   vars:
+#     master_nodes - a regex string or group name that defines the master nodes
+#                    Be careful not to use a string that picks up the
+#                    the master virtual host.
+#     master_vip   - the IP address used for the master VIP
+#     master_vhost - The virtual hostname of the ICP master
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#     The default inventory is in /etc/ansible/hosts.  The example invocation
+#     below uses the default inventory.
+#
+# Root privilege is needed to start/stop docker.
+# In this playbook, the tasks where root is needed include the become option.
+# It is assumed the user running the script can be elevated to root on the target
+# hosts without providing a password.
+#
+# Sample invocation (all on one line):
+#   ansible-playbook icp_master_node_failover_test_01.yml
+#                   --extra-vars "master_nodes=master0* master_vip=172.16.12.123 master_vhost=master.mycluster.mysite.local"
+#
+# NOTES:
+#   The "become" option needs to be specified with the tasks where it is needed,
+#   e.g., where docker is started or stopped.  We can't use --become on the command
+#   line because that leads to problems running things on the control host where
+#   an elevation of privilege is not actually needed.
+
+
+- hosts: "{{ master_nodes }}"
+
+  tasks:
+    - name: Ensure docker service started.
+      service: name=docker state=started
+      become: True
+
+      # NOTE: This task and the associated debug below are here for info purposes only.
+    - name: Is master VIP assigned?
+      # Using the | to wc simplifies the result of the script in stdout and avoids
+      # alarming failures in the Ansible output when running the playbook.
+      shell: ip addr | grep "{{ master_vip|quote }}" | wc -l
+      # Note: The shell_result.stdout is type string which is important for testing in conditional.
+      register: shell_result
+      changed_when: False
+
+    - debug:
+        msg: "{{ ansible_nodename }} has the master VIP assigned to one of its NICs."
+      when: shell_result.stdout == "1"
+
+  # Stop docker on the current ICP master node to simulate a master node failure.
+- hosts: "{{ master_vhost }}"
+  tasks:
+    - name: Get current ICP master hostname
+      shell: hostname
+      register: master_hostname
+      changed_when: False
+
+    - debug:
+        msg: The original ICP master host is {{ master_hostname.stdout }}
+
+    - name: Stop docker on current ICP master "{{ ansible_nodename }}"
+      service: name=docker state=stopped
+      become: True
+
+  # Cleanup the user's ~/.ssh/known_hosts file because the host associated with
+  # the master virtual host and host associated with the master VIP has changed.
+  # I found this approach to working with the SSH known_hosts here:
+  # https://serverfault.com/questions/132970/can-i-automatically-add-a-new-host-to-known-hosts
+- hosts: localhost
+  tasks:
+      # Get the localhost hostname, just for fun.
+    - name: Get hostname
+      shell: hostname
+      register: control_host
+      changed_when: False
+
+    - debug:
+        msg: The Ansible control host name is {{ control_host.stdout }}
+
+    - name: Remove {{ master_vhost }} entry in user's SSH known_hosts.
+      shell: ssh-keygen -R {{ master_vhost }} -f ~/.ssh/known_hosts
+
+    - name: Remove {{ master_vip }} entry in user's SSH known_hosts.
+      shell: ssh-keygen -R {{ master_vip }} -f ~/.ssh/known_hosts
+
+    - name: Remove {{ master_vhost }},{{ master_vip }} entry in user's SSH known_hosts.
+      shell: ssh-keygen -R {{ master_vhost }},{{ master_vip }} -f ~/.ssh/known_hosts
+
+    - name: Add the new {{ master_vhost }},{{ master_vip }} entry in user's SSH known_hosts.
+      shell: ssh-keyscan -H {{ master_vhost }},{{ master_vip }} >> ~/.ssh/known_hosts
+
+    - name: Add the new {{ master_vhost }} entry to the user's SSH known_hosts.
+      shell: ssh-keyscan -H {{ master_vhost }} >> ~/.ssh/known_hosts
+
+    - name: Add the new master_vip entry to the user's SSH knonwn_hosts.
+      shell: ssh-keyscan -H {{ master_vip }} >> ~/.ssh/known_hosts
+
+  # For information purposes emit the current master host.
+  # NOTE: This fails or results in a prompt to add a key if known_hosts is not cleaned up.
+- hosts: "{{ master_vhost }}"
+  tasks:
+    - name: Get current ICP master hostname
+      shell: hostname
+      register: master_hostname
+      changed_when: False
+
+    - debug:
+        msg: The current ICP master host is {{ master_hostname.stdout }}
+
+  # Then run a simple "smoke test" to confirm an ICP master failover has occurred.
+- hosts: localhost
+  tasks:
+      # This get hostname is just for fun.
+    - name: Get hostname
+      shell: hostname
+      register: control_host
+      changed_when: False
+
+    - debug:
+        msg: The Ansible control host name is {{ control_host.stdout }}
+
+      # We would like to run an ICP (Bluemix private) CLI to get a list of master nodes
+      # We run kubectl command instead since that seems to work.
+      # NOTE: For kubectl it is assumed the client configuration commands have been run
+      # and the authentication token is still valid.
+      # The bx stuff doesn't work.  TBD - How to set up the endpoint in the context
+      # of an Ansible play.  Things work fine at the command line, but not when run
+      # from Ansible.
+      # NOTE: I was using command: {{ item }}
+      # with_items:
+      #- bx pr login -u admin -p admin -a https://{{ master_vip }}:8443 --skip-ssl-validation
+      #- bx pr init --host https://{{ master_vip }}:8443 --skip-ssl-validation --insecure
+      #- bx pr masters {{ icp_cluster }}
+      # NOTE: command doesn't send content to stdout.  Need to investigate a way to get
+      # results of the commands to the output.
+      # Shell has stdout that you can capture in a registered variable.
+      # kubectl connects to the master_vhost on port 8001.
+    - name: Smoke test that ICP master node is accessible
+      shell: |
+        kubectl get deployments
+      register: k8s_deployments
+      changed_when: False
+
+    - debug:
+        msg: The Kubernetes deployments {{ k8s_deployments.stdout }}
+
+  # Make sure docker is running on all master nodes.
+  # Essentially, restart docker on the original ICP master node.
+- hosts: "{{ master_nodes }}"
+  tasks:
+    - name: Ensure docker service restarted.
+      service: name=docker state=started
+      become: True
+
+...
