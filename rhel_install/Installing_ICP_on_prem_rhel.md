@@ -730,7 +730,7 @@ Last login: Fri Jun 30 09:39:31 2017
 ```
 If you cannot gain access via SSH without a password, check the known_hosts and authorized_keys files on the hosts other than the boot-master.
 
-# Install and configure the GlusterFS server cluster
+# Install and configure a GlusterFS server cluster running in Docker
 
 If you are not going to use GlusterFS, then this section can be skipped.
 
@@ -831,19 +831,19 @@ ansible gluster -m shell -a 'echo dm_thin_pool | tee -a /etc/modules-load.d/modu
 If you want to check that dm_thin_pool got loaded in the docker image repository:
 ```
 $ ansible gluster -b -m shell -a 'lsmod | grep dm_thin_pool'
-gluster03.zzz.yyyy.xxx | SUCCESS | rc=0 >>
+gluster03.yyy.zzz | SUCCESS | rc=0 >>
 dm_thin_pool           65565  0
 dm_persistent_data     67216  1 dm_thin_pool
 dm_bio_prison          15907  1 dm_thin_pool
 dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm_thin_pool
 
-gluster01.zzz.yyyy.xxx | SUCCESS | rc=0 >>
+gluster01.yyy.zzz | SUCCESS | rc=0 >>
 dm_thin_pool           65565  0
 dm_persistent_data     67216  1 dm_thin_pool
 dm_bio_prison          15907  1 dm_thin_pool
 dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm_thin_pool
 
-gluster02.zzz.yyyy.xxx | SUCCESS | rc=0 >>
+gluster02.yyy.zzz | SUCCESS | rc=0 >>
 dm_thin_pool           65565  0
 dm_persistent_data     67216  1 dm_thin_pool
 dm_bio_prison          15907  1 dm_thin_pool
@@ -853,11 +853,114 @@ dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm
 
 At this point, the GlusterFS server cluster is up and running and you can proceed with the ICP installation.
 
+# Install "native" GlusterFS server
+
+This section describes the steps to installing the GlusterFS server directly on RHEL (not in a container).
+
+If you are using the GlusterFS server installed in a Docker container, (obviously) this section must be skipped.
+
+*NOTE:* The Gluster server topology and storage volumes do not need to be configured manually.  In a later section the hekeit-cli is used to configure the server topology based on a YAML configuration file.  The heketi-cli can then be used to define mountable storage volumes.  Many sources you find on the Internet describe extensive manual steps to configure storage devices and volumes.  You can ignore/skip all those configuration instructions.  The Gluster server machines need only to have raw disk devices defined on them.
+
+Installing GlusterFS server on RHEL rather than in a container may be a matter of preference and your level of comfort with containers vs native processes.  This section is for those who are more comfortable with working native RHEL processes.
+
+- A yum repository needs to be configured to get the GlusterFS, and Heketi RPMs.
+Here is a sample yum `gluster.conf` file that needs to be created in `/etc/yum.repos.d/`.
+```
+# Gluster 3.13 has Heketi 5.0
+name=Gluster 3.13
+baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-3.13/
+gpgcheck=0
+enabled=1
+```
+*NOTE:* Go out to http://mirror.centos.org/ and walk down the `centos` and `storage` directory tree to find out the latest `gluster` release and update the `gluster.repo` `baseurl` accordingly.
+
+- Disable SE-Linux enforcement (*TBD:* I'm not convinced this is necessary.  Gluster doc does not indicate this is necessary.  Need to test installing and running with `SELINUX=enforcing`.)
+  - Edit /etc/selinux/config and set `SELINUX=disabled`
+  - Reboot (`shutdown -r now`)
+
+- Configure `dm_thin_pool` kernel module
+```
+> modprobe dm_thin_pool
+```
+
+- Configure a `dm_thin_pool` in a conf file in `/etc/modules-load.d/` to support setting it at machine reboot. (The files in `/etc/modules-load.d/` are used to configure the kernel when the machine boots.)
+```
+> echo dm_thin_pool >> /etc/modules-load.d/dm_thin_pool.conf
+```
+
+- Install glusterfs-server
+```
+> yum -y install glusterfs-server
+```
+
+- Enable and start the `glusterd` daemon.
+```
+> systemctl enable --now glusterd
+```
+
+- Configure passwordless ssh for root among the GlusterFS servers in the cluster.  (This is a multi-way configuration.  Each server needs to be able to ssh to the other servers in the cluster.) (*TBD* Add the detail of the commands.)
+
+- Configure firewalld to open gluster server ports (*TBD* For now, stop,disable firewalld.  See the Gluster Doc on ports that need to be open.)
+
+# Install "native" GlusterFS client
+
+*NOTE:* Ansible playbook to do this: `icp_install_glusterfs_client.yml` with supporting file `dm_thin_pool.conf`.
+
+See GlusterFS documentation for client installation: [Accessing Data: Setting up GlusterFS Clients](http://docs.gluster.org/en/latest/Administrator%20Guide/Setting%20Up%20Clients/)
+
 # Install Heketi on RHEL (aka "native" install)
 
 This section describes the installation of Heketi on RHEL.  Heketi and the Heketi client will be running directly on the VM rather than in Kubernetes pods.  
 
 Heketi 5.0.0 is installed using the GlusterFS 3.13 yum repository.
+
+- It is assumed a yum repo has been configured that points to a GlusterFS repository.
+- Install Heketi server and Heketi CLI
+```
+> yum -y install heketi
+```
+- Confirm that port 8080 is not already in use. (`netstat -an | grep 8080`)  The heketi server uses port 8080 by default, but that can be changed in the `/etc/heketi/heketi.json` configuration file.  (If you run the heketi server on an ICP master node, you will need to a port other than 8080 since the ICP admin console process uses 8080.)
+
+- Make sure the options in `/usr/lib/systemd/system/heketi.service` use double-dash (--) rather than a single dash (-).  It is likely the only option will be --config.
+
+- Set up passwordless `ssh` between the heketi server node and all of the gluster server nodes for the gluster cluster to be managed.
+```
+> ssh-keygen -b 4096 -t rsa -f /etc/heketi/heketi_key -N ""
+> ssh-copy-id -i /etc/heketi/heketi_key.pub root@gluster##.xxx.yyy
+```
+where gluster##.xxx.yyy represents each of the VMs in your gluster server cluster.
+
+- Change the owner and group of the heketi keys to heketi.  (The heketi user got created as part of the heketi install.)
+```
+> chown heketi:heketi /etc/heketi/heketi_key*
+```
+
+- Modify the `/etc/heketi/heketi.json` file for your installation.
+  - Things to check in particular:
+    - port: something not already in use
+    - use_auth: true
+    - admin key
+    - user key
+    - executor: ssh
+    - sshexec:
+      - keyfile: `/etc/heketi/heketi_key`
+      - user: root
+      - port: 22
+      - fstab: `/etc/fstab`
+  - The kubeexec section can be ignored since sshexec is being used.
+  - The remainder of the options can be left at the defaults.
+
+- Enable and start the heketi server.
+```
+> systemctl enable --now heketi
+```
+
+- Smoke test for heketi server:
+```
+> curl http://localhost:8080/hello
+Hello from Heketi
+```
+In the above URL, you will need to use the port you configured for the Heketi server.
 
 ## Things that can go wrong with the Heketi install
 
@@ -874,6 +977,102 @@ The problem is the -config option to the Heketi executable.
 See https://bugzilla.redhat.com/show_bug.cgi?id=1439120  
 
 You need to edit the `/usr/lib/systemd/system/heketi.service` file and change the `-config` to `--config`.
+
+## Creating the GlusterFS topology using the native heketi-cli.
+
+- Create a topology.json file that represents your GlusterFS server cluster.
+
+*NOTE:* The GlusterFS documentation and other sources indicate the "manage" attribute for each hostname dictionary should be a fully qualified host name and the storage attribute for each host name should be an IP address.  *TBD:* Whether that is actually a strict requirement has not been fully confirmed.  Some deployments have shown that using IP addresses for both attributes also appears to work.
+
+Here is a sample topology.json for a 3 server cluster.
+```
+{
+  "clusters": [
+    {
+      "nodes": [
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "gluster01.yyy.zzz"
+              ],
+              "storage": [
+                "172.16.20.15"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            "/dev/sdb",
+            "/dev/sdc"
+          ]
+        },
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "gluster02.yyy.zzz"
+              ],
+              "storage": [
+                "172.16.20.16"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            "/dev/sdb",
+            "/dev/sdc"
+          ]
+        },
+        {
+          "node": {
+            "hostnames": {
+              "manage": [
+                "gluster03.yyy.zzz"
+              ],
+              "storage": [
+                "172.16.20.17"
+              ]
+            },
+            "zone": 1
+          },
+          "devices": [
+            "/dev/sdb",
+            "/dev/sdc"
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+If you tend to fat-finger JSON files, it is a good idea to run the `topology.json` content through a JSON validator. (It is easy to incorrectly edit JSON syntax.)  Search the Internet for a JSON validator to your liking.
+
+To get general usage help with the heketi-cli, use `heketi-cli --help`.
+
+To get more specific help use `heketi-cli command --help` where `command` is one of the heketi-cli commands.  (The "commands" are not verbs but rather an object type or class, e.g., topology, cluster, volume, node and device.)
+
+To get specific help for the "commands" associated with a given object type use `heketi-cli type command --help`, for example `heketi-cli topology load --help`.
+
+When working with heketi-cli it is very convenient to export values for the following environment variables:
+```
+> export HEKETI_CLI_SERVER=http://localhost:8081
+> export HEKETI_CLI_USER=admin
+> export HEKETI_CLI_KEY=passw0rd
+```
+
+The above example assumes the Heketi server is listening on port 8081 rather than the default port 8080.  The port the Hekeit server is using is defined in the heketi.json. In the above, the user and key are based on what is defined in the heketi.json that you configured before starting the Heketi server.  
+
+- Use the heketi-cli to load the topology.json file.
+```
+> heketi-cli topology load --json=topology.json
+```
+
+Obviously, the above command is assumed to have been run from the directory where the topology.json file is located.
+
+Once the topology has successfully loaded you can use `heketi-cli topology info` to see information about the topology.
+
+At this point you are ready to create mountable volumes that can be used by the ICP master nodes for shared storage.
 
 ## Things that can go wrong with Heketi CLI
 
@@ -897,15 +1096,15 @@ If the password/secret you provide does not match up with the user and key in th
 
 *NOTE:* If you change anything in the `heketi.json` file you need to restart the Heketi service (`systemctl restart heketi`) to pick up the changes.
 
-# Install Heketi administration client for Gluster
+# Install Heketi administration client for Gluster in Kubernetes
 
-*NOTE:* The installation of Heketi is very confusing.  This section is currently under review and should be taken as a collection of notes rather than verified guidance.
+*NOTE:* The installation of Heketi in Kubernetes is very confusing.  This section is currently under review and should be taken as a collection of notes rather than verified guidance.
 
 If you are not using Gluster for the shared file service, this section can be skipped.
 
-This section describes the steps to install the Heketi administration client for Gluster.
+If you installed Heketi directly on RHEL, then (obviously) this section can be skipped.
 
-A containerized Heketi is installed.  Another option is to do a "native" Heketi installation.
+This section describes the steps to install the Heketi administration client for Gluster in a Docker container managed by Kubernetes. Another option is to do a "native" Heketi installation.  See [Install Heketi on RHEL (aka "native" install)](#Install Heketi on RHEL (aka "native" install)).
 
 Public Heketi install guide: [Heketi Install for Kubernetes](https://github.com/heketi/heketi/blob/master/doc/admin/install-kubernetes.md)
 
@@ -915,7 +1114,7 @@ The Heketi client is installed on the boot-master machine.  (A Heketi client can
 
 - Get the [Heketi CLI](https://github.com/heketi/heketi/releases) for the current release.  (*TBD:* The instructions mention that this has heketi-cli in it.  However, it is vague as to what it means to "install" the heketi-cli.  I'm not sure what it is used for.)
 
-- Extract the archive on the machine where are doing the installation.  (Created a heketi directory in /root on master01 and extracted the archive there. `tar -xvf heketi-client-v5.0.1.linux.amd64.tar.gz`.  The root of everything in the archive is `heketi-client`, so no need to create a separate directory where the archive is extracted.)
+- Extract the archive on the machine where you are doing the installation.  (Create a heketi directory in /root on master01 and extracted the archive there. `tar -xvf heketi-client-v5.0.1.linux.amd64.tar.gz`.  The root of everything in the archive is `heketi-client`, so no need to create a separate directory where the archive is extracted.)
 
 - *TBD:* Also cloned the heketi git hub.  There appears to be more useful content in the git repo than what comes with the release tar ball.  (The following clone command was executed from the /root/heketi staging directory.) Is this a reasonable step or unnecessary? Or should this be done instead of downloading and extracting the heketi tar ball? The heketi release tar ball has the heketi-cli executable in it.  But I'm not sure what that is used for.
 ```
@@ -999,6 +1198,70 @@ Events:
 ```
 kubectl create -f heketi-bootstrap.json
 ```
+
+# Create persistent volumes for ICP master node shared file systems
+
+This section applies to an HA ICP deployment where there are 3 or 5 master nodes.  If you are doing a simple sandbox installation with a single master node, this section can be skipped.
+
+*NOTE:* The heketi-cli commands in this section assume that the following environment variables have been set appropriately:
+- HEKETI_CLI_SERVER
+- HEKETI_CLI_USER
+- HEKETI_CLI_KEY
+
+- Get the glusterfs cluster ID.  The topology info will have the cluster ID.
+```
+heketi-cli topology info
+```
+*NOTE:* The heketi doc recommends not providing a name for the created persistent volumes.  That is debatable. If you have a good naming convention that ensures uniqueness, then using a descriptive name seems like a good idea rather than using the default names that are generated strings which have no descriptive value.)
+
+- Create a volume for the master audit log.  In this example a 10GB volume is created.
+```
+> heketi-cli volume create --size=10 --clusters=042e3eb4b386b086c17d9d947e8ba885
+10GiB volume created for use by master nodes for shared audit log (mounted at /var/lib/icp/audit:
+Name: vol_de785f066ce0e0ce86c39c5fb920682c
+Size: 10
+Volume Id: de785f066ce0e0ce86c39c5fb920682c
+Cluster Id: 042e3eb4b386b086c17d9d947e8ba885
+Mount: 172.16.20.17:vol_de785f066ce0e0ce86c39c5fb920682c
+Mount Options: backup-volfile-servers=172.16.20.15,172.16.20.16
+Durability Type: replicate
+Distributed+Replica: 3
+```
+
+- Make note of the mountable volume host and name. That is what is used in the mount command and the entry in `/etc/fstab` on each of the master nodes. In the above example it is: `172.16.20.17:vol_de785f066ce0e0ce86c39c5fb920682c` You can replace the IP address with an actual hostname if you have an entry in DNS or `/etc/hosts` on the master nodes for the GlusterFS servers.
+
+- Mount the volume on each master node (Note the colon used to separate the backup servers rather than a comma.)
+```
+> mount -t glusterfs -o backup-volfile-servers=gluster01.xxx.yyy:gluster02.yyy.zzz gluster03.yyy.zzz:vol_de785f066ce0e0ce86c39c5fb920682c /var/lib/icp/audit
+```
+- Add a line to `/etc/fstab` (*TBD:* Does the backup-volfile-servers option work in fstab?)
+```
+gluster03.xxx.yyy:vol_de785f066ce0e0ce86c39c5fb920682c /var/lib/icp/audit glusterfs defaults,_netdev,backup-volfile-servers=gluster01.yyy.zzz:gluster02.yyy.zzz 0 0
+```
+
+- Create a volume for the master docker registry.  In this example a 50GB volume is created.
+```
+> heketi-cli volume create --size=50 --clusters=042e3eb4b386b086c17d9d947e8ba885
+Name: vol_ccdb21cfd1e83cf9c3299207f66fb705
+Size: 50
+Volume Id: ccdb21cfd1e83cf9c3299207f66fb705
+Cluster Id: 042e3eb4b386b086c17d9d947e8ba885
+Mount: 172.16.20.17:vol_ccdb21cfd1e83cf9c3299207f66fb705
+Mount Options: backup-volfile-servers=172.16.20.15,172.16.20.16
+Durability Type: replicate
+Distributed+Replica: 3
+```
+
+- Mount the volume on each master node (Note the colon used to separate the backup servers rather than a comma.)
+```
+> mount -t glusterfs -o backup-volfile-servers=gluster01.xxx.yyy:gluster02.yyy.zzz gluster03.yyy.zzz:vol_ccdb21cfd1e83cf9c3299207f66fb705 /var/lib/registry
+```
+
+- Add a line to `/etc/fstab` (*TBD:* Does the backup-volfile-servers option work in fstab?)
+```
+gluster03.xxx.yyy:vol_ccdb21cfd1e83cf9c3299207f66fb705 /var/lib/registry glusterfs defaults,_netdev,backup-volfile-servers=gluster01.yyy.zzz:gluster02.yyy.zzz 0 0
+```
+
 # Install IBM Cloud Private v2.1
 
 This is the start of the description of the steps to install IBM Cloud Private.
@@ -1234,7 +1497,7 @@ This section is a holding area for a collection of troubleshooting tips.
 
 This section describes the steps to uninstalling ICP.  You may need to do this if things go wrong and you want to do a clean install.
 ```
-> docker run -e LICENSE=accept --net=host --rm --name=installer -t -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0-ee uninstall
+> docker run -e LICENSE=accept --net=host --rm --name=installer -t -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0.1-ee uninstall
 ```
 The following directories should not exist on any nodes in the cluster/cloud:
 ```
@@ -1242,6 +1505,9 @@ The following directories should not exist on any nodes in the cluster/cloud:
 /var/lib/kubelet/
 /etc/cfc/
 ```
+
+*NOTE:* When you are using an HA configuration you will have multiple master nodes using a shared volume mounted at `/var/lib/registry`.  You will probably need to unmount that volume on each master node (`umount /var/lib/registry`).  (*TBD:* It doesn't seem to be the case that `/var/lib/icp/audit` needs to be unmounted.)
+
 # Miscellaneous useful docker commands
 
 This section holds a collection of sub-sections where various useful docker commands are documented.
@@ -1329,6 +1595,17 @@ The primary configuration tasks:
 ## Same thing without a password
 %wheel  ALL=(ALL)       NOPASSWD: ALL
 ```
+
+# Docker basics
+
+The following collection of sub-sections is intended to provide enough information about Docker to get you started. The commands described tend to be things that come up frequently in the operation of IBM Cloud Private.  Your favorite Internet search engine is your friend when it comes to learning Docker and Docker command idioms.
+
+## Open a shell in a Docker container.
+It is assumed the container includes a bash shell.  (Every once in awhile you run into one that doesn't.)
+```
+docker exec -it <container_id>|<container_name> /bin/bash
+```
+
 # Kubernetes in a nutshell
 
 The following collection of sub-sections is intended to provide enough information about kubernetes to get you started.  Obviously, to become proficient with kubernetes, you will need to gain experience through use and you will need to consult more complete sources of information, including the kubernetes documentation.
@@ -1360,9 +1637,20 @@ To set up authentication in your shell:
 
 The authentication token is good for 12 hours.  You have to log out of the ICP console and log back in to get a new token using the same procedure described in the steps above.
 
+### Get a list of namespaces
+```
+kubectl get namespaces
+```
+
 ### Get a list of pods
 ```
-kubectl get pods
+kubectl get pods --all-namespaces
+```
+*NOTE:* A newly deployed ICP cluster typically has pods defined only in the kube-system namespace.
+
+You can limit the pod listing to a specific namespace with the `--namespace=NAMESPACE_NAME`, e.g.,
+```
+kubectl get pods --namesapce=kube-system
 ```
 
 ### Get info about a pod
