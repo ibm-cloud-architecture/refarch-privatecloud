@@ -366,18 +366,18 @@ The file system requirements as described in the ICP v2.1 KC documentation are r
 
 | **Location**         |  **Minimum Disk Space**                       |
 |---------------------:|----------------------------------------------:|
-| `/var/lib/docker`    | >50 GB (This is more than the KC calls for.)  |
+| `/var/lib/docker`    | on worker nodes: 40 GB; on master and mgmt nodes: >60 GB (This is more than the KC calls for.)  |
 | `/var/lib/etcd`      | >1 GB                                         |
-| `/var/lib/registry`  | Large enough to host the Docker images you expect to load into the local registry. Docker images for ICP itself are on the order of 8 GB.                        |
+| `/var/lib/registry`  | Large enough to host the Docker images you expect to load into the local registry.  |
 | `/opt/ibm/cfc`       | >100 GB                                       |
 | `/var/lib/kubelet`   | >10 GB w/o Vulnerbility Advisor               |
 | `/var/lib/kubelet`   | >100 GB w/ Vulnerability Advisor              |
 
-*NOTE:* See the section in the ICP v2.1 Knowledge Center, ![Specifying a default Docker storage directory by using bind mount](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/docker_dir.html)
+*NOTE:* See the section in the ICP v2.1 Knowledge Center, [Specifying a default Docker storage directory by using bind mount](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/docker_dir.html)
 
 *NOTE:* If you are creating your own RHEL VMs, there is a step at the point where the install is being set up where you can customize the disk partitions rather than take the automatic defaults. It is recommended that you choose to customize the disk partitions to ensure the VM meets the ICP file system sizing requirements. The RHEL 7 documentation for installation that describes the file system configuration is in the section [Installation Destination](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/installation_guide/sect-disk-partitioning-setup-x86) Scroll down to the "Manual Partitioning" section to get to the details that describe the manual partitioning steps. The section below, [Installing RHEL 7 - a sample](#Installing RHEL 7 - a sample) provides a step-by-step example of installing RHEL 7, including creating custom disk partitions.
 
-The RHEL 7 documentation for ![Mounting a file system](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/sect-using_the_mount_command-mounting) provides detailed information about the mount command.
+The RHEL 7 documentation for [Mounting a file system](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/sect-using_the_mount_command-mounting) provides detailed information about the mount command.
 
 # Special RHEL configuration
 
@@ -465,25 +465,21 @@ The Docker documentation, [*Get Docker CE for CentOS*](https://docs.docker.com/e
 *NOTE:* The docker-ce install has a pre-req of container-selinux.  If there is no container-selinux in your yum repositories the above command will fail.  (The container-selinux package is in the RHEL "extras" repo.)
 
 A work-around to the above install is described here: [https://github.com/docker/for-linux/issues/20If](https://github.com/docker/for-linux/issues/20If) The following command was taken from the work-aournd:
-
 ```
 yum -y install --setopt=obsoletes=0 docker-ce-17.03.2.ce-1.el7.centos.x86_64 docker-ce-selinux-17.03.2.ce-1.el7.centos.noarch
 ```
 
 - Start and enable the docker daemon.
-
-	```
-  systemctl start docker
-  systemctl enable docker
-  ```
+```
+systemctl enable docker --now
+```
 
 -	Run the usual `docker run hello-world` to confirm the installation.
+```
+docker run hello-world
+```
 
-	```
-  docker run hello-world
-  ```
-
-The main thing to check for in the output from hello-world:
+- The main thing to check for in the output from hello-world:
 ```
 Hello from Docker!
 This message shows that your installation appears to be working correctly.
