@@ -851,7 +851,7 @@ dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm
 
 ```
 
-At this point, the GlusterFS server cluster is up and running and you can proceed with the ICP installation.
+At this point, the GlusterFS server cluster is up and running and you can proceed with the ICP installation. (*TBD:* There are more steps needed to allocate storage for the ICP master node shared file systems before doing the actual ICP installation.)
 
 # Install "native" GlusterFS server
 
@@ -910,7 +910,9 @@ See GlusterFS documentation for client installation: [Accessing Data: Setting up
 
 # Install Heketi on RHEL (aka "native" install)
 
-This section describes the installation of Heketi on RHEL.  Heketi and the Heketi client will be running directly on the VM rather than in Kubernetes pods.  
+This section describes the installation of Heketi on RHEL.  Heketi and the Heketi client will be running directly on the VM rather than in Kubernetes pods.
+
+See [Managing Volumes using Heketi](https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/administration_guide/ch05s02) for Red Hat documenation on the Heketi installation and configuration.  
 
 Heketi 5.0.0 is installed using the GlusterFS 3.13 yum repository.
 
@@ -919,9 +921,9 @@ Heketi 5.0.0 is installed using the GlusterFS 3.13 yum repository.
 ```
 > yum -y install heketi
 ```
-- Confirm that port 8080 is not already in use. (`netstat -an | grep 8080`)  The heketi server uses port 8080 by default, but that can be changed in the `/etc/heketi/heketi.json` configuration file.  (If you run the heketi server on an ICP master node, you will need to a port other than 8080 since the ICP admin console process uses 8080.)
+- Confirm that port 8080 is not already in use. (`netstat -an | grep 8080`)  The heketi server uses port 8080 by default, but that can be changed in the `/etc/heketi/heketi.json` configuration file.  (If you run the heketi server on an ICP master node, you will need to use a port other than 8080 since the ICP admin console process uses 8080.)
 
-- Make sure the options in `/usr/lib/systemd/system/heketi.service` use double-dash (--) rather than a single dash (-).  It is likely the only option will be --config.
+- Make sure the command line options in `/usr/lib/systemd/system/heketi.service` use double-dash (--) rather than a single dash (-).  It is likely the only option will be --config.
 
 - Set up passwordless `ssh` between the heketi server node and all of the gluster server nodes for the gluster cluster to be managed.
 ```
@@ -948,6 +950,7 @@ where gluster##.xxx.yyy represents each of the VMs in your gluster server cluste
       - port: 22
       - fstab: `/etc/fstab`
   - The kubeexec section can be ignored since sshexec is being used.
+  - The heketi database is in the default location `/var/lib/heketi/heketi.db`.
   - The remainder of the options can be left at the defaults.
 
 - Enable and start the heketi server.
@@ -961,6 +964,8 @@ where gluster##.xxx.yyy represents each of the VMs in your gluster server cluste
 Hello from Heketi
 ```
 In the above URL, you will need to use the port you configured for the Heketi server.
+
+*NOTE:* This native install of Heketi has a single point of failure in the `heketi.db` being located on the node where it gets installed.  *TBD:* Revisit this to create a `heketi-db` shared volume in GlusterFS after the initial installation of Heketi.  Stop Heketi.  Move the `heketi.db` file out of `/var/lib/heketi` to some temporary location. Mount the heketi-db shared volume on `/var/lib/heketi` and copy the existing `heketi.db` into the shared volume.  Heketi can then be installed on the other master nodes with that same shared volume mounted on `/var/lib/heketi`.  Only one heketi server an be running at any given time to avoid issues with multiple servers accessing the `heketi.db` file concurrently.  Hence, running the Heketi server in a Kubernetes pod is a stronger approach.
 
 ## Things that can go wrong with the Heketi install
 
@@ -1061,7 +1066,9 @@ When working with heketi-cli it is very convenient to export values for the foll
 > export HEKETI_CLI_KEY=passw0rd
 ```
 
-The above example assumes the Heketi server is listening on port 8081 rather than the default port 8080.  The port the Hekeit server is using is defined in the heketi.json. In the above, the user and key are based on what is defined in the heketi.json that you configured before starting the Heketi server.  
+*NOTE:* When providing the Heketi server URL, be sure not to include a trailing slash on the URL.  So for example `http://localhost:8081/` will lead to problems.  The trailing slash causes an issue for a volume create operation, for example.
+
+The above example assumes the Heketi server is listening on port 8081 rather than the default port 8080.  The port the Heketi server is using is defined in the heketi.json. In the above, the user and key are based on what is defined in the heketi.json that you configured before starting the Heketi server.  
 
 - Use the heketi-cli to load the topology.json file.
 ```
@@ -1100,17 +1107,17 @@ If the password/secret you provide does not match up with the user and key in th
 
 *NOTE:* The installation of Heketi in Kubernetes is very confusing.  This section is currently under review and should be taken as a collection of notes rather than verified guidance.
 
-If you are not using Gluster for the shared file service, this section can be skipped.
+If you are not using GlusterFS for the shared file service, this section can be skipped.
 
 If you installed Heketi directly on RHEL, then (obviously) this section can be skipped.
 
-This section describes the steps to install the Heketi administration client for Gluster in a Docker container managed by Kubernetes. Another option is to do a "native" Heketi installation.  See [Install Heketi on RHEL (aka "native" install)](#Install Heketi on RHEL (aka "native" install)).
+This section describes the steps to install the Heketi administration client for GlusterFS in a Docker container managed by Kubernetes. Another option is to do a "native" Heketi installation.  See [Install Heketi on RHEL (aka "native" install)](#Install Heketi on RHEL (aka "native" install)).
 
 Public Heketi install guide: [Heketi Install for Kubernetes](https://github.com/heketi/heketi/blob/master/doc/admin/install-kubernetes.md)
 
 The Heketi client is installed on the boot-master machine.  (A Heketi client can be installed where you prefer, including on an administrator's desktop machine. The Heketi client obviously must have network access to the Gluster servers to be managed.)
 
-- Follow the instructions for the Heketi install in the install-kubernetes.md doc (link above).  (Ignore the glusterfs installation instructions.  The glusterfs install was done into docker containers on each of the gluster servers. (See above section of this guide.) Important to note that the glusterfs install uses docker only, not kubernetes.  *TBD:* Should we create a separate kubernetes cluster for glusterfs?  That seems like overkill.  I would do a "native" glusterfs install instead.)
+- Follow the instructions for the Heketi install in the install-kubernetes.md doc (link above).  (Ignore the GlusterFS installation instructions.  The GlusterFS install was done into docker containers on each of the GlusterFS servers. (See above section of this guide.) Important to note that the glusterfs install uses Docker only, not Kubernetes.  *TBD:* Should we create a separate Kubernetes cluster for GlusterFS?  That seems like overkill.  I would do a "native" GlusterFS install instead.)
 
 - Get the [Heketi CLI](https://github.com/heketi/heketi/releases) for the current release.  (*TBD:* The instructions mention that this has heketi-cli in it.  However, it is vague as to what it means to "install" the heketi-cli.  I'm not sure what it is used for.)
 
@@ -1268,7 +1275,7 @@ This is the start of the description of the steps to install IBM Cloud Private.
 
 ## Prerequisite steps to Install IBM Cloud Private v2.1
 
-1. If you are building you own VM, you should have already created a clone of the ICP base VM for each VM in the cluster.  At a minimum, this would be the boot-master, the proxy and a couple of worker nodes.
+1. If you are building your own VM, you should have already created a clone of the ICP base VM for each VM in the cluster.  At a minimum, this would be the boot-master, the proxy and a couple of worker nodes.
 
 2. If you are using VMs provided to you, then you should have completed all the steps to getting Docker running on at least the boot-master machine. The install process includes installing Docker on each cluster member.  As an expedient we recommend pre-installing Docker on each cluster member.  (See the section [Copy and load ICP docker image tar ball to all cluster VMs](#Copy and load ICP docker image tar ball to all cluster VMs) below for details.)
 
@@ -1493,12 +1500,95 @@ This section is a holding area for a collection of troubleshooting tips.
 
 2.	Make sure the docker images repository has the correct images in it. For example, kubernetes-ee may not be present.  Or the wrong version of kubernetes or some other image is in the docker images registry/repository.
 
+# Configure a Kubernetes StorageClass
+
+In order to use the shared storage provided by the GlusterFS cluster, some additional Kubernetes artifacts need to be created.  The ICP cluster needs to be up and running in order to create these artifacts.
+
+*NOTE:* It appears that you need to be logged in as admin to the Kubernetes/ICP cluster to work with Storage Classes.
+
+## Create a secret for Heketi admin
+
+[Kubernetes documentation on secrets](https://kubernetes.io/docs/concepts/configuration/secret/)
+
+The Heketi admin secret holds the admin user and password defined in the `/etc/heketi/heketi.json` file used to configure the Heketi server.  The secret is needed to create a Kubernetes Storage Class as described in the next sub-section.
+
+The user and key attributes must be base64 encoded.  The `base64` utility is handy for encoding and decoding strings.
+
+*NOTE:* Make sure you use the -n option to echo so that the string to be encoded does not include a newline character.
+
+```
+> echo -n passw0rd | base64
+cGFzc3cwcmQ=
+```
+```
+> echo -n admin | base64
+YWRtaW4=
+```
+
+Here is a sample YAML for a secret named `heketi-secret` defined in the default namespace.  (Be careful about proper indenting if you cut-and-paste to a file.)
+
+```
+---
+apiVersion: v1
+type: kubernetes.io/glusterfs
+kind: Secret
+metadata:
+  name: heketi-secret
+  namespace: default
+data:
+  user: YWRtaW4=
+  key: cGFzc3cwcmQ=
+```
+
+Assuming the above content is in a file named `heketi-secret.yml`, the command to create the secret:
+```
+kubectl create -f heketi-secret.yml
+```
+
+## Create a storage class for persistent volume claims
+
+[Kubernetes Storage Class documentation](https://kubernetes.io/docs/concepts/storage/storage-classes/)
+[Kubernetes Persistent Volume and Persistent Volume Claim documentation](https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+
+When a Persistent Volume Claim (PVC) is made in Kubernetes, a Storage Class (SC) is needed to satisfy the claim.
+
+To create a storage class you need:
+1. The GlusterFS cluster ID of the GlusterFS cluster to be used.
+2. The URL that points to the Heketi server to be used to manage the storage.  (If the Heketi server is running in a Kubernetes pod, then the host name (FQDN) or IP address will be the proxy server virtual host name or VIP.)
+3. The name and namespace of the Kubernetes secret that holds the Heketi server admin user and password.
+4. Other optional configuration parameters. (It is best to err on the side of explicitly defining attributes rather than relying on default values.)
+
+The following YAML can be used to create a storage class named cluster.shared.storage in the default namespace.  (Be careful about proper indenting if you cut-and-paste to a file.)
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cluster.shared.storage
+provisioner: kubernetes.io/glusterfs
+parameters:
+  resturl: "http://172.16.25.100:8081"
+  clusterid: "042e3eb4b386b086c17d9d947e8ba885"
+  restuser: "admin"
+  secretNamespace: "default"
+  secretName: "heketi-secret"
+  volumetype: "replicate:3"
+```
+*WARNING:* Be very careful not to include a trailing slash on the `resturl` for the Heketi server.  For example, `http://172.16.25.100:8081/` will fail when you use the storage class to create a PVC with a cryptic error message. The storage class will fail when creating a volume.  The state of the PVC will be "pending". You can see the error in the "events" associated with the PVC.
+
+Assuming the above content is in a file named `cluster-shared-storage.yml`, the command to create the storage class:
+```
+> kubectl create -f cluster-shared-storage.yml
+```
+
+Once the storage class is created, confirm that it works by created a test PVC using `kubectl` or the ICP console.
+
 # Uninstall IBM Cloud Private
 
 This section describes the steps to uninstalling ICP.  You may need to do this if things go wrong and you want to do a clean install.
 ```
 > docker run -e LICENSE=accept --net=host --rm --name=installer -t -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0.1-ee uninstall
 ```
+
 The following directories should not exist on any nodes in the cluster/cloud:
 ```
 /var/lib/etcd/
@@ -1508,42 +1598,7 @@ The following directories should not exist on any nodes in the cluster/cloud:
 
 *NOTE:* When you are using an HA configuration you will have multiple master nodes using a shared volume mounted at `/var/lib/registry`.  You will probably need to unmount that volume on each master node (`umount /var/lib/registry`).  (*TBD:* It doesn't seem to be the case that `/var/lib/icp/audit` needs to be unmounted.)
 
-# Miscellaneous useful docker commands
-
-This section holds a collection of sub-sections where various useful docker commands are documented.
-
-## Getting a list of docker container status
-The `docker ps` command is likely one of the first commands you will want to know and you will use it often.  You can add the -a option to see all containers, i.e., those that have exited as well as those still running.
-```
-> docker ps
-```
-or
-```
-> docker ps -a
-```
-use
-```
-> docker help ps
-```
-to get more information on ps options.
-
-## Getting a shell inside the container
-
-The command below will open a shell console in a container for the given docker image.  (You will need to use an appropriate image name for the local docker registry.)
-```
-> docker run -e LICENSE=accept --net=host --rm -it -v "$(pwd)":/installer/cluster --entrypoint=/bin/bash ibmcom/icp-inception:2.1.0-ee
-```
-## Getting a list of local docker registry content
-
-It is useful to get a list of what is in the local docker registry.  (The term registry is misused by docker.  The docker registry is really a repository, i.e., it holds the docker images, not just a list of where the images are located.)
-
-The docker command is simple:
-```
-docker images
-```
-Once ICP is loaded into the local docker repository, there are a lot of images. You will likely want to grep for some string that is part of the image of interest to cut down the amount of output from a full docker images list.
-
-# Installing Ansible
+# Install Ansible
 Ansible is very useful for administration of a collection of machines such as an ICP cluster.  We recommend installing it to ease general administration of the ICP cluster.  
 
 See the Ansible documentation for [installation instructions](http://docs.ansible.com/ansible/latest/intro_installation.html#id26). The installation instructions are very detailed and complete for virtually every platform.
@@ -1600,10 +1655,42 @@ The primary configuration tasks:
 
 The following collection of sub-sections is intended to provide enough information about Docker to get you started. The commands described tend to be things that come up frequently in the operation of IBM Cloud Private.  Your favorite Internet search engine is your friend when it comes to learning Docker and Docker command idioms.
 
+## Getting a list of docker container status
+The `docker ps` command is likely one of the first commands you will want to know and you will use it often.  You can add the -a option to see all containers, i.e., those that have exited as well as those still running.
+```
+> docker ps
+```
+or
+```
+> docker ps -a
+```
+use
+```
+> docker help ps
+```
+to get more information on ps options.
+
+## Getting a list of local docker registry content
+
+It is useful to get a list of what is in the local docker registry.  (The term registry is misused by docker.  The docker registry is really a repository, i.e., it holds the docker images, not just a list of where the images are located.)
+
+```
+docker images
+```
+
+Once ICP is loaded into the local docker repository, there are a lot of images. You will likely want to grep for some string that is part of the image of interest to cut down the amount of output from a full docker images list.
+
 ## Open a shell in a Docker container.
 It is assumed the container includes a bash shell.  (Every once in awhile you run into one that doesn't.)
 ```
 docker exec -it <container_id>|<container_name> /bin/bash
+```
+
+## Getting a shell inside the icp-inception container
+
+The command below will open a shell console in a container for the given docker image.  (You will need to use an appropriate image name for the local docker registry.)
+```
+> docker run -e LICENSE=accept --net=host --rm -it -v "$(pwd)":/installer/cluster --entrypoint=/bin/bash ibmcom/icp-inception:2.1.0.1-ee
 ```
 
 # Kubernetes in a nutshell
@@ -1622,7 +1709,7 @@ You can get kubectl from the kubernetes container already installed as part of I
 
 ## Kubernetes basics
 
-The command line tool for working with Kubernetes is kubectl.
+The command line tool for working with Kubernetes is `kubectl`.
 
 Kubernetes [Getting Started](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
 
@@ -1636,6 +1723,8 @@ To set up authentication in your shell:
 3. Do a paste in the shell window you are using.  At that point, the shell is configured to properly use `kubectl` commands.
 
 The authentication token is good for 12 hours.  You have to log out of the ICP console and log back in to get a new token using the same procedure described in the steps above.
+
+You can see your kubectl context using the `kubectl config view` command.
 
 ### Get a list of namespaces
 ```
@@ -1653,16 +1742,51 @@ You can limit the pod listing to a specific namespace with the `--namespace=NAME
 kubectl get pods --namesapce=kube-system
 ```
 
+*NOTE:* If you want to see the "completed" or pods (or pods that errored out) then use the `-a (--show-all)` option with the `get` command.
+
 ### Get info about a pod
 ```
 kubectl describe pod <pod_name>
 ```
-The describe command is particularly useful on any of the different kinds of kubernetes objects.
+The describe command is particularly useful on any of the different kinds of Kubernetes objects.
 
 ### Get a list of deployments
 ```
 kubectl get deployments
 ```
+
+### Get a log associated with a pod or container
+```
+kubectl logs pod/<pod_name> | tee -a mypod.log
+```
+or
+```
+kubectl logs pod/<pod_name> --container=<container_name> | tee -a mycontainer.log
+```
+If a pod has more than one container in it, then you need the `--container (-c)` option.
+
+Check out the usage information for the logs command (`kubectl logs --help`) for details on all the options.
+
+### Combining kubectl commands
+You can use all the usual Linux idioms for combining commands with `kubectl`.
+
+Here is an example of deleting a bunch of pods with bluecompute-ce in the pod name:
+```
+kubectl delete pods $(kubectl get pods -a | grep bluecompute-ce | awk '{print $1}')
+```
+
+# Helm basics
+It is useful to have Helm installed somewhere convenient.  Helm can be used to install applications that are described by Helm charts. Helm is the client for a server named Tiller.  ICP includes a Tiller server running in a pod.
+
+Helm is often installed on the boot/master01 node of the ICP cluster.  Another recommended place to install Helm is on the workstation of the cluster administrator(s).
+
+Instructions for installing helm are available in github.  See [Installing Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md)
+
+The "From Script" approach works well for RHEL nodes.  Access to the public Internet is a requirement for running the script.  There are other options for an air-gap installation.
+
+It is a good idea to be logged into the ICP cluster at the time Helm is installed (or at least when `helm init` is run) as the Helm initialization process checks for a Kubernetes context and determines if Tiller installed is and running in the cluster.
+
+In general, when working with Helm, you need to be logged into a Kubernetes cluster in order to connect to the Tiller server.  (For example, `helm version` will provide the version of Helm, but then fail to connect to the Tiller server if you don't have a Kubernetes context established.)
 
 # RHEL 7 network interface overview
 This section describes some basic information about networking for RHEL 7.
