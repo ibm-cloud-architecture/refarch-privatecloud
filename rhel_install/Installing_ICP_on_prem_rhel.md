@@ -53,9 +53,11 @@ This section provides a big picture summary of the installation process.
 
 * It is a really good idea that all machines used for ICP have access to the RHEL yum repositories (os, optional and extras) in order to install various RHEL packages that are pre-requisites for ICP.  Many data centers have a Red Hat Satellite server available. (A public Centos yum repository is available at http://mirror.centos.org/.)
 
+* It is recommended that static IP addresses be allocated for all VMs that will be associated with the ICP cluster or supporting systems, e.g., GlusterFS servers, LDAP server.  If DHCP is providing the IP addresses, the address reservation policy should protect against a given VM inadvertently getting a new IP address if it has to be power booted. A sandbox ICP deployment can get away with using DHCP assigned IP addresses, but a production ICP deployment should use statically assigned IP addresses.  
+
 * It is a really good idea for all the machines in the ICP cluster to have access to the public Internet.  The public Docker yum repository makes it convenient to install the latest version of Docker CE. Docker Hub is convenient for access to commonly available Docker images. The latest Gluster images are also easily retrieved from public sources.
 
-* The details of an "air-gap" install are not covered completely in this document.  Needless to say, doing an air-gap installation is more challenging due to the inconvenience of pulling together all of the RPMs and other artifacts needed to do an installation.
+* The details of an "air-gap" install are not covered in this document.  Needless to say, doing an air-gap installation is more challenging due to the inconvenience of pulling together all of the RPMs and other artifacts needed to do an installation.  An air-gap install will take at least an extra day, more likely 2 days, to do the installation.
 
 ## The simple, "sandbox" ICP installation in a nutshell:
 See the ICP Knowledge Center section, [Installing an IBM Cloud Private Enterprise environment](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/install_app_mod.html)
