@@ -609,13 +609,12 @@ The MountFlags setting needs to be done on all machines in the cluster/cloud.
 
 It is assumed that docker has been installed.  (You won't see a `docker.service` file in `/lib/systemd/system` if docker has not been installed.)
 
-1.	Edit the file: `/lib/systemd/system/docker.service `
+- Edit the file: `/lib/systemd/system/docker.service `
 
-2.	To the `Service` section, add the line:
-
-	```
-  MountFlags=shared
-  ```
+- To the `Service` section, add the line:
+```
+MountFlags=shared
+```
 
 # Starting, stopping and enabling Docker
 
@@ -623,6 +622,10 @@ This section has commands for starting, stopping and enabling docker and checkin
 
 After Docker is installed, you need to start it.  You need root privileges to start, stop and enable a service.
 
+To enable docker so that it starts on machine reboot and start docker immediately:
+```
+> systemctl enable docker --now
+```
 To start docker:
 ```
 > systemctl start docker
@@ -654,7 +657,7 @@ For the ICP KC instructions to do this work, see [Sharing SSH keys among cluster
 
 - On the boot-master, as root, from root’s home directory (/root) execute:
 ```
-  > ssh-keygen -b 4096 -f ~/.ssh/id_rsa -N ""
+> ssh-keygen -b 4096 -f ~/.ssh/id_rsa -N ""
 ```
 The above command requires no responses to prompts.
 You should see something like:
@@ -670,10 +673,10 @@ REDACTED
 
 - Now, executing a directory listing on /root/.ssh should show two files: id_rsa, id_rsa.pub. (A known_hosts file may also be present.)
 ```
-  > ls -l ~/.ssh
-	total 8
-	-rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
-	-rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
+> ls -l ~/.ssh
+  total 8
+  -rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
+  -rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
 ```
 - Using the `ssh-copy-id` command from root's home directory, copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which you are currently operating).
 
@@ -719,10 +722,10 @@ Connection to <proxy> closed.
 [root@<master> ~]# ssh root@<worker_01>
 Last login: Fri Jun 30 09:39:31 2017
 [root@<worker_01> ~]# exit
-	  logout
-	    Connection to <worker_01> closed.
-	    [root@<master> ~]#
-	    etc
+logout
+Connection to <worker_01> closed.
+[root@<master> ~]#
+etc
 ```
 If you cannot gain access via SSH without a password, check the known_hosts and authorized_keys files on the hosts other than the boot-master.
 
@@ -1080,7 +1083,7 @@ At this point you are ready to create mountable volumes that can be used by the 
 ## Things that can go wrong with Heketi CLI
 
 ### Error: Unable to get topology information: Unknown user
-TBD - This is caused by not having a --user argument or HEKETI_CLI_USER set.
+This is caused by not having a --user argument or HEKETI_CLI_USER set.
 
 ### Error: Unable to get topology information: signature is invalid
 
@@ -1162,9 +1165,9 @@ kubectl create secret generic master01-root-ssh-key --from-file=/root/.ssh/id_rs
   - block_hosting_volume_size: 100 (*TBD:* I'm pretty sure the units for this are GB.  So even if we want automatic creation of block hosting volume, the default of 500 GB is likely too large.)
 
   - The next step in the heketi install guide is to create a secret based on the heketi.json.  (*TBD:* Not really sure what it means to use that whole config file to create a "secret". How is that secret used?)
-  ```
-  kubectl create secret generic heketi-config-secret --from-file=./heketi.json
-  ```
+```
+kubectl create secret generic heketi-config-secret --from-file=./heketi.json
+```
 
 - Make a copy of `heketi-bootstrap.json` that comes in the `<repo-clone>/extras/kubernetes/`
 - Edit the `heketi-bootstrap.json` file to make sure it is what you want.
@@ -1312,54 +1315,53 @@ This section has some steps that need to be taken on the boot master before the 
 tar -xf ibm-cloud-private-x86_64-2.1.0.1.tar.gz -O | docker load
 ```
 - (On the boot-master) Extract the ICP boot meta-data to the `<ICP_HOME>/cluster` directory:
-    ```
-    > cd <ICP_HOME>
-    > docker run -v $(pwd):/data -e LICENSE=accept ibmcom/icp-inception:2.1.0.1-ee cp -r cluster /data  
-    ```
-    *NOTE:* You may need to using a different version tag for the `icp-inception` image. Use `docker images | grep icp-inception` to see the version tag in your image repository.
+```
+> cd <ICP_HOME>
+> docker run -v $(pwd):/data -e LICENSE=accept ibmcom/icp-inception:2.1.0.1-ee cp -r cluster /data  
+```
+*NOTE:* You may need to using a different version tag for the `icp-inception` image. Use `docker images | grep icp-inception` to see the version tag in your image repository.
 
-    The above command creates a directory named `cluster` in `<ICP_HOME>`.  The `cluster` directory has the following contents:
-    ```
-    > ls -l cluster
-    -rw-r--r--. 1 root root 3998 Oct 30 06:37 config.yaml
-    -rw-r--r--. 1 root root   88 Oct 30 06:37 hosts
-    drwxr-xr-x. 4 root root   39 Oct 30 06:37 misc
-    -r--------. 1 root root    1 Oct 30 06:37 ssh_key
-    ```
+The above command creates a directory named `cluster` in `<ICP_HOME>`.  The `cluster` directory has the following contents:
+```
+> ls -l cluster
+  -rw-r--r--. 1 root root 3998 Oct 30 06:37 config.yaml
+  -rw-r--r--. 1 root root   88 Oct 30 06:37 hosts
+  drwxr-xr-x. 4 root root   39 Oct 30 06:37 misc
+  -r--------. 1 root root    1 Oct 30 06:37 ssh_key
+```
 - Add the IP address of all the cluster/cloud members to the `hosts` file in `<ICP_HOME>/cluster`.
 
     NOTE: The ICP hosts file must use IP addresses.  Host names are not used.  
 
 - Copy the ssh key file to the <ICP_HOME>/cluster. (This overwrites the empty ssh_key file already there.)
-
-  ```
-  > cp ~/.ssh/id_rsa ssh_key
-  cp: overwrite ‘ssh_key’? y
-  ```
+```
+> cp ~/.ssh/id_rsa ssh_key
+cp: overwrite ‘ssh_key’? y
+```
 
 - Check the permissions on the ssh_key file and make sure they are read-only for the owner (root). If necessary, change the permissions on the ssh_key file in `<ICP_HOME>/cluster` to "read-only" by owner, i.e., root.
 
 - Check the access:
-  ```
-  > ls -l ssh_key
-    -r--------. 1 root root 1675 Jun 30 13:46 ssh_key
-  ```
+```
+> ls -l ssh_key
+  -r--------. 1 root root 1675 Jun 30 13:46 ssh_key
+```
 
 - If the access is not read-only by owner, then change it:
-  ```
-  > chmod 400 ssh_key
-  ```
+```
+> chmod 400 ssh_key
+```
 
 - Check again to make sure you changed it correctly.
 
 
 - Copy/move the "image" archive (`ibm-cloud-private-x86_64-2.1.0.1.tar.gz`) to the images directory in `<ICP_HOME>/cluster`. (You first need to create the images directory.) In the command below it is assumed the image archive is located initially in `<ICP_HOME>`.
 
-    From `<ICP_HOME>/cluster`:
-    ```
-    > mkdir images
-    > mv `<ICP_HOME>/ibm-cloud-private-x86_64-2.1.0.1.tar.gz` images
-    ```
+From `<ICP_HOME>/cluster`:
+```
+> mkdir images
+> mv `<ICP_HOME>/ibm-cloud-private-x86_64-2.1.0.1.tar.gz` images
+```
 
 Working with the config.yaml file is described in the next section.
 
@@ -1410,11 +1412,10 @@ It is expedient to pre-load the Docker registry on each VM that is a member of t
 - Copy the ICP image tar ball to all machines.  (You can open multiple shells on the boot-master machine and start an `scp` of the image tar ball to each machine in the cluster.)
 
 - Open a shell on each VM in the cluster and extract the docker images and load them into the docker registry:
-
-  ```
-  tar -xvf ibm-cloud-private-x86_64-2.1.0-beta-2.tar.gz -O | docker load
-  ```
-    If you run out of file system space during the above command, use `df -h` to view file system utilization.  You can use `df -ih` to view inode utilization. Make sure the file systems are adequately provisioned as described in the [Check the file system sizing](#Check the file system sizing) section above.
+```
+tar -xvf ibm-cloud-private-x86_64-2.1.0-beta-2.tar.gz -O | docker load
+```
+If you run out of file system space during the above command, use `df -h` to view file system utilization.  You can use `df -ih` to view inode utilization. Make sure the file systems are adequately provisioned as described in the [Check the file system sizing](#Check the file system sizing) section above.
 
 - On all but the boot-master machine, the ICP image tar file can be removed once the docker load completes.  On the boot-master machine the ICP image tar file gets moved to an images directory in `<ICP_HOME>/cluster`.
 
@@ -1422,7 +1423,8 @@ It is expedient to pre-load the Docker registry on each VM that is a member of t
 
 ### No space left on device
 During the load of the ICP images you may get something like:
-```Error processing tar file(exit status 1): write /opt/ibm/wlp/output/.classCache/C280M4F1A64P_liberty-root_G33: no space left on device
+```
+Error processing tar file(exit status 1): write /opt/ibm/wlp/output/.classCache/C280M4F1A64P_liberty-root_G33: no space left on device
 ```
 Do a `df -H` to see what is happening with file space.
 
@@ -1479,9 +1481,9 @@ After the install completes, configure firewall rules on each cluster member acc
 This section documents some basic measures to confirm correct ICP operation.
 
 1.	The simplest "smoke test" is to fire up the ICP admin console:
-  ```
-  https://<boot_master>:8443/
-  ```
+```
+https://<boot_master>:8443/
+```
 Default user ID and password: admin/admin
 
 2.	Check that all processes are "available".  In the ICP admin console you can see the workloads via the "hamburger" menu in the upper left corner margin. (See figure below.)
