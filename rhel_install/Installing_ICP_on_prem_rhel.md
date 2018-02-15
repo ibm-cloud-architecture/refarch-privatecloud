@@ -91,37 +91,25 @@ Suggested ICP production deployment resource allocations are described in the ta
 
 | Machine Role     | Number |  vCPU/Core   | Memory (GB)  | Storage<br/>Disks x Size (GB) |
 |------------------|:------:|-------------:|-------------:|------------------------------:|
-|   Master         | 3 or 5 |  8           |  32          |  1 x 250                      |
-|   Proxy          |   3    |  2           |   4          |  1 x 220                      |
-|   Management     | 2 or 3 |  8           |  32          |  1 x 250                      |
-|   Worker         |  5+    |  4           |  32          |  1 x 220                      |
+|   Master         | 3 or 5 |  8           |  32          |  1 x 260                      |
+|   Proxy          |   3    |  2           |   4          |  1 x 230                      |
+|   Management     | 2 or 3 |  8           |  32          |  1 x 260                      |
+|   Worker         |  5+    |  4           |  32          |  1 x 200                      |
 |   GlusterFS      |  3+    |  4           |  16          |  1 x 40 (/dev/sda)<br/>1 x 128 (/dev/sdb)<br/>1 x 128 (/dev/sdc) |
 
-**ICP Master** and **ICP Management** nodes suggested disk partitioning (250 GB disk).
+**ICP Master** and **ICP Management** nodes suggested disk partitioning (260 GB disk).
 
 | File System Name          |  Mount Point      |  Size (GB)    |
 |:--------------------------|:------------------|--------------:|
 |   system (aka root)       |   /               |    40         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     8         |
-|   var                     |   /var            |    50         |
+|   var                     |   /var            |    60         |
 |   tmp                     |   /tmp            |    20         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   120         |
 
-**ICP Proxy** node suggested disk partitioning (220 GB disk).
-
-| File System Name          |  Mount Point      |  Size (GB)    |
-|:--------------------------|:------------------|--------------:|
-|   system (aka root)       |   /               |    20         |
-|   boot                    |   /boot           |   256 MB      |
-|   swap                    |                   |     4         |
-|   var                     |   /var            |    50         |
-|   tmp                     |   /tmp            |    10         |
-|   home                    |   /home           |    10         |
-|   opt                     |   /opt            |   120         |
-
-**ICP Worker** node suggested disk partitioning (220 GB disk)
+**ICP Proxy** node suggested disk partitioning (230 GB disk).
 
 | File System Name          |  Mount Point      |  Size (GB)    |
 |:--------------------------|:------------------|--------------:|
@@ -131,7 +119,19 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   var                     |   /var            |    60         |
 |   tmp                     |   /tmp            |    10         |
 |   home                    |   /home           |    10         |
-|   opt                     |   /opt            |   130         |
+|   opt                     |   /opt            |   120         |
+
+**ICP Worker** node suggested disk partitioning (200 GB disk)
+
+| File System Name          |  Mount Point      |  Size (GB)    |
+|:--------------------------|:------------------|--------------:|
+|   system (aka root)       |   /               |    20         |
+|   boot                    |   /boot           |   256 MB      |
+|   swap                    |                   |     4         |
+|   var                     |   /var            |    40         |
+|   tmp                     |   /tmp            |    10         |
+|   home                    |   /home           |    10         |
+|   opt                     |   /opt            |   110         |
 
 ## Additional steps depending on specific circumstances and requirements:
 * Configure access to RHEL yum repositories.
@@ -365,8 +365,8 @@ The file system size minimum requirements are described in the ICP v2.1 Knowledg
 The file system requirements as described in the ICP v2.1 KC documentation are reproduced in the following table:
 
 | **Location**         |  **Minimum Disk Space**                       |
-|---------------------:|----------------------------------------------:|
-| `/var/lib/docker`    | on worker nodes: 40 GB; on master and mgmt nodes: >60 GB (This is more than the KC calls for.)  |
+|---------------------:|:----------------------------------------------|
+| `/var/lib/docker`    | on master and mgmt nodes: >60 GB (This is more than the KC calls for.)<br/>on worker nodes: 40 GB|
 | `/var/lib/etcd`      | >1 GB                                         |
 | `/var/lib/registry`  | Large enough to host the Docker images you expect to load into the local registry.  |
 | `/opt/ibm/cfc`       | >100 GB                                       |
@@ -1865,9 +1865,13 @@ For those of you who may need to build your own VMs, this section provides a ste
 - Continue to follow the bouncing ball until you hit finish.
 
 - Power on the VM and right-click on it and select the "Open console" item.  Once the console is open you should see something in the console that looks like the figure below.
+
 ![Install Red Hat](images/01_InstallRHEL.png)
+
 - Choose the most recent version of RHEL available.
+
 ![Install Red Hat v7.3](images/02_RHELv7.3.png)
+
 - A lot of logging will scroll by on the console as some initial installation steps occur.
 
 - You will be presented with a screen where you can choose the language you want to use.  (See figure below.)
@@ -1877,7 +1881,9 @@ For those of you who may need to build your own VMs, this section provides a ste
 - Once you choose the language, click on the Continue button in the lower right corner.
 
 - The next screen is where all the action is. (See figure below)  You will likely need to scroll to see all the installation configuration options.
+
 ![Installation Configuration Options](images/04_RHELInstallationSummary.png)
+
 - Things to take particular note of in this screen are:
   - Software Selection: For an ICP node a "minimal install" is sufficient.  Anything else you need can be picked up from a RHEL yum repository.  A minimal install keeps the VM small and fast to boot.  If you want to look at the other options click on the Software Selection icon.
 
@@ -1910,10 +1916,10 @@ The following table is a summary of the sample disk partitions.
 |   system (aka root)       |   /               |    40         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     8         |
-|   var                     |   /var            |    50         |
+|   var                     |   /var            |    60         |
 |   tmp                     |   /tmp            |    20         |
 |   home                    |   /home           |    20         |
-|   opt                     |   /opt            |   115         |
+|   opt                     |   /opt            |   120         |
 
 The figure below is a screen shot after the disk has been fully partitioned.  (The partition sizes in the screen shot are slightly different from those in the table above.)
 
