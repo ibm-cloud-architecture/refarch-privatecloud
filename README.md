@@ -20,6 +20,7 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
     *  [Installing ICP with RedHat Enterprise](rhel_install/Installing_ICP_on_prem_rhel.md)  
   * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
   * VirtualBox: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
+  * OpenStack: [Installing ICP on OpenStack](OpenStack/Install_ICP_On_OpenStack.md)   
 
   ### Deployment using TerraForm
   * Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
