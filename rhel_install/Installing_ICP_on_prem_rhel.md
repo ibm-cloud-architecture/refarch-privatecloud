@@ -99,7 +99,9 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   Worker         |  5+    |  4           |  32          |  1 x 200                      |
 |   GlusterFS      |  3+    |  4           |  16          |  1 x 40 (/dev/sda)<br/>1 x 128 (/dev/sdb)<br/>1 x 128 (/dev/sdc) |
 
-**ICP Master** and **ICP Management** nodes suggested disk partitioning (260 GB disk).
+**ICP Master** and **ICP Management** nodes suggested disk partitioning (260 GB disk).  For master and management nodes we recommend that `/var` be at least 60 GB which is larger than what is specified in the ICP v2.1 Knowledge Center documentation.
+
+*NOTE:* For a production VM, be sure to use Logical Volume Manager (LVM) for all file systems other than those that require a physical partition, e.g., `/boot`, swap.
 
 | File System Name          |  Mount Point      |  Size (GB)    |
 |:--------------------------|:------------------|--------------:|
@@ -134,6 +136,8 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   tmp                     |   /tmp            |    10         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   110         |
+
+*NOTE:* Lack of file system space particularly in `/var` is a common problem during the installation and upgrade/update of ICP.  Particularly on master and management nodes, the `/var/lib/docker` directory can consume 40 GB to 50 GB.  The `/var/lib/kubelet` directory typically consumes ~10 GB.
 
 ## Additional steps depending on specific circumstances and requirements:
 * Configure access to RHEL yum repositories.
@@ -1778,6 +1782,8 @@ kubectl delete pods $(kubectl get pods -a | grep bluecompute-ce | awk '{print $1
 # Helm basics
 It is useful to have Helm installed somewhere convenient.  Helm can be used to install applications that are described by Helm charts. Helm is the client for a server named Tiller.  ICP includes a Tiller server running in a pod.
 
+*NOTE:* Be careful about working with a version of Helm that is more recent than the version of Tiller deployed in ICP.  It is recommended that you install the version of Helm that matches the version of Tiller.
+
 Helm is often installed on the boot/master01 node of the ICP cluster.  Another recommended place to install Helm is on the workstation of the cluster administrator(s).
 
 Instructions for installing helm are available in github.  See [Installing Helm](https://github.com/kubernetes/helm/blob/master/docs/install.md)
@@ -1942,3 +1948,103 @@ The figure below is a screen shot after the disk has been fully partitioned.  (T
 - Using the console, log in and get the IP address (`ip addr` or `ifconfig -a`) of the new VM and record it in your machine inventory.
 
 - At this point you should be able to `ssh` to the machine either as root or as the default user you defined.
+
+# File system space work-arounds
+
+With Linux there are a number of things you can do when you run low on file system space in a particular partition (file system).  
+
+With ICP installations the most common file system that fills up (possibly unexpectedly) is `/var`.
+
+Sometimes file system space issues arise because a naive VM deployment has most of the disk allocated to some default that is inappropriate for an ICP runtime, e.g., a large amount of the disk allocated to `/home`.
+
+## Logical Volume Manager is your friend
+
+*NOTE:* The VMs in a production deployment of ICP should have been created using the Logical Volume Manager for all file systems other than those that must use a physical partition, e.g., `/boot`.
+
+If the file system that needs more space is defined using the Logical Volume Manager (LVM) it is relatively straight-forward to add more physical disk to your VM and then use that to expand the file systems that need more space.  Have your system administrator assist you if you don't have the appropriate access to your hosting environment or the specific VM to carry out the necessary steps.
+
+If you cat out `/etc/fstab`, you can easily tell which file systems are configured to use LVM:
+```
+> cat /etc/fstab
+...
+/dev/mapper/rhel_pvs--master01-root /                      xfs     defaults        0 0
+UUID=25c62d51-b6a0-4de6-ba27-74eba4dbcec2 /boot            xfs     defaults        0 0
+/dev/mapper/rhel_pvs--master01-home /home                  xfs     defaults        0 0
+/dev/mapper/rhel_pvs--master01-opt /opt                    xfs     defaults        0 0
+/dev/mapper/rhel_pvs--master01-tmp /tmp                    xfs     defaults        0 0
+/dev/mapper/rhel_pvs--master01-var /var                    xfs     defaults        0 0
+UUID=4c83db4c-bb2a-4867-8494-56b20cf8bc1f swap             swap    defaults        0 0
+
+...
+```
+
+In the above listing, all file systems that have a line that starts with `/dev/mapper` are using LVM.
+
+Those file systems with a line starting with `UUID=uniquifier_string` are a physical partition. In the above listing that would be `/boot` and `swap`, both of which are required to be physical partitions.
+
+TODO: Add a description of the steps to do add disk and expand a file system.
+
+## Symlinks can be your friend
+
+If one file system on a VM needs more space, e.g., `/var`, and another file system has a lot of free space, then one work-around is to use a symlink to allow directory trees to be moved to the file system where there is plenty of space.  Keep in mind this is a bit of a hack and not generally recommended.  But for some situations, e.g., non-production deployments, this is a reasonable work-around.
+
+This section describes the steps to rearrange the file system space in `/var` which was running out of space during an upgrade of ICP to a newer version.
+
+The `du -h` command is very useful in determining which directories are consuming space.  The output of `du` is verbose so it is a good idea to tee it out to a file and then look at the results in the file.
+```
+du -h /var | tee -a du-var.out
+```
+
+On an ICP VM, the two big hitters in `/var` are going to be `/var/lib/docker` and `/var/lib/kubelet`.  In this example, the `/var/lib/docker` directory is moved to `/opt/var/lib`.  (Assume the `/opt` file system has a lot of available space.)
+
+Since docker is using files and directories in `/var/lib/docker`, the docker process needs to be stopped before messing with its files.
+
+- Stop docker  (and check that it is stopped) (`systemctl stop docker`   and `systemctl status docker`)
+- Create a directory in `/opt`.  Here a similar path was used to make its purpose clear.
+```
+> mkdir -p /opt/var/lib
+```
+
+- Tar up the `/var/lib/docker` directory tree into `/opt/var/lib/docker.tar`.  In this case the tar ball will be rooted at `docker`.
+```
+> cd /var/lib
+> tar cvf /opt/var/lib/docker.tar docker
+```
+
+- Extract the `docker.tar` archive in `/opt/var/lib`
+```
+> cd /opt/var/lib
+> tar xvf docker.tar
+```
+
+- Go back to `/var/lib` and delete the `docker` directory tree
+```
+cd /var/lib
+rm -rf docker
+```
+Now, at this point there may be 1 to several directories that you get a "device or resource busy" error.  Usually an `umount` on those directories cleans that up and you can `rm -rf docker`.  
+
+You may run into a situation where the `umount` command does not unmount the offending directory, as it claims it is not mounted.  
+
+It may be in use by some process in which case `fuser -k` on that directory is intended to kill any process with a handle on anything in that directory tree.  If you want ot be more careful about things, then `fuser -m` will list PIDS and a special access type letter for all processes accessing the directory tree.  (See fuser man page for more details.)  (The `fuser` command is the modern equivalent to `lsof`, which is typically not installed on a base RHEL image.  If you want to use `lsof`, you will need to install it (`yum -y install lsof`).)  
+
+If all else fails a reboot (`shutdown -r now`) will clean things up. Then you can finally `rm -rf /var/lib/docker`.
+
+Once the original `/var/lib/docker` directory is deleted you can set up a symlink to the new location for the docker directory tree content.
+
+- Create a symlink to `/opt/var/lib/docker` from `/var/lib/docker`.
+```
+> ln -s /opt/var/lib/docker /var/lib/docker
+```
+
+- Check the symlink.
+```
+ls -l /var/lib
+```
+You should see in `/var/lib` a link to docker: `docker -> /opt/var/lib/docker`.
+
+- Start docker, `systemctl start docker` and check that it started, `systemctl status docker`.
+
+- Delete the `docker.tar` file in `/opt/var/lib`.
+
+Now there should be sufficient space available to grow the docker lib directory.
