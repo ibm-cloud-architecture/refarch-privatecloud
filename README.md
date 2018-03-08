@@ -22,7 +22,8 @@ IBM Cloud Private (ICP) supports 64-bit Linux (Red Hat Enterprise Linux & Ubuntu
 
 ### Deployment using TerraForm
 * Terraform Module for provisioning ICP cluster: [terraform-module-icp-deploy](https://github.com/ibm-cloud-architecture/terraform-module-icp-deploy)
-* Bluemix Infrastructure (formerly SoftLayer): [Deploy ICP Cluster to SoftLayer](https://github.com/ibm-cloud-architecture/terraform-icp-softlayer)
+* SoftLayer: [Deploy ICP Cluster to SoftLayer](https://github.com/ibm-cloud-architecture/terraform-icp-softlayer)
+* VMware: [Deploy ICP to VMware](https://github.com/ibm-cloud-architecture/terraform-icp-vmware)
 
 ## Accessing IBM Cloud Private (ICP) through the CLI
 
