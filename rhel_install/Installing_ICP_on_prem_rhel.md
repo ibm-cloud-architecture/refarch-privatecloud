@@ -144,12 +144,12 @@ Suggested ICP production deployment resource allocations are described in the ta
 * Configure `/etc/hosts` files on all cluster members if DNS is not available to resolve host names and IP addresses.
 * Update RHEL to the latest patch level.
 * Install NTP.
-* Install Python Docker modules to support the convenient use of Docker APIs in Python scripts.
 * Install Docker on each cluster member VM in addition to the boot-master VM. (This gives you full control over what version of Docker is installed, but more importantly, Docker on each VM is needed for the next step.)
 * Use Docker on each cluster member VM to pre-load the ICP Docker images rather than let the inception installation load the ICP Docker images.  (It turns out to be expedient to copy the ICP image tar-ball to each cluster member VM and then load the local Docker registry from that tar-ball rather than waiting for the inception installer to do that part of the installation.)
 * Install `kubectl` on the boot-master node.  `Kubectl` is useful for interacting with the ICP cluster.
 * Install `helm` on the boot or boot-master node.  Helm is useful for installing additional software on the cluster.
 * Install Ansible on the boot or boot-master node or, even better, on the administrator's desktop/laptop.  Ansible is very useful for administration when dealing with multiple machines. (The instructions in the [Install and configure the GlusterFS server cluster](#Install and configure the GlusterFS server cluster) section assumes the availability of Ansible.) See the [Installing Ansible](#Installing Ansible) section for guidance on installing and configuring Ansible.
+* Install Python Docker modules on the boot master node to support the convenient use of Docker APIs in Python scripts.
 
 # Basic RHEL configuration
 
@@ -159,28 +159,87 @@ If you are creating your own virtual machine, you can do all these steps on your
 
 If you are using VMs that were deployed for you, then it is likely the VMs are already configured as described in these sub-sections.  You should confirm with your VM provider or by doing the basic checks described below, that all the VMs that are going to be part of the ICP cluster have been configured as described in these sub-sections.
 
-## Configure network interface to start on boot
+## Configure network interface
 
 *NOTE:* This section describes steps you won't need to do for a virtual machine deployed for you in a typical virtualization platform.  If you are building your own VM, you will likely need to complete these steps.
 
-By default, RHEL 7 network interfaces are not started at boot time.  This tends to be inconvenient.  This section describes the steps to configure a network interface to start at boot time.
+*NOTE:* People familiar with configuring the network interface on Ubuntu will see that the concepts are the same, but the details are different.  In particular, some of the files that contain the configuration are different and the syntax, names and values of the configuration parameters are different.
 
-To find out the names of the network interfaces on a machine you can use the `iconfig` command.  The name of each network interface is in the first column.
+Ideally, ICP VMs should use a static IP address, particularly the master and proxy nodes.  A static IP address ensures that a VM does not get a new IP address when it is restarted using a power down and power up.  With DHCP assigned IP addresses there may be a possibility that a VM will get a new address when it is powered down.  DHCP lease times are intended to avoid unintended changes in an IP address assigned to a given VM, but you can't count on it.
+
+When configuring static IP addresses you need to collect the following information:
+- IP address to use for the VM.
+- Prefix or Netmask (Prefix is preferred.)
+- The gateway server address
+- DNS server addresses (usually at least 2)
+- DNS search domain
+
+*NOTE:* The BROADCAST and NETWORK attributes are unnecessary for RHEL 7.
+
+Various sources of information on static IP address configuration for RHEL:
+- See [Editing Network Configuration Files](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/networking_guide/sec-editing_network_configuration_files)
+- See [Linux Network Configuration](http://www.yolinux.com/TUTORIALS/LinuxTutorialNetworking.html#ASSIGNIP)
+- See [How to configure static IP address on CentOS 7/RHEL 7](https://www.cyberciti.biz/faq/howto-setting-rhel7-centos-7-static-ip-configuration/)
+- See [How to configure Static IP Addresses in CentOS 7/RHEL 7/Fedora 27/26](https://www.itzgeek.com/how-tos/linux/centos-how-tos/how-to-configure-static-ip-address-in-centos-7-rhel-7-fedora-26.html)
+
+The options for network configuration are all defined in `sysconfig.txt`.  Use `find / -name sysconfig.txt` to find where it is located on your machine.
+
+To find out the names of the network interfaces on a machine you can use the `iconfig` (or `ip addr`) command.  The name of each network interface is in the first column.
 
 The network interface configuration files are in `/etc/sysconfig/network-scripts/`.  The file names include the name of the network interface as seen in the `ifconfig` command output.
 
-1.	Edit the file in `/etc/sysconfig/network-scripts` associated with the network interface to be started at boot time, e.g., `/etc/sysconfig/network-scripts/ifcfg-ens33`.
+- Edit the file in `/etc/sysconfig/network-scripts` associated with the network interface to be started at boot time, e.g., `/etc/sysconfig/network-scripts/ifcfg-ens192`.  (See example content below.)
 
-2.	Change the value of `ONBOOT` from no to yes: `ONBOOT=yes`
+- The value of `ONBOOT` should be  `yes`.
+- For static IP address on RHEL:
+  - `BOOTPROTO` value should be `none`.  (The value `static` is not a valid option as of RHEL 6.)
+  - Be sure to include attributes for:
+    - IPADDR
+    - PREFIX
+    - GATEWAY
+    - DNS servers (DNS1, DNS2)
+    - DOMAIN
 
-3.	Save the changes.
+```
+NAME="ens192"
+DEVICE="ens192"
+ONBOOT=yes
+NETBOOT=yes
+UUID="1a89d56d-935e-49f9-81de-4287291b7708"
+IPV6INIT=yes
+BOOTPROTO=none
+TYPE=Ethernet
 
-4.	If desired, test by rebooting:
+# IPv4 network configuration
+IPADDR=xxx.xxx.xxx.xxx
+# PREFIX=16 equivalent NETMASK=255.255.0.0
+PREFIX=16
+GATEWAY xxx.xxx.xxx.xxx
 
-    ```
-    shutdown -r now
-    ```
-When the VM comes back up the network interface should be UP/RUNNING. The `ifconfig` command includes the status of each interface.
+# DNS servers
+# By default the DNS servers get copied to /etc/resolv.conf
+DNS1=xxx.xxx.xxx.xxx
+DNS2=xxx.xxx.xxx.xxx
+
+# Default domain search
+DOMAIN=somedomain.whatever
+```
+
+- Save the changes.
+
+- Test by restarting the network service:
+```
+systemctl restart network
+```
+
+*NOTE:* If you are setting the static IP address to something different from what the VM is currently using, then you will lose your ssh connection to the machine.  Reconnect using the new network address.
+
+When the network service comes back up the network interface should be UP/RUNNING. The `ifconfig` command includes the status of each interface.  You should see the static address assigned to the interface that has been configured.
+
+Another test is to reboot the VM and see that it comes up correctly.
+```
+shutdown -r now
+```
 
 ## Configure the host name
 This section describes the configuration of the host name for RHEL 7 VMs.
@@ -544,69 +603,6 @@ To finish things off, start and enable docker and run the hello-world smoke test
 
 As an installation expedient, it is recommended that you repeat the Docker installation on all the other VMs in the ICP cluster.
 
-# Install Python Docker support
-
-This section describes the steps for installing Python Docker support modules.  The Docker modules that get installed allow all the usual Docker commands to be used within a Python script.
-
-*NOTE:* This section may be skipped. Installing the Python Docker support modules is optional. If you don't intend to use Python for scripting of Docker operations, then this section can be skipped. It is **not** necessary to install pip as a pre-requisite to installing ICP.  
-
-*NOTE:* Python has a `docker` package and a `docker-py` package. The documentation gives the impression they are synonymous.  However, in comparing the effects of doing the install of docker vs docker-py, they do not appear to be equivalent. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa. More investigation is needed.
-
-In order to install the Python Docker support modules, pip needs to be installed.  (Pip is the Python package manager.) In order to install pip, the python-setuptools package needs to be installed.
-
-- Install Python setup tools. (Python setuptools may already be installed.)
-  ```
-  yum -y install python-setuptools
-  Loaded plugins: langpacks, product-id, search-disabled-repos, subscription-manager
-  Package python-setuptools-0.9.8-4.el7.noarch already installed and latest version
-  Nothing to do
-  ```
-- Install pip.
-  ```
-  easy_install pip
-  Searching for pip
-  Reading https://pypi.python.org/simple/pip/
-  Best match: pip 9.0.1
-  ...
-  Adding pip 9.0.1 to easy-install.pth file
-  Installing pip script to /usr/bin
-  Installing pip2.7 script to /usr/bin
-  Installing pip2 script to /usr/bin
-
-  Installed /usr/lib/python2.7/site-packages/pip-9.0.1-py2.7.egg
-  Processing dependencies for pip
-  Finished processing dependencies for pip
-  ```
-
-- Install Python Docker support modules.
-
-	```
-  pip install docker
-  ```
-
-After the install of the Python Docker support modules you should see the following directories:
-```
-> ls -l /usr/lib/python2.7/site-packages/docker*
-/usr/lib/python2.7/site-packages/docker:
-api   auth.py   client.py   constants.py   errors.py   __init__.py   models      tls.py   transport  utils       version.pyc
-auth  auth.pyc  client.pyc  constants.pyc  errors.pyc  __init__.pyc  ssladapter  tls.pyc  types      version.py
-
-/usr/lib/python2.7/site-packages/docker-2.5.1.dist-info:
-DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
-
-/usr/lib/python2.7/site-packages/docker_py-1.10.6.dist-info:
-DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
-
-/usr/lib/python2.7/site-packages/dockerpycreds:
-constants.py  constants.pyc  errors.py  errors.pyc  __init__.py  __init__.pyc  store.py  store.pyc  version.py  version.pyc
-
-/usr/lib/python2.7/site-packages/docker_pycreds-0.2.1.dist-info:
-DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
-```
-## Things that can go wrong with the Python Docker support installation
-
-- Pip needs access to the public Internet to get the modules.  Public access to the Internet may not be available in all contexts.  In such cases, you need to configure a private pip repo.
-
 # MountFlags in docker.service
 
 The Kubernetes kubelet process that runs on each VM in the ICP cluster needs `MountFlags=shared` in docker.service configuration file.
@@ -615,7 +611,7 @@ The MountFlags setting needs to be done on all machines in the cluster/cloud.
 
 It is assumed that docker has been installed.  (You won't see a `docker.service` file in `/lib/systemd/system` if docker has not been installed.)
 
-- Edit the file: `/lib/systemd/system/docker.service `
+- Edit the file: `/lib/systemd/system/docker.service`
 
 - To the `Service` section, add the line:
 ```
@@ -745,7 +741,7 @@ Heketi is the administrative client for Gluster.  The section, [Install Heketi a
 
 The instructions in this section describe how to run Gluster from a docker container. Other approaches run Gluster "natively".  
 
-*NOTE:* It is recommended that the GlusterFS server cluster be created prior to the actual installation of ICP.  You can choose to incorporate a GlusterFS cluster after ICP is installed.
+*NOTE:* It is recommended that the GlusterFS server cluster be created prior to the actual installation of ICP.  You may choose to incorporate a GlusterFS cluster after ICP is installed.
 
 A sample resource configuration for the GlusterFS VMs is summarized in the table below.
 
@@ -1151,8 +1147,8 @@ kubectl create secret generic master01-root-ssh-key --from-file=/root/.ssh/id_rs
 
 - Make a copy of the `heketi.json` to edit for the install.  (*TBD:* There are a number of `heketi.json` files in the git repo.  I started with the one in `<repo-clone>/etc/heketi.json` )
 
-- Things I changed in `heketi.json`:
-  - Server port: 8081  (8080 is already in use on master01, *TBD:* Find out what is using 8080.)
+- Things that may need to be changed in `heketi.json`:
+  - Server port: 8081  (8080 is used by the ICP console.)
   - use_auth: True
   - admin key, user key (*TBD:* Are these two secrets a password? Or the name of a kubernetes secret?  Looks like they are supposed to be a password.)
   - glusterfs executor: ssh
@@ -1168,7 +1164,7 @@ kubectl create secret generic master01-root-ssh-key --from-file=/root/.ssh/id_rs
     - namespace: default (*TBD:* Not sure what this should be.  Maybe `service`)
     - fstab: `/var/lib/heketi/fstab` (*TBD:* Need to confirm this is the correct path.)
   - auto_create_block_hosting_volume: false  (*TBD:* Confirm this is correct.  I'm pretty sure we don't want this.)
-  - block_hosting_volume_size: 100 (*TBD:* I'm pretty sure the units for this are GB.  So even if we want automatic creation of block hosting volume, the default of 500 GB is likely too large.)
+  - block_hosting_volume_size: 100 (in GB)
 
   - The next step in the heketi install guide is to create a secret based on the heketi.json.  (*TBD:* Not really sure what it means to use that whole config file to create a "secret". How is that secret used?)
 ```
@@ -1201,7 +1197,7 @@ Events:
 
 ```
 
-- Delete things you need to do the following:
+- To delete things you need to do the following:
   - Delete the heketi deployment: `kubectl delete deployment deploy-heketi`
   - Deleting the service as well: `kubectl delete service deploy-heketi`
   - NOTE: Deleting the deployment, deletes the pod(s), but it doesn't delete the service.  (*TBD:* Not sure why deleting a deployment does not delete the service.)
@@ -1313,10 +1309,10 @@ NOTE: The firewall only needs to be disabled during install.  It gets enabled ag
 
 This section has some steps that need to be taken on the boot master before the actual installation command can be run.
 
-*NOTE:* In these instructions, the root directory of the installation is referred to as `<ICP_HOME>`.  A common convention is to install ICP in a directory that includes the ICP version in the directory name, e.g., `/opt/icp2.1`.
+*NOTE:* In these instructions, the root directory of the installation is referred to as `<ICP_HOME>`.  A common convention is to install ICP in a directory that includes the ICP version in the directory name, e.g., `/opt/icp2101`.
 
 - It is assumed that Docker is installed and running on the boot-master machine.
-- It is assumed that the ICP images archive has been loaded into the Docker registry on the boot-master machine. (*NOTE:* The actual archive file name may be different depending on the versio of ICP you are installing.)
+- It is assumed that the ICP images archive has been loaded into the Docker registry on the boot-master machine. (*NOTE:* The actual archive file name may be different depending on the version of ICP you are installing.)
 ```
 tar -xf ibm-cloud-private-x86_64-2.1.0.1.tar.gz -O | docker load
 ```
@@ -1360,7 +1356,6 @@ cp: overwrite ‘ssh_key’? y
 
 - Check again to make sure you changed it correctly.
 
-
 - Copy/move the "image" archive (`ibm-cloud-private-x86_64-2.1.0.1.tar.gz`) to the images directory in `<ICP_HOME>/cluster`. (You first need to create the images directory.) In the command below it is assumed the image archive is located initially in `<ICP_HOME>`.
 
 From `<ICP_HOME>/cluster`:
@@ -1371,11 +1366,11 @@ From `<ICP_HOME>/cluster`:
 
 Working with the config.yaml file is described in the next section.
 
-## Configuring config.yaml on the boot master
+## Configuring `config.yaml` on the boot master
 
-For information on the content of config.yaml, see the ICP KC section, [Cluster configuration settings](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/config_yaml.html).
+For information on the content of `config.yaml`, see the ICP KC section, [Cluster configuration settings](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/config_yaml.html).
 
-For a simple sandbox deployment, the content of config.yaml can remain as is.
+For a simple sandbox deployment, the content of `config.yaml` can remain as is.
 
 *NOTE:* The network_cidr and service_cluster_ip_range are set to "10." IP networks.  If your cloud provide is using that same address range, then change the values to something else, e.g., some other "10." subnet or the "172.16." networks.
 
@@ -1384,16 +1379,20 @@ Things that can be left as-is for a small sandbox environment:
 - network_type calico
 - network_cidr: 10.1.0.0/16
 - service_cluster_ip_range: 10.0.0.1/24
-- For a simple cluster, everything else in config.yaml remains commented out.  
+- For a simple cluster, everything else in `config.yaml` remains commented out.  
 
-There are many parameters that may be set in config.yaml.  It is a good idea to read through the file to become familiar with the options.
+There are many parameters that may be set in `config.yaml`.  It is a good idea to read through the file to become familiar with the options.
 
 Additional things that need to be set for a production environment:
 
 - vip_iface, cluster_vip
 - proxy_vip_iface, proxy_vip
 
-*NOTE:* Gluster configuration in config.yml is not necessary when the Gluster servers are set up outside the ICP cluster, which is the topology used in this guide.  **No not** do any Gluster configuration in config.yml.
+You may want to include a `version` attribute in `config.yaml`.  I if you do, be sure it matches the version of the images in the docker registry that you want to use.  You can do a `docker images` list to check the version tags of the available images.  The version that will be deployed is set to an appropriate default in a YAML file in the icp-inception container so it setting the `version` value in `config.yaml` is intended for cases where the docker registry being used contains images from more than one version.  
+
+Likewise, you may want to include a `backup_version` attribute value in the `config.yaml`.  Again, make sure the value of `backup_version` makes sense for the docker registry in use in that it matches the tag on the images that are intended to be the backup version.
+
+*NOTE:* Gluster configuration in config.yml is not necessary when the Gluster servers are set up outside the ICP cluster, which is the topology used in this guide.  **Do not** do any Gluster configuration in `config.yaml`.
 
 ## Other things that you may need to check
 
@@ -1412,6 +1411,8 @@ You may want to double check the following on each VM that is a member of the cl
 ## Copy and load ICP Docker images tar ball to all cluster VMs
 
 This section assumes that Docker is pre-installed on all of the cluster member VMs. Installing Docker on each VM uses the same steps as installing Docker on the boot-master VM.
+
+*NOTE:* The need to do this step will likely go away with ICP releases starting with v2.1.0.2.  The icp-inception process will configure a docker hub on the boot/master and the other nodes will pull images from it as needed.  The local docker hub approach will make the image deployment process significantly more efficient.
 
 It is expedient to pre-load the Docker registry on each VM that is a member of the ICP cluster.  The installation process run from the boot-master machine will recognize that the Docker registry is up-to-date on the other cluster member machines and skip the step of copying and loading the image tar ball to the Docker registry on the given machine.  The gain in the time it takes to load the registry is achieved because you can open as many shells as needed to do the copy and load operations concurrently.
 
@@ -1446,6 +1447,8 @@ Docker is used to run the install for all members of the cluster/cloud.  The com
 
 *NOTE:* It is OK to run this command multiple times to get things installed on all members of the cluster/cloud should problems show up with a particular cluster/cloud member.  At least for basic problems, the error messages are very clear about where the problems are, e.g., network connectivity, firewall issues, docker not running.
 
+*NOTE:* As of ICP v2.1.0.2, an uninstall is recommended after a failed installation.  The installation detects that some lock files are still present if an uninstall has not been done and prompts you to do an uninstall.
+
 *NOTE:* During the installation all information messages go to stdout/stderr.  If you want to capture a log of the installation process, you need to direct output to a file.  The docker command line below uses `tee` to capture the log and also allow it to be visible in the shell window. A logs directory in `<ICP_HOME>/cluster>` was created to hold the log files. The log file will have escape character sequences in it for color coding the text output, but it is readable.
 ```
 > cd <ICP_HOME>/cluster
@@ -1455,7 +1458,7 @@ Docker is used to run the install for all members of the cluster/cloud.  The com
 
 A common convention (not shown here) is to include a date stamp in the file name of the install log that gets written to /tmp (in this case) as well as a log number (in this case 1).  The log number can be incremented each time the command is rerun if you want to save each log file.
 
-NOTE: If you need to get more detail for installation problem determination purposes add a `-vvv` to the command line after the install verb, e.g.,
+NOTE: A single `-v` option is recommended to include a useful amount of trace information in the log.  If you need to get more detail for installation problem determination purposes add a `-vv` or `-vvv` to the command line after the install verb for progressively more information, e.g.,
 ```
 > docker run -e LICENSE=accept --net=host --rm -t -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0.1-ee install -vvv | tee logs/icp_install-2.log
 ```
@@ -1470,7 +1473,7 @@ xxx.xx.xxx.60              : ok=163  changed=55   unreachable=0    failed=0
 localhost                  : ok=216  changed=114  unreachable=0    failed=0   
 ```
 
-- Problem determination is based on the installation log.  The error messages are relatively clear. If the recap contains a non-zero failed count for any of the cluster members or something is unreachable, then grep/search the install log for "failure" to determine begin the problem determination process.
+- Problem determination is based on the installation log.  The error messages are relatively clear. If the recap contains a non-zero failed count for any of the cluster members or something is unreachable, then grep/search the install log for `FAIL` or `fatal` to begin the problem determination process.
 
 -	Assuming the install went correctly move on to some basic "smoke tests" described in the section below.
 
@@ -1478,7 +1481,7 @@ localhost                  : ok=216  changed=114  unreachable=0    failed=0
 
 ## Start and enable the firewalld on all cluster members
 
-You may want to hold off on this step until some basic smoke tests have been executed.  See the "Basic ICP smoke tests" section below.
+You may want to hold off on this step until some basic smoke tests have been executed.  See the [Simple ICP smoke tests](#Simple ICP "smoke" tests) section below.
 
 After the install completes, configure firewall rules on each cluster member according to the ICP Knowledge Center section, [Default ports.](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/required_ports.html).  Then start and enable firewalld on each cluster/cloud member.
 
@@ -1629,6 +1632,11 @@ gpgcheck=0
 enabled=1
 ```
 
+Do the Ansible installation:
+```
+> yum -y install ansible
+```
+
 ## Configuring Ansible
 This section describes some very basic steps required to get Ansible configured to the point where you can start to do things with it.
 
@@ -1646,7 +1654,7 @@ The primary configuration tasks:
 
 *NOTE:* Use fully qualified domain names (FQDN) for the hosts when using the `ssh-copy-id` command or whatever you use to get the Ansible user's SSH key spread around to the managed nodes. If you use the short host name, you will likely get *The authenticity of host 'myhost.mysite.com (xxx.xxx.x.xx)' can't be established.* errors when you try something even as simple as an Ansible ping. Check the SSH `known_hosts` file for the Ansible user on the Ansible control machine to confirm that that the FQDN, and the IP address is listed with the host key if you are not sure about what will be recognized.
 
-*NOTE:* A simple way to provide the Ansible user with passwordless sudo privileges to run any command is to add the Ansible user to the wheel group.  For RHEL the command, `usermod -G wheel <ansible_user>` will add the `<ansible_user>` to the wheel group.  You will likely need to edit the `/etc/sudoers` file (using `visudo`) to comment out the default `wheel` entry and uncomment the `NOPASSWD` `wheel` entry.  See sample below:
+*NOTE:* A simple way to provide the Ansible user with passwordless sudo privileges to run any command is to add the Ansible user to the wheel group.  For RHEL the command, `usermod -a -G wheel <ansible_user>` will add the `<ansible_user>` to the wheel group.  You will likely need to edit the `/etc/sudoers` file (using `visudo`) to comment out the default `wheel` entry and uncomment the `NOPASSWD` `wheel` entry.  See sample below:
 ```
 ## Allows people in group wheel to run all commands
 # %wheel        ALL=(ALL)       ALL
@@ -1695,6 +1703,22 @@ docker exec -it <container_id>|<container_name> /bin/bash
 The command below will open a shell console in a container for the given docker image.  (You will need to use an appropriate image name for the local docker registry.)
 ```
 > docker run -e LICENSE=accept --net=host --rm -it -v "$(pwd)":/installer/cluster --entrypoint=/bin/bash ibmcom/icp-inception:2.1.0.1-ee
+```
+## Delete docker containers using an image with a given tag
+When you get a list of all containers (running and terminated) using `docker ps -a`, the first column is the container ID, which is the primary argument to `docker rm`, that removes a container.
+
+You may find that you need to remove all containers using a particular image (with a particular tag) in order to remove the image from the local docker registry.
+```
+> docker rm $(docker ps -a | grep 2.1.0.2-rc2-ee | awk '{print $1}')
+```
+
+## Delete images from the local Docker registry with a given tag
+
+In order to free up file system space you may want to delete a bunch of images with a given tag.  In the example images associated with a particular ICP release are deleted.
+
+When you get a list of docker images using `docker images`, the third column is the image ID, which is the primary argument to `docker image rm`.
+```
+> docker image rm $(docker images | grep 2.1.0.2-rc1 | awk '{print $3}')
 ```
 
 # Kubernetes in a nutshell
@@ -1746,7 +1770,7 @@ You can limit the pod listing to a specific namespace with the `--namespace=NAME
 kubectl get pods --namesapce=kube-system
 ```
 
-*NOTE:* If you want to see the "completed" or pods (or pods that errored out) then use the `-a (--show-all)` option with the `get` command.
+*NOTE:* If you want to see the terminated pods, i.e., those that have completed or errored out, then use the `-a (--show-all)` option with the `get` command.
 
 ### Get info about a pod
 ```
@@ -1774,9 +1798,28 @@ Check out the usage information for the logs command (`kubectl logs --help`) for
 ### Combining kubectl commands
 You can use all the usual Linux idioms for combining commands with `kubectl`.
 
-Here is an example of deleting a bunch of pods with bluecompute-ce in the pod name:
+Here is an example of deleting a bunch of pods with `bluecompute-ce` in the pod name:
 ```
 kubectl delete pods $(kubectl get pods -a | grep bluecompute-ce | awk '{print $1}')
+```
+
+### Change the current namespace preference
+
+Typically the namespace associated with a given kubeconfig will be the default namespace.  However you can change it to some other namespace.
+
+The following command changes the currently preferred namespace to `kube-system`.  By doing so the `--namespace` option for `kubectl` commands is not needed if the namespace if interest is `kube-system`.
+```
+kubectl config set-context $(kubectl config current-context) --namespace kube-system
+```
+
+For more detailed information on Kubernetes namespaces, see the Kubernetes [Namespaces](https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/) documentation.
+
+### `kubectl` without logging in
+There may be times when you can get the "client config" command line content from the ICP console, but you still want to be able to use `kubectl`.  In those cases get on the one of the master nodes (with kubectl installed) and use `-s localhost:8888` as one of the command line options to `kubectl` followed by the command you want to run.
+
+For example:
+```
+> kubectl -s localhost:8888 --namespace=kube-system get pods
 ```
 
 # Helm basics
@@ -1793,6 +1836,69 @@ The "From Script" approach works well for RHEL nodes.  Access to the public Inte
 It is a good idea to be logged into the ICP cluster at the time Helm is installed (or at least when `helm init` is run) as the Helm initialization process checks for a Kubernetes context and determines if Tiller installed is and running in the cluster.
 
 In general, when working with Helm, you need to be logged into a Kubernetes cluster in order to connect to the Tiller server.  (For example, `helm version` will provide the version of Helm, but then fail to connect to the Tiller server if you don't have a Kubernetes context established.)
+
+# Install Python Docker support
+
+This section describes the steps for installing Python Docker support modules.  The Docker modules that get installed allow all the usual Docker commands to be used within a Python script.
+
+*NOTE:* This section may be skipped. Installing the Python Docker support modules is optional. If you don't intend to use Python for scripting of Docker operations, then this section can be skipped. It is **not** necessary to install pip as a pre-requisite to installing ICP.  
+
+*NOTE:* Python has a `docker` package and a `docker-py` package. The documentation gives the impression they are synonymous.  However, in comparing the effects of doing the install of docker vs docker-py, they do not appear to be equivalent. The installation of the `docker` package appears to include the `docker-py` package, but not vice versa. More investigation is needed.
+
+In order to install the Python Docker support modules, pip needs to be installed.  (Pip is the Python package manager.) In order to install pip, the python-setuptools package needs to be installed.
+
+- Install Python setup tools. (Python setuptools may already be installed.)
+  ```
+  yum -y install python-setuptools
+  Loaded plugins: langpacks, product-id, search-disabled-repos, subscription-manager
+  Package python-setuptools-0.9.8-4.el7.noarch already installed and latest version
+  Nothing to do
+  ```
+- Install pip.
+  ```
+  easy_install pip
+  Searching for pip
+  Reading https://pypi.python.org/simple/pip/
+  Best match: pip 9.0.1
+  ...
+  Adding pip 9.0.1 to easy-install.pth file
+  Installing pip script to /usr/bin
+  Installing pip2.7 script to /usr/bin
+  Installing pip2 script to /usr/bin
+
+  Installed /usr/lib/python2.7/site-packages/pip-9.0.1-py2.7.egg
+  Processing dependencies for pip
+  Finished processing dependencies for pip
+  ```
+
+- Install Python Docker support modules.
+
+	```
+  pip install docker
+  ```
+
+After the install of the Python Docker support modules you should see the following directories:
+```
+> ls -l /usr/lib/python2.7/site-packages/docker*
+/usr/lib/python2.7/site-packages/docker:
+api   auth.py   client.py   constants.py   errors.py   __init__.py   models      tls.py   transport  utils       version.pyc
+auth  auth.pyc  client.pyc  constants.pyc  errors.pyc  __init__.pyc  ssladapter  tls.pyc  types      version.py
+
+/usr/lib/python2.7/site-packages/docker-2.5.1.dist-info:
+DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
+
+/usr/lib/python2.7/site-packages/docker_py-1.10.6.dist-info:
+DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
+
+/usr/lib/python2.7/site-packages/dockerpycreds:
+constants.py  constants.pyc  errors.py  errors.pyc  __init__.py  __init__.pyc  store.py  store.pyc  version.py  version.pyc
+
+/usr/lib/python2.7/site-packages/docker_pycreds-0.2.1.dist-info:
+DESCRIPTION.rst  INSTALLER  METADATA  metadata.json  RECORD  top_level.txt  WHEEL
+```
+## Things that can go wrong with the Python Docker support installation
+
+- Pip needs access to the public Internet to get the modules.  Public access to the Internet may not be available in all contexts.  In such cases, you need to configure a private pip repo.
 
 # RHEL 7 network interface overview
 This section describes some basic information about networking for RHEL 7.
@@ -2026,9 +2132,9 @@ Now, at this point there may be 1 to several directories that you get a "device 
 
 You may run into a situation where the `umount` command does not unmount the offending directory, as it claims it is not mounted.  
 
-It may be in use by some process in which case `fuser -k` on that directory is intended to kill any process with a handle on anything in that directory tree.  If you want ot be more careful about things, then `fuser -m` will list PIDS and a special access type letter for all processes accessing the directory tree.  (See fuser man page for more details.)  (The `fuser` command is the modern equivalent to `lsof`, which is typically not installed on a base RHEL image.  If you want to use `lsof`, you will need to install it (`yum -y install lsof`).)  
+It may be in use by some process in which case `fuser -k` on that directory is intended to kill any process with a handle on anything in that directory tree.  If you want ot be more careful about things, then `fuser -m` will list PIDS and a special access type letter for all processes accessing the directory tree.  (See fuser man page for more details.)  (The `fuser` command is the modern equivalent to `lsof`.  Neither `fuser` nor `lsof` are typically installed on a base RHEL image.  To get `fuser`, use `yum -y install psmisc`. To get `lsof`, use: `yum -y install lsof`.)  
 
-If all else fails a reboot (`shutdown -r now`) will clean things up. Then you can finally `rm -rf /var/lib/docker`.
+If all else fails a disable docker (`systemctl disable docker`) so that it does not start on boot-up, and reboot (`shutdown -r now`) the VM to clean things up. Then you can finally `rm -rf /var/lib/docker`.  Be sure to enable docker (`systemctl enable docker`).  (Do not start docker, yet.)
 
 Once the original `/var/lib/docker` directory is deleted you can set up a symlink to the new location for the docker directory tree content.
 
@@ -2048,3 +2154,35 @@ You should see in `/var/lib` a link to docker: `docker -> /opt/var/lib/docker`.
 - Delete the `docker.tar` file in `/opt/var/lib`.
 
 Now there should be sufficient space available to grow the docker lib directory.
+
+# Sample HA install step-by-step
+
+- Create the VMs
+  - Allocate the disk to the file systems
+  - Most of the VMs are created by cloning the first one
+- Configure network on each VM with static IP
+- Set the hostname
+- Configure DNS with cluster host names or create /etc/hosts on boot-master and copy to all nodes
+- Configure passwordless SSH
+- Install Ansible on boot-master
+- Configure all nodes to allow Ansible user (icpmaestro) passwordless sudo
+- Configure yum repos or RHS (preferred)
+- Update to latest RHEL RPMs (7.4) Reboot all nodes to pick up kernel updates.
+- Install NTP on all nodes
+  - Start and enable ntpd service
+- Set vm.max_map_count on all nodes
+  - Set immediately and for reboot in `/etc/sysctl.conf`
+  - Ansible lineinfile path=`/etc/sysctl.conf` line='vm.max_map_count=262144' insertafter=EOF state=present
+- Install Docker on all nodes
+  - Start and enable Docker service
+  - Ansible lineinfile path=`/lib/systemd/system/docker.service` line='MountFlags=False' insertafter=`StartLimitInterval=*` state=present
+  - Restart docker on all nodes
+- Install ICP
+  - Load docker images from ICP install tar ball on the boot-master node.
+  - Get the initial ICP install artifacts
+  - Configure ICP hosts file; copy root ssh id_rsa to ssh_key; edit config.yaml
+  - Stop firewalld on all nodes
+  - Move ICP install tar ball to images directory in <ICP_HOME>/cluster
+  - Kick off the install
+- Install kubectl on all of the master nodes (at a minimum on the boot-master node)
+  - `docker run --net=host -v /usr/local/bin:/data ibmcom/kubernetes:v1.9.1-ee cp /kubectl /data`
