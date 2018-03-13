@@ -353,6 +353,21 @@ It is assumed you have configured your VM with yum repositories.
 
 2. Then reboot. (`shutdown -r now`). You need to reboot to get to the latest kernel.
 
+## Additional packages to install
+
+This section lists some software that is needed at some time or another and it is not part of a minimal RHEL server installation.
+
+| **Package**    | **Install Command**         | **Comments**                     |
+|:--------------:|:----------------------------|:---------------------------------|
+| yum-utils      | `yum -y install yum-utils`  | for yum-config-manager           |        
+| unzip          | `yum -y install unzip`      | zip archive extractor            |
+| git            | `yum -y install git`        | source file repo management      |
+| bind-utils     | `yum -y install bind-utils` | for nslookup                     |
+| psmisc         | `yum -y install psmsc`      | for fuser to find/kill processes holding file locks     |
+| lsof           | `yum -y install lsof`       | old school utility to find processes holding file locks |
+| dos2unix       | `yum -y install dos2unix`   | for cleaning up files that came from Windows            |
+
+
 ## Install NTP
 
 Some mechanism is needed on each VM to keep the time synchronized with the rest of the world.  All of the VMs in the ICP cluster will need to share a common notion of time, and the usual approach to keeping time is to use NTP.  
@@ -421,7 +436,7 @@ In some circumstances you can edit `/etc/hosts` once on the boot-master and then
 
 ## Check the file system sizing
 
-The file system size minimum requirements are described in the ICP v2.1 Knowledge Center section, ![Hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/hardware_reqs.html)(See Table 3). The "important" note following the table suggests mounting `/var/lib/etcd`, `/var/lib/registry` and `/opt/ibm/cfc` on separate paths associated with larger disks.
+The file system size minimum requirements are described in the ICP v2.1 Knowledge Center section, [Hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/supported_system_config/hardware_reqs.html)(See Table 3). The "important" note following the table suggests mounting `/var/lib/etcd`, `/var/lib/registry` and `/opt/ibm/cfc` on separate paths associated with larger disks.
 
 *NOTE:* Do not use `/opt/ibm/cfc` as a file system mount point.  The ICP uninstall has a step that deletes the `/opt/ibm/cfc` directory.  If that directory is a mount point for a file system, the delete operation will fail.  Use either `/opt` or `/opt/ibm` as the mount point for the file system.
 
@@ -557,7 +572,7 @@ As an installation expedient, it is recommended that you repeat the Docker insta
 
 1.	Your RHEL install doesn't have a `container-selinux` version greater than 2.9.  See [https://stackoverflow.com/questions/45272827/docker-ce-on-rhel-requires-container-selinux-2-9](https://stackoverflow.com/questions/45272827/docker-ce-on-rhel-requires-container-selinux-2-9)
 
-2. Your RHEL install doesn't have yum-config-manager.  You need to install yum-utils (`yum install -y yum-utils`)
+2. Your RHEL install doesn't have yum-config-manager.  You need to install yum-utils (`yum -y install yum-utils`)
 
 # Installing Docker CE using the docker install binary from Passport Advantage
 If your VM doesn't have access to the public docker repository, then you can install Docker using the Docker install binary available on Passport Advantage along with the ICP install archive.
