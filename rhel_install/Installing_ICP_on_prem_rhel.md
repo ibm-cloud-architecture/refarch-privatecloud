@@ -880,11 +880,11 @@ If you are using the GlusterFS server installed in a Docker container, (obviousl
 Installing GlusterFS server on RHEL rather than in a container may be a matter of preference and your level of comfort with containers vs native processes.  This section is for those who are more comfortable with working native RHEL processes.
 
 - A yum repository needs to be configured to get the GlusterFS, and Heketi RPMs.
-Here is a sample yum `gluster.conf` file that needs to be created in `/etc/yum.repos.d/`.
+Here is a sample yum `gluster.repo` file that needs to be created in `/etc/yum.repos.d/`.
 ```
-# Gluster 3.13 has Heketi 5.0
+[Gluster_4.0]
 name=Gluster 3.13
-baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-3.13/
+baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-4.0/
 gpgcheck=0
 enabled=1
 ```
@@ -928,18 +928,27 @@ See GlusterFS documentation for client installation: [Accessing Data: Setting up
 
 This section describes the installation of Heketi on RHEL.  Heketi and the Heketi client will be running directly on the VM rather than in Kubernetes pods.
 
-See [Managing Volumes using Heketi](https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/administration_guide/ch05s02) for Red Hat documenation on the Heketi installation and configuration.  
+See [Managing Volumes using Heketi](https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/administration_guide/ch05s02) for Red Hat documentation on the Heketi installation and configuration.  
 
-Heketi 5.0.0 is installed using the GlusterFS 3.13 yum repository.
+- A yum repository needs to be configured to get the GlusterFS, and Heketi RPMs.
+Here is a sample yum `glusterfs.repo` file that needs to be created in `/etc/yum.repos.d/`.
+```
+[Gluster_4.0]
+name=Gluster 3.13
+baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-4.0/
+gpgcheck=0
+enabled=1
+```
 
 - It is assumed a yum repo has been configured that points to a GlusterFS repository.
 - Install Heketi server and Heketi CLI
 ```
 > yum -y install heketi
+> yum -y install heketi-client
 ```
 - Confirm that port 8080 is not already in use. (`netstat -an | grep 8080`)  The heketi server uses port 8080 by default, but that can be changed in the `/etc/heketi/heketi.json` configuration file.  (If you run the heketi server on an ICP master node, you will need to use a port other than 8080 since the ICP admin console process uses 8080.)
 
-- Make sure the command line options in `/usr/lib/systemd/system/heketi.service` use double-dash (--) rather than a single dash (-).  It is likely the only option will be --config.
+- Make sure the command line options on the `ExecStart` property in `/usr/lib/systemd/system/heketi.service` use double-dash (--) rather than a single dash (-).  It is likely the only option will be `--config`.
 
 - Set up passwordless `ssh` between the heketi server node and all of the gluster server nodes for the gluster cluster to be managed.
 ```
@@ -1133,7 +1142,7 @@ Public Heketi install guide: [Heketi Install for Kubernetes](https://github.com/
 
 The Heketi client is installed on the boot-master machine.  (A Heketi client can be installed where you prefer, including on an administrator's desktop machine. The Heketi client obviously must have network access to the Gluster servers to be managed.)
 
-- Follow the instructions for the Heketi install in the install-kubernetes.md doc (link above).  (Ignore the GlusterFS installation instructions.  The GlusterFS install was done into docker containers on each of the GlusterFS servers. (See above section of this guide.) Important to note that the glusterfs install uses Docker only, not Kubernetes.  *TBD:* Should we create a separate Kubernetes cluster for GlusterFS?  That seems like overkill.  I would do a "native" GlusterFS install instead.)
+- Follow the instructions for the [Heketi install](https://github.com/heketi/heketi/blob/master/doc/admin/install-kubernetes.md).  (Ignore the GlusterFS installation instructions.  The GlusterFS install was done into docker containers on each of the GlusterFS servers. (See above section of this guide.) Important to note that the glusterfs install uses Docker only, not Kubernetes.  *TBD:* Should we create a separate Kubernetes cluster for GlusterFS?  That seems like overkill.  I would do a "native" GlusterFS install instead.)
 
 - Get the [Heketi CLI](https://github.com/heketi/heketi/releases) for the current release.  (*TBD:* The instructions mention that this has heketi-cli in it.  However, it is vague as to what it means to "install" the heketi-cli.  I'm not sure what it is used for.)
 
@@ -1602,7 +1611,12 @@ Assuming the above content is in a file named `cluster-shared-storage.yml`, the 
 > kubectl create -f cluster-shared-storage.yml
 ```
 
-Once the storage class is created, confirm that it works by created a test PVC using `kubectl` or the ICP console.
+At least one StorageClass object should be set as the `default`.  To make the `cluster.shared.storage` the default StorageClass use the following command:
+```
+> kubectl patch storageclass cluster.shared.storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+```
+
+Once the storage class is created and made the default, confirm that it works by created a test PVC using `kubectl` or the ICP console.
 
 # Uninstall IBM Cloud Private
 
