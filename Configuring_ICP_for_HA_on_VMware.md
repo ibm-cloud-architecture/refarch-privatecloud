@@ -13,9 +13,7 @@ First, create all of your needed VMs for your ICP HA environment:
 
 In VMware vCenter server, you cannot create a virtual disk independent of a virtual machine (VM).  You can create an independent disk associated with a VM and then mount it on multiple servers, but a disk must be associated with a VM.
 
-Since data is only written by one master node at any time, a race condition will not occur when the same disk is mounted by multiple servers.
-
-To create an independent disk on an existing VM it is necessary to add a secondary iscsi controller and add your independent disk to that controller.
+To create an independent disk on an existing VM it is necessary to add a secondary SCSI controller and add your independent disk to that controller.
 
 On all of the other nodes where this disk will be mounted you should also create an additional controller for the mounted disk.
 
