@@ -93,25 +93,40 @@ Suggested ICP production deployment resource allocations are described in the ta
 
 | Machine Role     | Number |  vCPU/Core   | Memory (GB)  | Storage<br/>Disks x Size (GB) |
 |------------------|:------:|-------------:|-------------:|------------------------------:|
-|   Master         | 3 or 5 |  8           |  32          |  1 x 260                      |
-|   Proxy          |   3    |  2           |   4          |  1 x 230                      |
-|   Management     | 2 or 3 |  8           |  32          |  1 x 260                      |
-|   Worker         |  5+    |  4           |  32          |  1 x 200                      |
+|   Master         | 3 or 5 |  8           |  32          |  1 x 260  (1 x 270 if VA enabled) |
+|   Proxy          |   3    |  2           |   4          |  1 x 230  (1 x 240 if VA enabled) |
+|   Management     | 2 or 3 |  8           |  32          |  1 x 260  (1 x 270 if VA enabled) |
+|   Vulnerability Advisor   |  3  |  8     |  32          |  1 x 500                          |
+|   Worker         |  5+    |  4           |  32          |  1 x 200  (1 x 210 if VA enabled) |
 |   GlusterFS      |  3+    |  4           |  16          |  1 x 40 (/dev/sda)<br/>1 x 128 (/dev/sdb)<br/>1 x 128 (/dev/sdc) |
 
-**ICP Master** and **ICP Management** nodes suggested disk partitioning (260 GB disk).  For master and management nodes we recommend that `/var` be at least 60 GB which is larger than what is specified in the ICP v2.1 Knowledge Center documentation.
+*NOTE:* If Vulnerability Advisor (VA) is enabled, then all (non-VA) nodes need at least an additional 10 GB for `/var` as `/var/lib/kubelet` will need additional space.  The VA nodes need an additional 200 GB of `/var` disk space.  See the ICP 2.1.0.2 Knowledge Center [Hardware requirements and recommendations](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/supported_system_config/hardware_reqs.html)
 
 *NOTE:* For a production VM, be sure to use Logical Volume Manager (LVM) for all file systems other than those that require a physical partition, e.g., `/boot`, swap.
+
+**ICP Master** and **ICP Management** nodes suggested disk partitioning (260 GB disk).  For master and management nodes we recommend that `/var` be at least 60 GB which is larger than what is specified in the ICP Knowledge Center documentation.  
 
 | File System Name          |  Mount Point      |  Size (GB)    |
 |:--------------------------|:------------------|--------------:|
 |   system (aka root)       |   /               |    40         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     8         |
-|   var                     |   /var            |    60         |
+|   var                     |   /var            |    60 (70 if VA enabled) |
 |   tmp                     |   /tmp            |    20         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   120         |
+
+**ICP Vulnerbility Advisor** nodes disk partitioning (500 GB disk) For the VA nodes we recommend that `/var` be 300 GB.
+
+| File System Name          |  Mount Point      |  Size (GB)    |
+|:--------------------------|:------------------|--------------:|
+|   system (aka root)       |   /               |     40        |
+|   boot                    |   /boot           |       256 MB  |
+|   swap                    |                   |      8        |
+|   var                     |   /var            |    300        |
+|   tmp                     |   /tmp            |     20        |
+|   home                    |   /home           |     10        |
+|   opt                     |   /opt            |    120        |
 
 **ICP Proxy** node suggested disk partitioning (230 GB disk).
 
@@ -120,7 +135,7 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   system (aka root)       |   /               |    20         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     4         |
-|   var                     |   /var            |    60         |
+|   var                     |   /var            |    60 (70 if VA enabled) |
 |   tmp                     |   /tmp            |    10         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   120         |
@@ -132,21 +147,30 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   system (aka root)       |   /               |    20         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     4         |
-|   var                     |   /var            |    40         |
+|   var                     |   /var            |    40 (50 if VA enabled) |
 |   tmp                     |   /tmp            |    10         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   110         |
 
 *NOTE:* Lack of file system space particularly in `/var` is a common problem during the installation and upgrade/update of ICP.  Particularly on master and management nodes, the `/var/lib/docker` directory can consume 40 GB to 50 GB.  The `/var/lib/kubelet` directory typically consumes ~10 GB.
 
+## When is a separate boot node needed?
+
+Usually the boot node role combined with a master node.
+
+A separate boot node is appropriate if the nodes in the cluster are not permitted to have direct access to the Internet.  A separate boot node that has access to the Internet and to the ICP cluster nodes can serve as an intermediate staging node for getting content from the Internet to the ICP cluster nodes.
+
+The resources needed for a boot node are something on the order of 2 vCPU, 8 GB memory, 250 GB disk.
+
 ## Additional steps depending on specific circumstances and requirements:
-* Configure access to RHEL yum repositories.
+* Configure access to RHEL yum repositories or Red Hat Satellite (RHS).
 * Configure `/etc/hosts` files on all cluster members if DNS is not available to resolve host names and IP addresses.
 * Update RHEL to the latest patch level.
 * Install NTP.
 * Install Docker on each cluster member VM in addition to the boot-master VM. (This gives you full control over what version of Docker is installed, but more importantly, Docker on each VM is needed for the next step.)
 * Use Docker on each cluster member VM to pre-load the ICP Docker images rather than let the inception installation load the ICP Docker images.  (It turns out to be expedient to copy the ICP image tar-ball to each cluster member VM and then load the local Docker registry from that tar-ball rather than waiting for the inception installer to do that part of the installation.)
 * Install `kubectl` on the boot-master node.  `Kubectl` is useful for interacting with the ICP cluster.
+* Install the ICP CLI.  (Pre-req for running helm.)
 * Install `helm` on the boot or boot-master node.  Helm is useful for installing additional software on the cluster.
 * Install Ansible on the boot or boot-master node or, even better, on the administrator's desktop/laptop.  Ansible is very useful for administration when dealing with multiple machines. (The instructions in the [Install and configure the GlusterFS server cluster](#Install and configure the GlusterFS server cluster) section assumes the availability of Ansible.) See the [Installing Ansible](#Installing Ansible) section for guidance on installing and configuring Ansible.
 * Install Python Docker modules on the boot master node to support the convenient use of Docker APIs in Python scripts.
@@ -2192,9 +2216,12 @@ Now there should be sufficient space available to grow the docker lib directory.
 - Configure network on each VM with static IP
 - Set the hostname
 - Configure DNS with cluster host names or create /etc/hosts on boot-master and copy to all nodes
-- Configure passwordless SSH
+- Configure passwordless SSH for root from boot-master to all nodes, including boot-master
 - Install Ansible on boot-master
-- Configure all nodes to allow Ansible user (icpmaestro) passwordless sudo
+- (optional) Configure an non-root Ansible user for all nodes
+  - The Ansible user needs passwordless sudo on all nodes including boot-master.
+  - Configure passwordless SSH for the non-root Ansible user including the boot-master.
+  - Configuring a non-root Ansible user is commonly required due to restrictions on who has root.
 - Configure yum repos or RHS (preferred)
 - Update to latest RHEL RPMs (7.4) Reboot all nodes to pick up kernel updates.
 - Install NTP on all nodes
@@ -2215,3 +2242,5 @@ Now there should be sufficient space available to grow the docker lib directory.
   - Kick off the install
 - Install kubectl on all of the master nodes (at a minimum on the boot-master node)
   - `docker run --net=host -v /usr/local/bin:/data ibmcom/kubernetes:v1.9.1-ee cp /kubectl /data`
+- Install ICP CLI on boot master. (See [Installing the IBM Cloud Private CLI](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/manage_cluster/install_cli.html))
+- Install helm on the boot master.  (Particularly for ICP 2.1.0.2, see [Setting up Helm CLI](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html))
