@@ -34,7 +34,7 @@ The following table shows the test environment:
 |jk-worker02|172.16.40.181|worker|
 |jk-worker03|172.16.40.182|worker|
 |jk-worker04|172.16.40.183|worker|
-|n/a|172.168.40.188|jk-master-vip|
+|n/a|172.16.40.188|jk-master-vip|
 |n/a|172.16.40.189|jk-proxy-vip|
 
 The shared directories `/var/lib/registry` and `/var/lib/icp/audit` are created as redundant storage on the three master nodes backed by a replicated volume in GlusterFS.
@@ -73,7 +73,7 @@ We created a text file `hostlist.txt` as follows with each of the roles and IP a
 
 ### Install IBM Cloud Private EE in HA
 
-Use the [documentation]((https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/installing/install_app_mod_HA.html) to install IBM Cloud Private in Highly Available configuration.
+Use the [documentation](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/installing/install_app_mod_HA.html) to install IBM Cloud Private in Highly Available configuration.
 
 ### kubectl
 
