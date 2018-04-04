@@ -1,6 +1,6 @@
 # Guidance on HA ICP Cluster Setup
 
-This page provides guidance on how to setup HA resilient ICP cluster with multiple master nodes and proxy nodes. We used [GlusterFS](https://www.gluster.org/) as the shared file system in this guidance, but the principle applies to other shared file system as well.
+This page provides guidance on how to setup a highly available, resilient ICP cluster with multiple master nodes and proxy nodes. As a pre-requisite, highly available shared storage needs to be created before installation for two directories that are shared on the master nodes, `/var/lib/registry` and `/var/lib/icp/audit`.  In this proof-of-concept, we provisioned [GlusterFS](https://www.gluster.org/) outside of the cluster as a low-cost option to demonstrate the feasibility of the solution, but the principle applies to other shared file system as well.  In a typical production deployment, the administrator is responsible for providing a vendor-supported highly available shared storage solution.
 
 We will not provide detailed HA ICP installation steps here, for that, please reference the [IBM Cloud Private Knowledge Center](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/installing/install_app_mod_HA.html)
 
@@ -11,8 +11,10 @@ Here is the diagram for the validated Topology.
 ![](images/icp_ha_glusterfs.png)
 
 - There are three Proxy Nodes and three Master Nodes that are accessed using a Virtual IP.  The Virtual IP will forward the client to one of the master or proxy nodes in the cluster.  Using three nodes allows up to two hardware failures.
-- GlusterFS is installed in three standalone nodes so it can be scaled out as necessary by adding more storage nodes and/or block devices.  Since it is a distributed file system, it is resilient to hardware failures as it maintains redundant copies of data distributed throughout the cluster.  This is used to provide fault-tolerant storage for shared storage for the master nodes as well as application workloads.  By default, we create three GlusterFS nodes so that a distributed volume can survive up to two hardware failures.
-- If running ICP on VMware VMs, it makes sense to either place each of the master, GlusterFS, and proxy nodes in different Host Clusters, or to create DRS rules on the clusters so that each of the nodes in the HA group are on different physical hosts (and won't be migrated together).  This ensures that a hardware failure will only affect one member in the HA group.
+
+- GlusterFS is installed in at least three standalone nodes and can be scaled out as necessary by adding more storage nodes and/or block devices.  Since it is a distributed file system, it is resilient to hardware failures as it maintains redundant copies of data distributed throughout the cluster.  This is used to provide fault-tolerant storage for shared storage for the master nodes as well as application workloads.  In our test environment, we created three GlusterFS nodes so that a distributed volume can survive up to two hardware failures.
+
+- If running ICP on VMware VMs, each of the master, GlusterFS, and proxy nodes should be in different Host Clusters, or to create DRS rules on the clusters so that each of the nodes in the HA group are on different physical hosts (and won't be migrated together).  This ensures that a hardware failure will only affect one member in the HA group.
 
 The following table shows the test environment:
 
@@ -32,13 +34,10 @@ The following table shows the test environment:
 |jk-worker02|172.16.40.181|worker|
 |jk-worker03|172.16.40.182|worker|
 |jk-worker04|172.16.40.183|worker|
-|n/a|172.168.40.188|jk-master-vip|
+|n/a|172.16.40.188|jk-master-vip|
 |n/a|172.16.40.189|jk-proxy-vip|
 
-The shared directories /var/lib/registry and /var/lib/icp/audit are created as redundant storage on the three master nodes backed by a replicated volume in GlusterFS.
-
-
-
+The shared directories `/var/lib/registry` and `/var/lib/icp/audit` are created as redundant storage on the three master nodes backed by a replicated volume in GlusterFS.
 
 ## Prerequisites
 
@@ -72,10 +71,9 @@ We created a text file `hostlist.txt` as follows with each of the roles and IP a
 172.16.40.183
 ```
 
-
 ### Install IBM Cloud Private EE in HA
 
-Use the [documentation]((https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/installing/install_app_mod_HA.html) to install IBM Cloud Private in Highly Available configuration.
+Use the [documentation](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0/installing/install_app_mod_HA.html) to install IBM Cloud Private in Highly Available configuration.
 
 ### kubectl
 
@@ -83,7 +81,7 @@ You will require the [kubectl](https://kubernetes.io/docs/tasks/tools/install-ku
 
 # Install GlusterFS
 
-On the GlusterFS nodes, we run GlusterFS in Docker containers.  Since GlusterFS runs in containers, the host operating system that the nodes are running is not important.  It can be either Ubuntu or RHEL.  The below steps are for Gluster nodes running Ubuntu.
+Create three or more virtual machines for GlusterFS, each with one or more additional block devices on top of the OS disk that will be used to store the filesystem bricks.  On the GlusterFS nodes, we will run the gluster daemon in Docker containers.  Since GlusterFS runs in containers, the host operating system that the nodes are running is not important.  It can be either Ubuntu or RHEL.  The below steps are for Gluster nodes running on top of Ubuntu.
 
 ## Install Docker
 
@@ -275,7 +273,7 @@ Durability Type: replicate
 Distributed+Replica: 3
 ```
 
-Use the output of the command to mount the volume across all master servers, using the ansible [mount](http://docs.ansible.com/ansible/latest/mount_module.html) module:
+Use the output of the command to mount the volume across all master servers, using the ansible [mount](http://docs.ansible.com/ansible/latest/mount_module.html) module.  Note that the heketi output uses commas (`,`) in the mount options, while the mount command uses colons (`:`).
 
 ```bash
 ansible -i hostlist.txt master -b -m mount -a 'src=172.16.40.170:/var_lib_registry path=/var/lib/registry fstype=glusterfs opts=defaults,_netdev,backup-volfile-servers=172.16.40.171:172.16.40.172 state=mounted'
