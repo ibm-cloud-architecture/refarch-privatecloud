@@ -34,7 +34,6 @@
 7. Create the required user and roles in vCenter for the installer
 
   1. Create two roles
-
     Grant the first role the following permissions:
     * Datastore: Low level file operations
     * Datastore: Update virtual machine files
