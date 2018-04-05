@@ -32,18 +32,18 @@
   ```
 
 7. Create the required user and roles in vCenter for the installer
-  1. Create two roles
-  Grant the first role the following permissions:
-    * Datastore: Low level file operations
-    * Datastore: Update virtual machine files
-    * vApp: Import
-  Grant the second role the following permission:
-    * Global: Manage custom attributes
-  If you use Virtual Distributed Switch Network, grant the role the following permission:
-    * dvPort group: Modify
+    1. Create two roles
+    Grant the first role the following permissions:
+      * Datastore: Low level file operations
+      * Datastore: Update virtual machine files
+      * vApp: Import
+    Grant the second role the following permission:
+      * Global: Manage custom attributes
+    If you use Virtual Distributed Switch Network, grant the role the following permission:
+      * dvPort group: Modify
 
-  2. Create a vCenter user
-    * Assign the user the following roles for list vSphere components:
+    2. Create a vCenter user
+      * Assign the user the following roles for list vSphere components:
       <pre>
       <strong>VMware user permissions</strong>
         <strong>vSphere Client view</strong>                <strong>vSphere component</strong>       <strong>Role</strong>                      <strong>Other</strong>
@@ -54,13 +54,13 @@
         Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
       </pre>
 
-  3. If you use a vSwitch network:
-    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+    3. If you use a vSwitch network:
+      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
-  4. If you use a Virtual Distributed Switch (vDS) Network:
-    * Place the vDS switch in a folder
-    * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
-    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+    4. If you use a Virtual Distributed Switch (vDS) Network:
+      * Place the vDS switch in a folder
+      * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
+      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
 ## Prepare Installation Virtual Machine
 1. Create an installation VM in your 'CloudFoundry' cluster
