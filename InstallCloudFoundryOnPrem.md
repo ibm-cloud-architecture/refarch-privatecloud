@@ -32,26 +32,29 @@
   ```
 
 7. Create the required user and roles in vCenter for the installer
+
   Create two roles
+
   icp-ds: Grant this role the following permissions:
     * Datastore: Low level file operations
     * Datastore: Update virtual machine files
     * vApp: Import
+
   icp-attr:  Grant this role the following permission:
     * Global: Manage custom attributes
     * If you use Virtual Distributed Switch Network, grant the icp-attr role the permission: dvPort group: Modify
 
-    2. Create a vCenter user
-      * Assign the user the following roles for list vSphere components:
-      <pre>
+  Create a vCenter user
+  * Assign the user the following roles for list vSphere components:
+    <pre>
       <strong>VMware user permissions</strong>
-        <strong>vSphere Client view</strong>                <strong>vSphere component</strong>       <strong>Role</strong>                      <strong>Other</strong>
-        Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
-        Hosts and Clusters                 Data Center             First user-defined role   Not propagated
-        Hosts and Clusters                 Cluster                 Administrator             Propagated
-        VMs and Templates                  Virtual machine folder  Administrator             Propagated
-        Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
-      </pre>
+      <strong>vSphere Client view</strong>                <strong>vSphere component</strong>      <strong>Role</strong>                      <strong>Other</strong>
+      Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
+      Hosts and Clusters                 Data Center             First user-defined role   Not propagated
+      Hosts and Clusters                 Cluster                 Administrator             Propagated
+      VMs and Templates                  Virtual machine folder  Administrator             Propagated
+      Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
+    </pre>
 
     3. If you use a vSwitch network:
       * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
