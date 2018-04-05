@@ -32,19 +32,19 @@
   ```
 
 7. Create the required user and roles in vCenter for the installer
-  1. Create two roles
 
-  icp-ds: Grant this role the following permissions:
+  1. Create two roles
+    icp-ds: Grant this role the following permissions:
     * Datastore: Low level file operations
     * Datastore: Update virtual machine files
     * vApp: Import
 
-  icp-attr:  Grant this role the following permission:
+    icp-attr:  Grant this role the following permission:
     * Global: Manage custom attributes
     * If you use Virtual Distributed Switch Network, grant the icp-attr role the permission: dvPort group: Modify
 
   2. Create a vCenter user
-  * Assign the user the following roles for list vSphere components:
+    Assign the user the following roles for list vSphere components:
     <pre>
       <strong>VMware user permissions</strong>
       <strong>vSphere Client view</strong>                <strong>vSphere component</strong>      <strong>Role</strong>                      <strong>Other</strong>
