@@ -36,14 +36,17 @@
   1. Create two roles
 
   Grant the first role the following permissions:
+
     * Datastore: Low level file operations
     * Datastore: Update virtual machine files
     * vApp: Import
 
   Grant the second role the following permission:
+
     * Global: Manage custom attributes
 
-  If you use Virtual Distributed Switch Network, grant the role the following permission:    
+  If you use Virtual Distributed Switch Network, grant the role the following permission:
+    
     * dvPort group: Modify
 
   2. Create a vCenter user
