@@ -32,13 +32,11 @@
   ```
 
 7. Create the required user and roles in vCenter for the installer
-  1. Create two roles
-
+  1. Create two roles<br>
     Grant the first role the following permissions:
       * Datastore: Low level file operations
       * Datastore: Update virtual machine files
-      * vApp: Import
-      
+      * vApp: Import<br>
     Grant the second role the following permission:
       * Global: Manage custom attributes
       * If you use Virtual Distributed Switch Network, grant the role the following permission:
