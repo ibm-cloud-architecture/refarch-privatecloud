@@ -42,8 +42,8 @@
       * If you use Virtual Distributed Switch Network, grant the role the following permission:
         * dvPort group: Modify
   2. Create a vCenter user
-
     * Assign the user the following roles for list vSphere components:
+    <pre>
       __VMware user permissions__
         __vSphere Client view__                __vSphere component__       __Role__                      __Other__
         Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
@@ -51,14 +51,13 @@
         Hosts and Clusters                 Cluster                 Administrator             Propagated
         VMs and Templates                  Virtual machine folder  Administrator             Propagated
         Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
-
-    3. If you use a vSwitch network:
-      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
-
-    4. If you use a Virtual Distributed Switch (vDS) Network:
-      * Place the vDS switch in a folder
-      * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
-      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+    </pre>
+  3. If you use a vSwitch network:
+    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+  4. If you use a Virtual Distributed Switch (vDS) Network:
+    * Place the vDS switch in a folder
+    * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
+    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
 ## Prepare Installation Virtual Machine
 1. Create an installation VM in your 'CloudFoundry' cluster
