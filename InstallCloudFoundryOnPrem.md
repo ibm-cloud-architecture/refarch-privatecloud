@@ -33,36 +33,36 @@
 
 7. Create the required user and roles in vCenter for the installer
 
-  1. Create two roles<br>
+Create two roles<br>
 
-    icp-ds: Grant this role the following permissions:
-      * Datastore: Low level file operations
-      * Datastore: Update virtual machine files
-      * vApp: Import<br>
+  icp-ds: Grant this role the following permissions:
+    * Datastore: Low level file operations
+    * Datastore: Update virtual machine files
+    * vApp: Import<br>
 
-    icp-attr:  Grant this role the following permission:
-      * Global: Manage custom attributes
-      * If you use Virtual Distributed Switch Network, grant the icp-attr role the permission: dvPort group: Modify<br>
+  icp-attr:  Grant this role the following permission:
+    * Global: Manage custom attributes
+    * If you use Virtual Distributed Switch Network, grant the icp-attr role the permission: dvPort group: Modify<br>
 
-  2. Create a vCenter user
-    Assign the user the following roles for list vSphere components:
-    <pre>
-      <strong>VMware user permissions</strong>
-      <strong>vSphere Client view</strong>                <strong>vSphere component</strong>      <strong>Role</strong>                      <strong>Other</strong>
-      Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
-      Hosts and Clusters                 Data Center             First user-defined role   Not propagated
-      Hosts and Clusters                 Cluster                 Administrator             Propagated
-      VMs and Templates                  Virtual machine folder  Administrator             Propagated
-      Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
-    </pre>
+Create a vCenter user
+  Assign the user the following roles for list vSphere components:
+  <pre>
+    <strong>VMware user permissions</strong>
+    <strong>vSphere Client view</strong>                <strong>vSphere component</strong>      <strong>Role</strong>                      <strong>Other</strong>
+    Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
+    Hosts and Clusters                 Data Center             First user-defined role   Not propagated
+    Hosts and Clusters                 Cluster                 Administrator             Propagated
+    VMs and Templates                  Virtual machine folder  Administrator             Propagated
+    Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
+  </pre>
 
-  3. If you use a vSwitch network:
-    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+If you use a vSwitch network:
+  * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
-  4. If you use a Virtual Distributed Switch (vDS) Network:
-    * Place the vDS switch in a folder
-    * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
-    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+If you use a Virtual Distributed Switch (vDS) Network:
+  * Place the vDS switch in a folder
+  * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
+  * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
 ## Prepare Installation Virtual Machine
 1. Create an installation VM in your 'CloudFoundry' cluster
