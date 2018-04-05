@@ -32,6 +32,7 @@
   ```
 
 7. Create the required user and roles in vCenter for the installer
+
   1. Create two roles<br>
     Grant the first role the following permissions:
       * Datastore: Low level file operations
@@ -53,8 +54,10 @@
         VMs and Templates                  Virtual machine folder  Administrator             Propagated
         Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
       </pre>
+
   3. If you use a vSwitch network:
     * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+
   4. If you use a Virtual Distributed Switch (vDS) Network:
     * Place the vDS switch in a folder
     * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
