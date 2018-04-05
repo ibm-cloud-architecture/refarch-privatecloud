@@ -37,13 +37,15 @@
     * Datastore: Low level file operations
     * Datastore: Update virtual machine files
     * vApp: Import
+
     Grant the second role the following permission:
     * Global: Manage custom attributes
     * If you use Virtual Distributed Switch Network, grant the role the following permission:
       * dvPort group: Modify
+      
   2. Create a vCenter user
-  * Assign the user the following roles for list vSphere components:
-    <pre>
+    * Assign the user the following roles for list vSphere components:
+      <pre>
       __VMware user permissions__
         __vSphere Client view__                __vSphere component__       __Role__                      __Other__
         Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
@@ -51,7 +53,7 @@
         Hosts and Clusters                 Cluster                 Administrator             Propagated
         VMs and Templates                  Virtual machine folder  Administrator             Propagated
         Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
-    </pre>
+      </pre>
   3. If you use a vSwitch network:
     * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
   4. If you use a Virtual Distributed Switch (vDS) Network:
