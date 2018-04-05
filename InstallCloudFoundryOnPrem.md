@@ -56,13 +56,13 @@
       Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
     </pre>
 
-    3. If you use a vSwitch network:
-      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+  3. If you use a vSwitch network:
+    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
-    4. If you use a Virtual Distributed Switch (vDS) Network:
-      * Place the vDS switch in a folder
-      * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
-      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+  4. If you use a Virtual Distributed Switch (vDS) Network:
+    * Place the vDS switch in a folder
+    * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
+    * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
 ## Prepare Installation Virtual Machine
 1. Create an installation VM in your 'CloudFoundry' cluster
