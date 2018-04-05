@@ -31,6 +31,33 @@
   ICP_CF_210
   ```
 
+7. Create the required user and roles in vCenter for the installer
+  1. Create two roles.
+    Grant the first role the following permissions:
+      * Datastore: Low level file operations
+      * Datastore: Update virtual machine files
+      * vApp: Import
+    Grant the second role the following permission:
+      * Global: Manage custom attributes
+      * If you use Virtual Distributed Switch Network, grant the role the following permission:
+        * dvPort group: Modify
+  2. Create a vCenter user.
+    * Assign the user the following roles for list vSphere components:
+      VMware user permissions
+        | vSphere Client view	| vSphere component	| Role | Other |
+        |---------------------|-------------------|------|-------|
+        | Hosts and Clusters	| VCenter	| Second user-defined role | Not propagated |
+        | Hosts and Clusters	| Data Center	| First user-defined role	| Not propagated |
+        | Hosts and Clusters	| Cluster	| Administrator	| Propagated |
+        | VMs and Templates	  | Virtual machine folder	| Administrator	| Propagated |
+        | Datastores and Datastore Clusters	| Each datastore	| Administrator	| Propagated |
+    3. If you use a vSwitch network:
+      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+    4. If you use a Virtual Distributed Switch (vDS) Network:
+      * Place the vDS switch in a folder
+      * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
+      * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+
 ## Prepare Installation Virtual Machine
 1. Create an installation VM in your 'CloudFoundry' cluster
 
@@ -60,8 +87,10 @@
   ./import_images.sh
   ```
 
-## Generate Certificate keys for your CloudFoundry domains
+## Generate Certificate keys for your CloudFoundry domains (optional)
 1. Generate certificate keys for your new domain[s]
+
+  __note:__ In ICP CF 2.1.0.2 and later, cert keys can be automatically created for you during install.  Only use this section if you want to specify your own self-signed certificates with specific information.
 
   Just like IBM Bluemix Public, ICP uses two domains for its CloudFoundry implementation, one for the infrastructure components (e.g. bluemix.net), and one for the applications (e.g. mybluemix.net).  In our example we will use bluemix.csplab.local and mybluemix.csplab.local.
 
@@ -140,6 +169,8 @@
   * Copy the text below into a file called uiconfig-csplab.yml
 
   * Update the file to match your environment
+
+  * __note:__ In the section below, if you did not create your own certificate keys then you should leave that section blank.  In the example template, remove the -----BEGIN CERTIFICATE----- and -----END CERTIFICATE----- lines in each of the cert sections and also remove the "|+" on the key line.  With an empty value here the installer will create the keys for you.
 
   ```
   uiconfig:
