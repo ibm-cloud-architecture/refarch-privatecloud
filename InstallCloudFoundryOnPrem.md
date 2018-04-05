@@ -42,12 +42,12 @@
     * Global: Manage custom attributes
     * If you use Virtual Distributed Switch Network, grant the role the following permission:
       * dvPort group: Modify
-      
+
   2. Create a vCenter user
     * Assign the user the following roles for list vSphere components:
       <pre>
-      __VMware user permissions__
-        __vSphere Client view__                __vSphere component__       __Role__                      __Other__
+      <strong>VMware user permissions</strong>
+        <strong>vSphere Client view</strong>                <strong>vSphere component</strong>       <strong>Role</strong>                      <strong>Other</strong>
         Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
         Hosts and Clusters                 Data Center             First user-defined role   Not propagated
         Hosts and Clusters                 Cluster                 Administrator             Propagated
