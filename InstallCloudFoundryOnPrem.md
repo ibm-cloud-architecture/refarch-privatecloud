@@ -43,14 +43,14 @@
         * dvPort group: Modify
   2. Create a vCenter user.
     * Assign the user the following roles for list vSphere components:
-      VMware user permissions
+      __VMware user permissions__
       <table>
         <tr><th>vSphere Client view</th><th>vSphere component</th><th>Role</th><th>Other</th></tr>
         <tr><td>Hosts and Clusters</td><td>VCenter</td><td>Second user-defined role</td><td>Not propagated</td></tr>
         <tr><td>Hosts and Clusters</td><td>Data Center</td><td>First user-defined role</td><td>Not propagated</td></tr>
         <tr><td>Hosts and Clusters</td><td>Cluster</td><td>Administrator</td><td>Propagated</td></tr>
         <tr><td>VMs and Templates</td><td>Virtual machine folder</td><td>Administrator</td><td>Propagated</td></tr>
-        |<tr><td>Datastores and Datastore Clusters</td><td>ach datastore</td><td>Administrator</td><td>Propagated</td></tr>
+        <tr><td>Datastores and Datastore Clusters</td><td>ach datastore</td><td>Administrator</td><td>Propagated</td></tr>
     </table>
     3. If you use a vSwitch network:
       * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
