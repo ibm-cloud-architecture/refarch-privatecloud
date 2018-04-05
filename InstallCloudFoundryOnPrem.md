@@ -41,19 +41,20 @@
       * Global: Manage custom attributes
       * If you use Virtual Distributed Switch Network, grant the role the following permission:
         * dvPort group: Modify
-  2. Create a vCenter user.
+  2. Create a vCenter user
+
     * Assign the user the following roles for list vSphere components:
       __VMware user permissions__
-      <table>
-        <tr><th>vSphere Client view</th><th>vSphere component</th><th>Role</th><th>Other</th></tr>
-        <tr><td>Hosts and Clusters</td><td>VCenter</td><td>Second user-defined role</td><td>Not propagated</td></tr>
-        <tr><td>Hosts and Clusters</td><td>Data Center</td><td>First user-defined role</td><td>Not propagated</td></tr>
-        <tr><td>Hosts and Clusters</td><td>Cluster</td><td>Administrator</td><td>Propagated</td></tr>
-        <tr><td>VMs and Templates</td><td>Virtual machine folder</td><td>Administrator</td><td>Propagated</td></tr>
-        <tr><td>Datastores and Datastore Clusters</td><td>ach datastore</td><td>Administrator</td><td>Propagated</td></tr>
-    </table>
+        __vSphere Client view__                __vSphere component__       __Role__                      __Other__
+        Hosts and Clusters                 VCenter                 Second user-defined role  Not propagated
+        Hosts and Clusters                 Data Center             First user-defined role   Not propagated
+        Hosts and Clusters                 Cluster                 Administrator             Propagated
+        VMs and Templates                  Virtual machine folder  Administrator             Propagated
+        Datastores and Datastore Clusters  Each datastore          Administrator             Propagated
+
     3. If you use a vSwitch network:
       * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
+
     4. If you use a Virtual Distributed Switch (vDS) Network:
       * Place the vDS switch in a folder
       * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
