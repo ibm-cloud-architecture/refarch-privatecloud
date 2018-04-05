@@ -32,7 +32,6 @@
   ```
 
 7. Create the required user and roles in vCenter for the installer
-
   1. Create two roles
 
   icp-ds: Grant this role the following permissions:
