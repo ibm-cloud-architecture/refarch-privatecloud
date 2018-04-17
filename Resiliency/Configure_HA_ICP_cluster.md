@@ -300,6 +300,24 @@ Distributed+Replica: 3
 ansible -i hostlist.txt master -b -m mount -a 'src=172.16.40.170:/var_lib_icp_audit path=/var/lib/icp_audit fstype=glusterfs opts=defaults,_netdev,backup-volfile-servers=172.16.40.171:172.16.40.172 state=mounted'
 ```
 
+If using ICP 2.1.0.2 or later, create a file named `file-check` in the `/var/lib/registry` directory on one of the master hosts so that the registry health check will pass.
+
+```bash
+touch /var/lib/registry/file-check
+```
+
+Restart the `image-manager` pods using kubectl so that the shared directory is mounted to the containers.
+
+```bash
+kubectl delete pods -l app=image-manager -n kube-system
+```
+
+Ensure that `image-manager` pods start correctly:
+
+```bash
+kubectl get pods -l app=image-manager -n kube-system
+```
+
 
 # Create a dynamic storage class for GlusterFS
 
