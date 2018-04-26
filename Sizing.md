@@ -4,28 +4,40 @@ Although each ICP deployment will have its own characteristics, this is a simple
 
 Use it simply as a guide for your deployment, especially regarding the number of Worker nodes.
 
-## Small ICP environment
+## Small ICP Environment								
 
-| Node type | Number of nodes | CPU | Memory | Disk |
-| --- | --- | --- | --- | --- | 
-| Master / Management | 3 | 4 | 16 GB | 200 GB |
-| Worker | 3 | 4 | 8 GB | 100 GB |
-| Proxy | 3 | 2 | 4 GB | 25 GB |
+| Node type | Number of nodes | CPU | Memory (GB) | Disk (GB) |
+| :---: | :---: | :---: | :---: | :---: |
+| Boot	| 1	| 2	| 8	| 250 |
+|	Master/Management	| 3	| 8	| 32	| 250 |
+|	Proxy	| 3	| 4	| 16	| 250 |
+|	Worker | 3+ (Max:20)	| 8	| 32	| 250 |
+|	Total  | 10+	| 62	| 248	| 2500 |				
 
-## Medium ICP environment
 
-| Node type | Number of nodes | CPU | Memory | Disk |
-| --- | --- | --- | --- | --- | 
-| Master | 3 | 4 | 16 GB | 200 GB |
-| Management | 3 | 4 | 16 GB | 200 GB |
-| Worker | 5 | 4 | 8 GB | 100 GB |
-| Proxy | 3 | 4 | 8 GB | 25 GB |
+## Medium ICP Environment								
 
-## Large ICP environment
+| Node type | Number of nodes | CPU | Memory (GB) | Disk (GB) |
+| :---: | :---: | :---: | :---: | :---: |
+|	Boot	| 1	| 2	| 8	| 250 |
+|	Master	| 3	| 8	| 32 | 250 |
+|	Management | 2	| 8	| 32 | 300 |
+|	Proxy	| 3	| 4	| 16 | 250 |
+|	VA	| 3	| 6	| 24	| 500 |
+|	Worker | 5+ (Max:70)| 8 | 32	| 250 |
+|	Total |	17+	| 112	| 448	| 5100 |				
 
-| Node type | Number of nodes | CPU | Memory | Disk |
-| --- | --- | --- | --- | --- | 
-| Master | 5 | 4 | 32 GB | 200 GB |
-| Management | 3 | 4 | 32 GB | 400 GB |
-| Worker | 7 | 8 | 16 GB | 100 GB |
-| Proxy | 3 | 4 | 8 GB | 25 GB |
+
+## Large ICP Environment								
+
+| Node type | Number of nodes | CPU | Memory (GB) | Disk (GB) |
+| :---: | :---: | :---: | :---: | :---: |
+|	Boot	| 1	| 2	| 8	| 250 |
+|	Master | 5 | 8 | 32	| 250 |
+|	Management	| 3	| 8	| 32 |	300 |
+|	Proxy |	3	| 4	| 16	| 250 |
+|	VA |	5	 | 6	| 24	| 500 |
+|	Worker | 7+	(Max:150)| 8	| 32	|250 |
+|	Total |	24+ |164	| 656 |	7400 |
+
+**Note:** Disk space can be Thin Provisioned.
