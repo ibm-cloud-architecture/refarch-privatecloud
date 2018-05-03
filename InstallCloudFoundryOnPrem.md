@@ -64,7 +64,7 @@ If you use a Virtual Distributed Switch (vDS) Network:
   * Assign the vDS parent folder the Read-only role for the new user, and select Propagate to Child Objects.
   * Assign the appropriate port group the administrator role. Ensure that Propagate to Child Objects is not selected.
 
-## Prepare Installation Virtual Machine
+## Prepare the Installation Virtual Machine
 1. Create an installation VM in your 'CloudFoundry' cluster
 
   * 2 vCPU, 8GB Memory, 200GB Disk (thin provisioned)
@@ -447,15 +447,35 @@ If you use a Virtual Distributed Switch (vDS) Network:
   Go to https://github.com/cloudfoundry/cli/releases to find the release for your workstation's architecture.
 
 2. Install the certificate key for the api server
+  The root certificate is stored in /opt/cf/data/CloudFoundry/certificates.yml.  Open this file and search for the section entitled "rootca: -> certificate: -> data: |".
+
+  Copy the data beginning with the line containin "BEGIN CERTIFICATE" and ending with the line containing "END CERTIFICATE".
+
+  Paste this data into a local file named "rootCA.pem".
+
   * Linux
     ```
     cat rootCA.pem >> /etc/ssl/certs/ca-certificates.crt
     ```
 
   * Mac
-    ```
-    sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain rootCA.pem
-    ```
+    1. Click on Finder->Applications->Utilities->Keychain Access.
+
+    2. Open a second finder window and browse to the location of the rootca file you just created.
+
+    3. In Keychain Access, at the top left click on "System" and at the bottom left click on "Certificates".
+
+    4. Drag and drop your newly created rootca file onto the bottom of the right-hand pane.
+
+    5. Your new bmxroot certificate will be imported and will how up in your listed of certificates with a red x indicating it is not trusted.
+
+    6. With the bmxroot certificate highlighted click the information (i) icon at the very bottom of the window.
+
+    7. Open the "Trust" spinner and change the value of "When using this certificat:" to "Always Trust".
+
+    8. Click the red x button in the title bar to exit the information dialog box.  Enter your password to trust the certificate.
+
+  You should now be able to securely login to your ICP CF instance.
 
 2. Configure your cf client's local
   ```
@@ -468,6 +488,25 @@ If you use a Virtual Distributed Switch (vDS) Network:
   cf login -u cfadmin -p Passw0rd!
   ```
 
+## Install Operations Manager (ops mgr)
+1. Create a new directory for ops manager e.g. /opt/cf/opsmgr
+   ```
+   mkdir /opt/cf/opsmgr
+   ```
+2. Untar the icp-cf-op-console-x86_64-xxx.tar.gz file into this Directory
+  ```
+  tar -xvzf icp-cf-opo-console-x86_64-2.1.0.2.tar.gz
+  ```
+3. Import the images into Docker
+  ```
+  cd /opt/cf/opsmgr
+  ./import_images.sh
+  ```
+4. Launch the ops manager installer
+  ```
+  cd /opt/cf/opsmgr
+  ./launchOps.sh -B ../BOM.yml -c /opt/cf/data -e LICENSE=accept
+  ```
 
 ## Troubleshooting
 If the installer fails it will output some information which is not very useful plus something like "bosh task 97 --debug" for more information (the 97 may be any number). bosh runs inside the inception container and so executing this command requires a bash shell on the container and not on the installer VM's local filesystem.
