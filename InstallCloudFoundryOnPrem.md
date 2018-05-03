@@ -507,6 +507,16 @@ If you use a Virtual Distributed Switch (vDS) Network:
   ./launchOps.sh -B ../BOM.yml -c /opt/cf/data -e LICENSE=accept
   ```
 
+5. Add the admin user
+  ```
+  cd /opt/cf/ops/mgr
+  ./add_user.sh -ip <ip of installation VM> -u <new admin user> -p <password for admin user>
+  ```
+
+6. Login to ops mgr
+  http://<ip of installation VM>:9666
+  Login with the userid and password created in the previous step.
+
 ## Troubleshooting
 If the installer fails it will output some information which is not very useful plus something like "bosh task 97 --debug" for more information (the 97 may be any number). bosh runs inside the inception container and so executing this command requires a bash shell on the container and not on the installer VM's local filesystem.
 
