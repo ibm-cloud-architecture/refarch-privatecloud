@@ -442,11 +442,10 @@ If you use a Virtual Distributed Switch (vDS) Network:
 ## Test your newly provisioned environment
 1. Install the cloud foundry CLI to your local workstation
 
-  **Note:** As of the time of this writing, setting roles for an org requires cf cli version 6.13.  All other commands can use the latest version of the cf cli which is available.
-
   Go to https://github.com/cloudfoundry/cli/releases to find the release for your workstation's architecture.
 
 2. Install the certificate key for the api server
+
   The root certificate is stored in /opt/cf/data/CloudFoundry/certificates.yml.  Open this file and search for the section entitled "rootca: -> certificate: -> data: |".
 
   Copy the data beginning with the line containin "BEGIN CERTIFICATE" and ending with the line containing "END CERTIFICATE".
