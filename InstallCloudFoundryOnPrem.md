@@ -415,6 +415,8 @@ If you use a Virtual Distributed Switch (vDS) Network:
 
   * **|tee deploy.log** Copy all output to deploy.log for later troubleshooting and redirect stderr to stdout to capture it as well.
 
+  *Deployment could take 90 minutes or longer to complete.*
+
 ## Configure the DNS
 
   Create an `A` Record in the DNS pointing to hte IP address of your ha_proxy (which was defined in your uiconfig-csplab.yml file) with a hostname of \*.bluemix.csplab.local and another for \*.bluemix.csplab.local
