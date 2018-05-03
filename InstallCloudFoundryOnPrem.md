@@ -404,7 +404,7 @@ If you use a Virtual Distributed Switch (vDS) Network:
   *NOTE:* To install a production instance, reverse the flags setting cf and diego to READY and cfpoc and diegopoc to SKIP. The default environment will do a production install.
 
 ## Deploy the environment
-  **NOTE:** You may have to execute this command many times to get to completion.  See troubleshooting section below.
+  **NOTE:** You may have to execute this command *many times* to get to completion.  See troubleshooting section below.  If the installation fails with a timeout, just restart the installation and it will pick up where it left off and should continue past the previous point.  If it times out at the same place more than once, it is likely that you have some kind of another error that needs troubleshooting.
 
   ```
   cd /opt/cf
