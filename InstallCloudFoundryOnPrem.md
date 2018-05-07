@@ -519,6 +519,134 @@ If you use a Virtual Distributed Switch (vDS) Network:
   http://<ip of installation VM>:9666
   Login with the userid and password created in the previous step.
 
+## Integrating ICP CF logs with ICP kubernetes based ELK
+  CloudFoundry outputs log messages in the RFC5425 syslog protocol.  To integrate logs from CF into the ELK stack running inside ICP kubernetes, you must first configure ELK inside kubernetes to receive syslog messages from CF.
+
+  **CONFIGURE KUBERNETES TO RECEIVE SYSLOG MESSAGES**
+
+  By default, the logstash service inside kubernetes is only exposed internally inside the cluster and is only configured to receive beats messages.  We will have to reconfigure logstash to receive syslog messages and create a new network service which is exposed outside the cluster to which CF can send logs.
+
+  First, we will reconfigure logstash to receive syslog messages by editing the configmap in the kube-system namespace named "logstash-pipeline".
+
+  The easiest way to make these changes is to use the kubectl cli with the `kubectl edit configmap logstash-pipeline --namespace=kube-system` command.
+
+  After executing this command you will get a VI editor on the screen with the contents of the configmap file available for editing.
+
+  You will find the configmap is a yaml file with some embedded json under the data -> k8s.conf section.
+
+  You will find an input {} object, a few filter {} objects, and an output {} object.
+
+  First, modify the input { } section as follows (make sure you use only spaces [no tabs] and your spacing is correctly lined up):
+```
+input {
+  beats {
+    port => 5044
+  }
+  tcp {
+    port => 5000
+  }
+  udp {
+    port => 5000
+  }
+}
+```
+
+Move to just below the input {} object and above the first filter {} object and add/paste the following:
+
+```
+filter {
+   if [type] == "syslog" {
+       grok {
+           match => { "message" => "%{SYSLOG5424PRI}%{NONNEGINT:syslog5424_ver} +(?:%{TIMESTAMP_ISO8601:syslog5424_ts}|-) +(?:%{HOSTNAME:syslog5424_host}|-) +(?:%{NOTSPACE:syslog5424_app}|-) +(?:%{NOTSPACE:syslog5424_proc}|-) +(?:%{WORD:syslog5424_msgid}|-) +(?:%{SYSLOG5424SD:syslog5424_sd}|-|) +%{GREEDYDATA:syslog5424_msg}" }
+       }
+       syslog_pri { }
+       date {
+           match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+       }
+       if !("_grokparsefailure" in [tags]) {
+           mutate {
+               replace => [ "@source_host", "%{syslog_hostname}" ]
+               replace =>[ "@message", "%{syslog_message}" ]
+           }
+       }
+       mutate {
+           remove_field => [ "syslog_hostname", "syslog_message", "syslog_timestamp" ]
+       }
+   }
+}
+```
+
+Next, you will need to create a kubernetes service to expose the logstash database outside of the cluster.  There is an existing logstash service, but it is defined as a ClusterIP and not NodePort or Ingress, so it cannot be used outside of the cluster.
+
+From the ICP UI, on the Network Access -> Services page click the "Create Service" link at the top - right of the page and enter the following:
+
+General:
+  * Name: CloudFoundryLogs
+  * Namespace: kube-system
+  * Type: NodePort
+
+Labels:
+  * Label: app, Value: logstash
+  * Label: component, Value: logstash
+
+Ports:
+  * Protocol: TCP, Name: tcp, Port: 5000, TargetPort: 5000
+  * Protocol: UDP, Name: udp, Port: 5000, TargetPort: 5000
+
+Selectors:
+  * Selector: name, Value: logstash
+
+Click `Create` to create the service.
+
+
+In the search box on that same page type "cf-logstash" and click the link to the "cf-logstash" service.
+
+This will display the details of the newly created service including the node port on which the service is listening.
+
+When configuring CloudFoundry for log forwarding you will need this port number as your target.
+
+**Note:** The service will listen on all worker nodes as well as the proxy node.  If the proxy node is exposed outside a firewall, you can use the proxy VIP address (assuming traffic is not blocked) for the destination IP, but this will likely result in all log traffic traversing the firewall which could add significant load and the ports 30000 and above may not be exposed over the firewall.  The default link in the pane displaying details points to this proxy IP address by default, but for these reasons, this address may not work in your environment.
+
+Alternatively (as noted above), you can specify the IP address of any worker node as the target IP. This would likely keep all traffic behind the firewall and eliminate any load for this traffic across the firewall/router as well as provide direct access to the service without having to open a hole throught he firewall for this traffic.
+
+If you intend to send other logs to your ICP kubernetes based ELK stack you could also expose this port via ingress and forward other syslog streams to it.
+
+**CONFIGURE ICP CLOUDFOUNDRY TO FORWARD LOGS TO ELK ON KUBERNETES**
+
+To configure ICP CF to forward system logs to your newly created cf-logstash service, add the following to the bottom of your CloudFoundry uiconfig.yml file:
+
+```
+cf_custom: |
+  properties:
+    syslog_daemon_config:
+      address: 172.16.40.39
+      port: 31921
+      transport: tcp
+```
+
+Remember, this is yml and spacing matters.  Use spaces and not tabs and make sure the "cf_custom:" bit is spaced over two spaces from the left.  The address should be the IP address of your proxy node or a worker node and the port.
+
+Save the file and execute the following commands:
+
+```
+cd /opt/cf
+./cm engine reset
+./launch_deployment.sh -c uiconfig.yml --no-validation |tee logstash.log
+```
+
+... where the path in the `cd` line is the path to your cm binary and uiconfig.yml is the custom uiconfig.yml file where you added the cf_custom section.
+
+This will redeploy CF and configure logging.  Importantly, if you change the exposed port to the logstash service you will need to reconfigure this file and redeploy.
+
+To configure an application to send logs to the k8s based ELK stack use the following commands:
+  ```
+  cf cups log-drain -l syslog://<ip of logstash service>:5044
+  cf bind-service <appname> log-drain
+  cf restage <appname>
+  ```
+
+## Integrating with LDAP for authentication
+
 ## Troubleshooting
 If the installer fails it will output some information which is not very useful plus something like "bosh task 97 --debug" for more information (the 97 may be any number). bosh runs inside the inception container and so executing this command requires a bash shell on the container and not on the installer VM's local filesystem.
 
