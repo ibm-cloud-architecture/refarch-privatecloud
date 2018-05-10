@@ -28,7 +28,7 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 * VMware: [Deploy ICP to VMware](https://github.com/ibm-cloud-architecture/terraform-icp-vmware)
 
 ## Accessing IBM Cloud Private (ICP) through the CLI
- 
+
 [Accessing ICp](Accessing_ICp_through_CLI.md)
 
 # Installing the Cloud Foundry Environment
@@ -42,6 +42,10 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 
   [Setup Highly Available ICP Cluster](Resiliency/Configure_HA_ICP_cluster.md)   
   Guide and best practice on install and configure a highly available ICP clusters with multiple master nodes, multiple proxy nodes and management nodes.   
+
+  [ICP HA/DR with backup on VMWare](Resiliency/vmware-icp-dr.md)
+  Guidance on how to take backup of ICP deployed on VMWare and restore the platform on a DR VMWare site.
+  
 
 ## Best practices
 
