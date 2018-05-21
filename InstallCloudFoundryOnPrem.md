@@ -526,7 +526,7 @@ If you use a Virtual Distributed Switch (vDS) Network:
 
   By default, the logstash service inside kubernetes is only exposed internally inside the cluster and is only configured to receive beats messages.  We will have to reconfigure logstash to receive syslog messages and create a new network service which is exposed outside the cluster to which CF can send logs.
 
-  First, we will reconfigure logstash to receive syslog messages by editing the configmap in the kube-system namespace named "logstash-pipeline".
+  First, we will reconfigure logstash to receive CloudFoundry (syslog formatted) messages by editing the configmap in the kube-system namespace named "logstash-pipeline".
 
   The easiest way to make these changes is to use the kubectl cli with the `kubectl edit configmap logstash-pipeline --namespace=kube-system` command.
 
@@ -538,43 +538,69 @@ If you use a Virtual Distributed Switch (vDS) Network:
 
   First, modify the input { } section as follows (make sure you use only spaces [no tabs] and your spacing is correctly lined up):
 ```
-input {
-  beats {
-    port => 5044
-  }
-  tcp {
-    port => 5000
-  }
-  udp {
-    port => 5000
-  }
-}
+    input {
+      beats {
+        port => 5044
+      }
+      tcp {
+        port => 5000
+        type => cfp
+      }
+      udp {
+        port => 5000
+        type => cfp
+      }
+    }
 ```
 
 Move to just below the input {} object and above the first filter {} object and add/paste the following:
 
 ```
-filter {
-   if [type] == "syslog" {
-       grok {
-           match => { "message" => "%{SYSLOG5424PRI}%{NONNEGINT:syslog5424_ver} +(?:%{TIMESTAMP_ISO8601:syslog5424_ts}|-) +(?:%{HOSTNAME:syslog5424_host}|-) +(?:%{NOTSPACE:syslog5424_app}|-) +(?:%{NOTSPACE:syslog5424_proc}|-) +(?:%{WORD:syslog5424_msgid}|-) +(?:%{SYSLOG5424SD:syslog5424_sd}|-|) +%{GREEDYDATA:syslog5424_msg}" }
-       }
-       syslog_pri { }
-       date {
-           match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
-       }
-       if !("_grokparsefailure" in [tags]) {
+    filter {
+       if [type] == "cfp" {
+           grok {
+              match => { "message" => [
+                "(?<cfjson>\{\S*.+\S*\})",
+                "%{SYSLOG5424PRI}(?:%{TIMESTAMP_ISO8601:@timestamp}|-) +(?:%{IPORHOST:host}|-) +(?:%{NOTSPACE:cfsource}|-) +(?<cfservice>\[.*?\]) +%{GREEDYDATA:cfmessage}" ] }
+           }
+           json {
+             id => "cfjson"
+             skip_on_invalid_json => true
+             source => "cfjson"
+             target => "cfp"
+             add_field => { "json_parsed" => true }
+             remove_field => [ "cfjson" ]
+           }
+           syslog_pri { }
+           date {
+               match => [ "syslog_timestamp", "MMM  d HH:mm:ss", "MMM dd HH:mm:ss" ]
+           }
+           if !("_grokparsefailure" in [tags]) {
+               mutate {
+                   replace => [ "@source_host", "%{host}" ]
+               }
+           }
+           if [cfmessage] {
+             mutate {
+               replace => [ "message" , "%{cfmessage}" ]
+             }
+           }
+           if [cfp][message] {
+             mutate {
+               replace => [ "message" , "%{[cfp][message]}" ]
+             }
+           }
            mutate {
-               replace => [ "@source_host", "%{syslog_hostname}" ]
-               replace =>[ "@message", "%{syslog_message}" ]
+               remove_field => [ "syslog_timestamp" ]
            }
        }
-       mutate {
-           remove_field => [ "syslog_hostname", "syslog_message", "syslog_timestamp" ]
-       }
-   }
-}
+    }
 ```
+Type ":wq" in the vi terminal window to save the configmap.  The logstash application will automatically recognize that the configmap has changed and will reconfigure itself without having to restart the pod.
+
+If you type ":wq" and the window re-opens it means you have an error in your configmap syntax. There will be an error message at the top indicating the error that was received.  Resolve the error and save again. You should get a message on the terminal window that your configmap was edited: `configmap "logstash-pipeline" edited`.
+
+_NOTE:_ If you receive a message that says: "# * : Invalid value: "The edited file failed validation": [invalid character 'a' looking for beginning of value, invalid character 'a' looking for beginning of value]", it is likely that this is a false error and if you just type ":wq" again, it will save, exit, and work fine.
 
 Next, you will need to create a kubernetes service to expose the logstash database outside of the cluster.  There is an existing logstash service, but it is defined as a ClusterIP and not NodePort or Ingress, so it cannot be used outside of the cluster.
 
@@ -646,6 +672,138 @@ To configure an application to send logs to the k8s based ELK stack use the foll
   ```
 
 ## Integrating with LDAP for authentication
+  A best practice is to complete the non-integrated CF installation prior to attempting LDAP integration.  Since the installer is bosh based, you can redeploy as many times as you like and the installer will modify the installation to match the configuration file you specify.
+
+  By breaking down the installation into chunks you can make each progressive install less complex.
+
+  Your first step in integrating CF with your local LDAP server is to create the following .yml file modifying the values to match your environment.
+
+  **NOTE:** Spacing in this file is extremely important.  Use spaces and not tabs and make sure the columns line up properly.
+
+  ```
+uiconfig:
+ properties:
+   loginserver:
+     NG:
+     - type: LDAP
+       id: myldap
+       default: true
+       cliSearchOrder: 20
+       group: mygroup
+       LDAP:
+         url: ldap://172.16.0.11
+         userId: cn=Cloud Foundry,cn=users,dc=csplab,dc=local
+         password: Sup3rS3cr3tPassw0rd!
+         objCls: person
+         userNameAttr: sAMAccountName
+         mailAttr: mail
+         firstNameAttr: givenName
+         lastNameAttr: sn
+         searchCtx: cn=users,dc=csplab,dc=local
+         groupsAttr: memberOf
+         expressions:
+           searchLoginUser: (&(%userNameAttr=%loginUser)(memberOf=cn=cloudusers,cn=users,dc=csplab,dc=local))
+       SignUp:
+         type: UAASyncByGroup
+         groups:
+         - name: cn=cloudusers,cn=users,dc=csplab,dc=local
+           orgName: default
+           orgRole: managers
+           spaceName: dev
+           spaceRole: developers
+     - UAA:
+         userPattern: cf_*
+         usersList: admin
+       cliSearchOrder: 10
+       id: UAA
+       type: UAA
+       default: false
+     autoProvisionUsers: .*
+     clientsThatAcceptNonProvisionedUsers: null
+  ```
+  * uiconfig.properties.loginserver.NG.type: Should always be "LDAP"
+  * uiconfig.properties.loginserver.NG.id: Any arbitrary value
+  * uiconfig.properties.loginserver.NG.default: If there is more than one auth mechanism defined, is this the default?  Normaly, you will use both LDAP and UAA, LDAP for user authentication and UAA for the admin account an any other service accounts which may not be in LDAP.  The default is true and you should probably leave it as such.
+  * uiconfig.properties.loginserver.NG.cliSearchOrder: This is a relative order with all your other auth sources to determine in which order these auth sources should be searched for a user.  It will use the first match it finds, and the lower the number the higher it is on the list.  For instance, an auth provider with a search order of 1 will be searched before a search order of 2.  Normally, the UAA is set to a lower value (10) than LDAP (20) so users defined directly in UAA take precedence over a user with the same userid in LDAP.  This can be reversed if you want the opposite to be true.
+  * uiconfig.properties.loginserver.NG.group: This is an arbitrary string and can be anything.
+  * uiconfig.properties.loginserver.NG.LDAP: These are the details of your LDAP server.
+      * uiconfig.properties.loginserver.NG.LDAP.url: URL for your LDAP server e.g. ldap://10.1.1.1 or ldaps://10.2.0.1
+      * uiconfig.properties.loginserver.NG.LDAP.userid: This is the DN of the user CF will use to query the LDAP server. Note that the username (the first cn=) should be the full name (e.g. cn=Cloud Foundry) and not the username (e.g. cn=cfadmin):.
+      * uiconfig.properties.loginserver.NG.LDAP.password: The plain text password if the above userid.
+      * uiconfig.properties.loginserver.NG.LDAP.obCls: The object class of any object which should match the query.  This is normally "person" or could be "orgPerson" or some such thing.  All users who should be successfully authenticated should have an object class with this value as an attribute to their LDAP record.
+      * uiconfig.properties.loginserver.NG.LDAP.userNameAttr: This is the LDAP attribute that the user will use as their userid.  For MSAD this will be sAMAccountName.  For OpenLDAP, this could be "userid" or "email", this could vary depending on the schema being used.
+      * uiconfig.properties.loginserver.NG.LDAP.mailAttr: This is the LDAP attribute which contains the user's email address.
+      * uiconfig.properties.loginserver.NG.LDAP.firstNameAttr: This is the LDAP attribute which contains the user's first name (given name).
+      * uiconfig.properties.loginserver.NG.LDAP.lastNameAttr: This is the LDAP attribute which contains the user's last name (surname).
+      * uiconfig.properties.loginserver.NG.LDAP.searchCtx: This is the DN that should be searched for users. For MSAD this should be something similar to cn=users, dc=mydomain,dc=com.
+      * uiconfig.properties.loginserver.NG.LDAP.groupsAttr: This is the LDAP attribute which specifies of which groups a user is a member. For MSAD this is memberOf, but could also be something like groupOfUniqueNames, etc. in other LDAP implementations.
+      * uiconfig.properties.loginserver.NG.LDAP.expressions.searchLoginUser: If specified, this value is a valid LDAP filter which any value user must match.  This can be used to only authenticate a user if they are a member of a specific LDAP group.
+    * uiconfig.properties.loginserver.NG.SignUp: This section specifies a default org and space in which to put users who can successfully authenticate.
+      * uiconfig.properties.loginserver.NG.SignUp.type: Do not change this value from UAASyncByGroup.
+      * uiconfig.properties.loginserver.NG.SignUp.groups: This is an array of groups which will allow you to specify that all users in this LDAP group should be placed in to a specific org and space with the defined role.
+      * uiconfig.properties.loginserver.NG.SignUp.groups.name: The DN of the group for this entry.
+      * uiconfig.properties.loginserver.NG.SignUp.groups.orgName: The name of the org to which people in this LDAP group should belong.
+      * uiconfig.properties.loginserver.NG.SignUp.groups.orgRole: The role this user should have in the specified org. orgRole should be one of: OrgManager, BillingManager, OrgAuditor
+      * uiconfig.properties.loginserver.NG.SignUp.groups.spaceName: The name of the space to which people in this LDAP group should belong.
+      * uiconfig.properties.loginserver.NG.SignUp.groups.spaceRole: The role this user should have in the specified space. spaceRole should be one of: SpaceManager, SpaceDeveloper, or SpaceAuditor
+      *NOTE:* A user's org and space assignments can be changed after their initial successful authentication via the `cf` cli.
+    * uiconfig.properties.loginserver.NG.UAA: This is the internal user database for CF and can be used to add additional users or service accounts which do not exist in LDAP.
+      * uiconfig.properties.loginserver.NG.UAA.userPattern: A regular expression pattern which specifies which users should be searched for in UAA.  This value must be specified to prevent a syntax error during installation, but can contain ".\*".
+      * uiconfig.properties.loginserver.NG.UAA.usersList: A list of all users who should be authenticated via UAA vs LDAP. It is unclear why the list must be created ahead of time. If there are service accounts that should be created up front this is the place to do it. Best practice is to put on the the admin user here and put all other accounts into the LDAP server.
+      * uiconfig.properties.loginserver.NG.UAA.cliSearchOrder: Same as in the LDAP section, this specifies the order CF will use to test for successful authentication amongst all authentication providers.
+      * uiconfig.properties.loginserver.NG.UAA.id: Do not change from UAA
+      * uiconfig.properties.loginserver.NG.UAA.type: Do not change from UAA
+      * uiconfig.properties.loginserver.NG.UAA.default: Only one provider can have default set to true.  If LDAP is the default provider and is specified in the LDAP section then this must be false.
+    * uiconfig.properties.loginserver.autoProvisionUsers: The users which should be auto-provisioned into the above org and space when they have been successfully authenticated.  This is a pattern.  ".\*" will autoprovision all authenticated users who match the groups specified in the SignUp section.  Other patterns can be used to specify a naming convention for users who should be auto-provisioned.
+    * uiconfig.properties.loginserver.clientsThatAcceptNonProvisionedUsers: Do not change this from "null".
+
+  Save your ldap.yaml file and then insert it into the bosh pipeline with the following commands:
+
+  1. Push the config file to the inception container
+  ```
+  cd /opt/cf
+  ./cm extension -e cfp-ext-ldap save -c ldap.yml
+  ```
+  2. Insert the extention into the CF deployment.
+  ```
+  ./cm states insert -i cfp-ext-ldap -n deploy-cf -b
+  ```
+  3. Reset the engine
+  ```
+  ./cm engine reset
+  ```
+  4. Relaunch your deployment to deploy your LDAP integration
+  ```
+  ./launch_deployment.sh -c uiconfig.yml | tee deploy_ldap.log
+  ```
+  **IMPORTANT:** The uiconfig.yml file you specify here is not the ldap.yml file that you just created.  The ldap.yml file has already been pushed to the inception container to be used for this configuration.  This uiconfig.yml file is the same uiconfig.yml file you used for your successful CF installation.
+
+  The engine will recognize that there is a new step added (the ldap integration step) and will install that integration.  It will also recognize that nothing else has changed.
+
+  To test your ldap integration use the following command from any command line where curl is available.  The domain specified is the infrastructure domain, e.g. login.bluemix.mydomain.com:
+  ```
+  curl https://login.<mydomain>/UAALoginServerWAR/check
+  ```
+
+  Check the status under "Authentication Method: NG". A successful LDAP connection should look something like this:
+  ```
+Connectivity Check for realm source 'csplab_ldap' (type: 'LDAP')
+
+General Connectivity:
+
+LDAP Server csplab_ldap: ok
+
+Search for login user:
+ok
+
+General search user:
+ok
+
+General search group:
+ok
+```
+
+To authenticate a user against LDAP you must create a new user with the cf cli (as noted below) assigning the user any arbitrary password.  When the user authenticates, CF will use the LDAP password for authentication.
 
 ## Troubleshooting
 If the installer fails it will output some information which is not very useful plus something like "bosh task 97 --debug" for more information (the 97 may be any number). bosh runs inside the inception container and so executing this command requires a bash shell on the container and not on the installer VM's local filesystem.
