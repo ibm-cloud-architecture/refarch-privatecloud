@@ -528,7 +528,13 @@ If you use a Virtual Distributed Switch (vDS) Network:
 
   First, we will reconfigure logstash to receive CloudFoundry (syslog formatted) messages by editing the configmap in the kube-system namespace named "logstash-pipeline".
 
-  The easiest way to make these changes is to use the kubectl cli with the `kubectl edit configmap logstash-pipeline --namespace=kube-system` command.
+  The easiest way to make these changes is to use the kubectl cli:
+
+      ICP 2.1.0.2:
+        `kubectl edit configmap logstash-pipeline --namespace=kube-system`
+
+      ICP 2.1.0.3:
+        `kubectl edit configmap logging-elk-logstash-config --namespace=kube-system`
 
   After executing this command you will get a VI editor on the screen with the contents of the configmap file available for editing.
 
@@ -602,25 +608,50 @@ If you type ":wq" and the window re-opens it means you have an error in your con
 
 _NOTE:_ If you receive a message that says: "# * : Invalid value: "The edited file failed validation": [invalid character 'a' looking for beginning of value, invalid character 'a' looking for beginning of value]", it is likely that this is a false error and if you just type ":wq" again, it will save, exit, and work fine.
 
+The above filter will cause JSON formatted CF messages to be parsed and added to a field named 'cfp'.
+
 Next, you will need to create a kubernetes service to expose the logstash database outside of the cluster.  There is an existing logstash service, but it is defined as a ClusterIP and not NodePort or Ingress, so it cannot be used outside of the cluster.
 
 From the ICP UI, on the Network Access -> Services page click the "Create Service" link at the top - right of the page and enter the following:
 
-General:
-  * Name: CloudFoundryLogs
-  * Namespace: kube-system
-  * Type: NodePort
+ICP 2.1.0.2
+  General:
+    * Name: CloudFoundryLogs
+    * Namespace: kube-system
+    * Type: NodePort
 
-Labels:
-  * Label: app, Value: logstash
-  * Label: component, Value: logstash
+  Labels:
+    * Label: app, Value: logstash
+    * Label: component, Value: logstash
 
-Ports:
-  * Protocol: TCP, Name: tcp, Port: 5000, TargetPort: 5000
-  * Protocol: UDP, Name: udp, Port: 5000, TargetPort: 5000
+  Ports:
+    * Protocol: TCP, Name: tcp, Port: 5000, TargetPort: 5000
+    * Protocol: UDP, Name: udp, Port: 5000, TargetPort: 5000
 
-Selectors:
-  * Selector: name, Value: logstash
+  Selectors:
+    * Selector: name, Value: logstash
+
+ICP 2.1.0.3
+  General:
+    * Name: CloudFoundryLogs
+    * Namespace: kube-System
+    * type: NodePort
+
+  Labels:
+    * Label: app, Value: logging-elk-elasticsearch
+    * Label: chart, Value: ibm-icplogging-1.0.0
+    * Label: Component, Value logstash
+    * Label: Heritage Value: tiller
+    * Label: release, Value: logging
+
+  Ports:
+    * Protocol TCP, Name: tcp, Port: 5000, TargetPort: 5000
+
+  Selectors:
+    * Selector: app, Value: logging-elk-elasticsearch
+    * Selector: component, Value: logstash
+    * Selector: role, Value: logstash
+
 
 Click `Create` to create the service.
 
@@ -629,7 +660,7 @@ In the search box on that same page type "cf-logstash" and click the link to the
 
 This will display the details of the newly created service including the node port on which the service is listening.
 
-When configuring CloudFoundry for log forwarding you will need this port number as your target.
+*IMPORTANT:* When configuring CloudFoundry for log forwarding you will need this port number as your target.
 
 **Note:** The service will listen on all worker nodes as well as the proxy node.  If the proxy node is exposed outside a firewall, you can use the proxy VIP address (assuming traffic is not blocked) for the destination IP, but this will likely result in all log traffic traversing the firewall which could add significant load and the ports 30000 and above may not be exposed over the firewall.  The default link in the pane displaying details points to this proxy IP address by default, but for these reasons, this address may not work in your environment.
 
@@ -666,7 +697,7 @@ This will redeploy CF and configure logging.  Importantly, if you change the exp
 
 To configure an application to send logs to the k8s based ELK stack use the following commands:
   ```
-  cf cups log-drain -l syslog://<ip of logstash service>:5044
+  cf cups log-drain -l syslog://<ip of logstash service>:30384
   cf bind-service <appname> log-drain
   cf restage <appname>
   ```
@@ -817,7 +848,7 @@ connect.sh -name csplab
 You are now running a bash shell on the inception vm.  To get more information about the failed task execute:
 
 ```
-bosh task <task number> --debug
+bosh2 -e IBMCloudPrivate task <task number> --debug
 ```
 
 Don't forget to type `exit` on the command line to exit the container shell when you are done.
@@ -839,7 +870,7 @@ If a task is in a SUCCESS state and you want to reinstall, edit the file and rep
 
 ### Login to a specific bosh image
 From the inception container execute "bosh ssh <service>"
-e.g. `bosh -d /data/CloudFoundry/cf-deploy-poc.yml ssh cc_core/0`
+e.g. `bosh2 -e IBMCloudPrivate -d /data/CloudFoundry/cf-deploy-poc.yml ssh cc_core/0`
 On the bosh container, data is in /var/vcap.  Most calls will require running as root, so use `sudo <command>` or become root with `sudo su -`.
 
 
@@ -848,12 +879,12 @@ See `less /data/<env>/CloudFoundry/credentials.yml`
 
 ### To execute bosh commands
 ```
-bosh login
-bosh target http://<director_ip>:25555
+bosh2 -e IBMCloudPrivate login
+bosh2 -e IBMCloudPrivate target http://<director_ip>:25555
 ```
 
 ### Show all bosh VMs and their IP addresses
-From the inception container execute `bosh vms`
+From the inception container execute `bosh2 -e IBMCloudPrivate vms`
 
 
 
