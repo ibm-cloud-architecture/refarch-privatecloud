@@ -70,11 +70,11 @@ See the ICP Knowledge Center section, [Installing an IBM Cloud Private Enterpris
 Suggested ICP "sandbox" deployment resource allocations are described in the table below.
 
 | Machine Role       | Number |  vCPU/Core   | Memory (GB)  | Storage<br/>Disks x Size (GB)|
-|--------------------|:------:|-------------:|-------------:|-----------------------------:|
-|   Boot/Master/Mgmt | 1      |  2           |  8           |  1 x 250                     |
-|   Proxy            | 1      |  2           |  4           |  1 x 100                     |
-|   Worker           | 2 or 3 |  2           |  8           |  1 x 100                     |
-|   NFS Server       |  1     |              |              |  1 x 100                     |
+|--------------------|:------:|-------------:|-------------:|---------------------------:|
+|   Boot/Master/Mgmt | 1      |  2           |  8           |  1 x 250                   |
+|   Proxy            | 1      |  2           |  4           |  1 x 100                   |
+|   Worker           | 2 or 3 |  2           |  8           |  1 x 100                   |
+|   NFS Server       | 1      |  2           |  8           |  1 x 100                   |
 
 ## A production ICP installation in a nutshell:
 See the ICP Knowledge Center section, [Installing an IBM Cloud Private Enterprise HA environment](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/install_app_mod_HA.html)
@@ -104,15 +104,17 @@ Suggested ICP production deployment resource allocations are described in the ta
 
 *NOTE:* For a production VM, be sure to use Logical Volume Manager (LVM) for all file systems other than those that require a physical partition, e.g., `/boot`, swap.
 
-**ICP Master** and **ICP Management** nodes suggested disk partitioning (260 GB disk).  For master and management nodes we recommend that `/var` be at least 60 GB which is larger than what is specified in the ICP Knowledge Center documentation.  
+**ICP Master** and **ICP Management** nodes suggested disk partitioning (300 GB disk).  For master and management nodes we recommend that `/var` be at least 60 GB which is larger than what is specified in the ICP Knowledge Center documentation.
+
+*NOTE:* ICP 2.1.0.3 moves to using /var instead of /var and /opt.  The tables below reflect disk sizings as of ICP 2.1.0.2.
 
 | File System Name          |  Mount Point      |  Size (GB)    |
 |:--------------------------|:------------------|--------------:|
-|   system (aka root)       |   /               |    40         |
+|   system (aka root)       |   /               |    20         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     8         |
-|   var                     |   /var            |    60 (70 if VA enabled) |
-|   tmp                     |   /tmp            |    20         |
+|   var                     |   /var            |    70         |
+|   tmp                     |   /tmp            |    50         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   120         |
 
@@ -135,7 +137,7 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   system (aka root)       |   /               |    20         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     4         |
-|   var                     |   /var            |    60 (70 if VA enabled) |
+|   var                     |   /var            |    70         |
 |   tmp                     |   /tmp            |    10         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   120         |
@@ -147,7 +149,7 @@ Suggested ICP production deployment resource allocations are described in the ta
 |   system (aka root)       |   /               |    20         |
 |   boot                    |   /boot           |   256 MB      |
 |   swap                    |                   |     4         |
-|   var                     |   /var            |    40 (50 if VA enabled) |
+|   var                     |   /var            |    50         |
 |   tmp                     |   /tmp            |    10         |
 |   home                    |   /home           |    10         |
 |   opt                     |   /opt            |   110         |
@@ -156,9 +158,9 @@ Suggested ICP production deployment resource allocations are described in the ta
 
 ## When is a separate boot node needed?
 
-Usually the boot node role combined with a master node.
+We recommend that a separate boot node be used for convenience reasons. This is particularly true for scenarios where the ICP cluster is isolated from access to the public Internet.  When the number of deployed VMs is to be minimized, the master node can be used as the boot server.
 
-A separate boot node is appropriate if the nodes in the cluster are not permitted to have direct access to the Internet.  A separate boot node that has access to the Internet and to the ICP cluster nodes can serve as an intermediate staging node for getting content from the Internet to the ICP cluster nodes.
+A separate boot node is appropriate if the nodes in the cluster are not permitted to have direct access to the public Internet.  A separate boot node that has access to the Internet and to the ICP cluster nodes can serve as an intermediate staging node for getting content from the Internet to the ICP cluster nodes.
 
 The resources needed for a boot node are something on the order of 2 vCPU, 8 GB memory, 250 GB disk.
 
@@ -301,68 +303,6 @@ Additional notes on host name:
 
 The configuration for ssh is in `/etc/ssh/sshd_config`.  You will notice that `PermitRootLogin` is commented out.  However, `UsePAM` is set to yes.  A PAM configuration file for `sshd` is in `/etc/pam.d`. Configuration of the PAM plugin for `sshd` is beyond the scope of this document.
 
-## Yum repository configuration
-
-*NOTE:* A RHEL virtual machine provided for you will very likely already have a yum repository configured, most likely using a Red Hat Satellite (RHS) server.  This section is intended to provide guidance for those who need to configure a yum repository.
-
-*NOTE:* You may need to provide a userid and password as part of the yum repository URL. If you are using an ID with an @ character in it, e.g., an Internet email address, use %40 in place of the @ character.  Otherwise the repository URL is misinterpreted because an @ character marks the beginning of the host name in the URL.
-
-You need to set up the repos for yum to be able to install additional packages and get OS updates.
-
-The yum repo definition files are in `/etc/yum.repos.d/`. Any file in that directory with a `.repo` extension will be treated as a repo definition.
-
-Each file may have multiple repositories defined.
-
-Each repo definition typically has at least 5 attributes:
-```
-[rhel-os]
-name=Red Hat Enterprise Linux at my site
-enabled=1
-gpgcheck=0
-baseurl=<protocol>://<userid>:<password>@<repo_host>/<repo_path>
-```
-
-The `<protocol>` could be ftp or http(s) for remote repos, or file for a local repo.
-
-If the repository requires a `<userid>` and `<password>`, that is included in the URL as shown.
-
-See the Red Hat documentation [Configuring Yum and Yum Repositories](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/sec-configuring_yum_and_yum_repositories) for more details.
-
-The `<repo_path>` needs to point to a directory with a `repodata` sub-directory where a file named `repomd.xml` is found.  If you need to explore a repository to determine the <repo_path>, something like Filezilla is very handy to use for exploration.  You can also confirm your user ID and password in getting to the repo.  (See figure below.)
-
-![Sample Yum Repository Directory Structure](images/YumRepoDirectoryStructure.png)
-
-In the figure above the `<repo_path>` text would be:  `/redhat/rhs6/server/7/7Server/x86_64/extras/os/`
-
-You may need to explore a given collection of yum repositories in order to figure out where various packages are located.  Packages are typically spread across multiple directories such as "os", "optional" and "extras".
-
-Depending on how DNS is configured, you may need to add an entry in the `/etc/hosts` file for the `<repo_host>`.
-
-Once you have configured the yum repository you can do a quick test to confirm the configuration file is correct:
-```
-yum repolist
-```
-Yum caches its repository information as a performance enhancement. If you want to "clean" the cache to make sure you are not using stale information about yum repositories, use:
-```
-yum clean all
-```
-Once you have the desired yum repositories configured, you can proceed with any RHEL configuration that requires additional packages (rpms) to be installed.
-
-At some point while using yum, you may see "Given file does not exist" errors such as:
-```
-rhel-optional/updateinfo       FAILED                                          
-ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid1>-updateinfo.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
-Trying other mirror.
-rhel-optional/primary          FAILED                                          
-ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid2>-primary.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
-Trying other mirror.
-ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid2>-primary.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
-Trying other mirror.
-ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optional/os/repodata/<uuid2>-primary.xml.gz: [Errno 14] FTP Error 550 - Given file does not exist
-```
-If you inspect the yum repository, you will notice that the `<uuid1>-updateinfo.xml.gz` and `<uuid2>-primary.xml.gz` files have a new UUID.
-
-A `yum clean all` will likely clean up such errors.
 
 ## Update RHEL
 This section describes the steps to update RHEL.
@@ -377,74 +317,8 @@ It is assumed you have configured your VM with yum repositories.
 
 2. Then reboot. (`shutdown -r now`). You need to reboot to get to the latest kernel.
 
-## Additional packages to install
+[Additional (optional) Packages to Install](additional-packages.md)
 
-This section lists some software that is needed at some time or another and it is not part of a minimal RHEL server installation.
-
-| **Package**    | **Install Command**         | **Comments**                     |
-|:--------------:|:----------------------------|:---------------------------------|
-| yum-utils      | `yum -y install yum-utils`  | for yum-config-manager           |        
-| unzip          | `yum -y install unzip`      | zip archive extractor            |
-| git            | `yum -y install git`        | source file repo management      |
-| bind-utils     | `yum -y install bind-utils` | for nslookup                     |
-| psmisc         | `yum -y install psmsc`      | for fuser to find/kill processes holding file locks     |
-| lsof           | `yum -y install lsof`       | old school utility to find processes holding file locks |
-| dos2unix       | `yum -y install dos2unix`   | for cleaning up files that came from Windows            |
-
-
-## Install NTP
-
-Some mechanism is needed on each VM to keep the time synchronized with the rest of the world.  All of the VMs in the ICP cluster will need to share a common notion of time, and the usual approach to keeping time is to use NTP.  
-
-*NOTE:* If you are using virtual machines provided to you, it is very likely NTP is already installed and enabled for startup at machine boot.
-
-*NOTE:* If you are using virtual machines provided to you, and NTP is not installed and in use, the VMs may be using some other time provider, such as the hypervisor.  Check with your provider to determine if it is necessary to install NTP.
-
-- Install NTP
-
-    ```
-    yum -y install ntp
-    ```
-
--	Check the NTP configuration in `/etc/ntp.conf`
-
-See the Red Hat documentation, [Configure NTP](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/system_administrators_guide/s1-configure_ntp), for more detailed guidance.
-
-*NOTE:* The default `/etc/ntp.conf` content is likely sufficient.  You may want to add one or more local time providers to the list of servers provided by Red Hat:
-```
-server 0.rhel.pool.ntp.org iburst
-server 1.rhel.pool.ntp.org iburst
-server 2.rhel.pool.ntp.org iburst
-server 3.rhel.pool.ntp.org iburst
-```
-- Enable the NTP daemon.  (This will make sure ntpd starts up when the machine is booted.)
-
-  *NOTE:* The name of the service is **ntpd**, not ntp.  (Go figure.)
-  ```
-  systemctl enable ntpd
-  ```
-
-- Start the NTP service.
-  ```
-  systemctl start ntpd
-  ```
-
-- Check the NTP service status.
-  ```
-  systemctl status ntpd
-  ```
-
-- If you need to stop the NTP service:
-  ```
-	systemctl stop ntpd
-  ```
-
-- To get a list of peer servers in use:
-  ```
-	ntpq -p
-  ```
-
-*NOTE:* Leave NTPD started and enabled (so that it starts at boot time).
 
 ## Configure /etc/hosts
 
@@ -452,7 +326,7 @@ This section describes the steps to add entries to the `/etc/hosts` file of each
 
 *NOTE:* This section can be skipped if DNS is being used for host name resolution.  You can use `nslookup` on the IP addresses of a sampling of cluster members to determine if there are DNS entries for the cluster member VMs.  If not, then you need to configure `/etc/hosts`.
 
-*NOTE:* The "minimal" RHEL install does not include bind-utils, which is the RPM that contains the `nslookup` command.  If you are using a minimal RHEL image, then you need to install bind-utils if you want to use `nslookup`.  (`yum -y install bind-utils`)
+*NOTE:* The "minimal" RHEL install does not include `bind-utils`, which is the RPM that contains the `nslookup` command.  If you are using a minimal RHEL image, then you need to install `bind-utils` if you want to use `nslookup`.  (`yum -y install bind-utils`)
 
 - For each VM in the cluster, edit `/etc/hosts` and add an entry for each VM in the cluster.
 
@@ -526,7 +400,17 @@ If the `/var/lib/mysql` directory exists on any of the ICP cluster VMs, the inst
   rmdir /var/lib/mysql
   ```
 
+# Installing Docker using the Passport Advantage executable
+
+*WARNING:* For ICP 2.1.0.2 on RHEL, you must install Docker provided in Passport Advantage for ICP.  Search Passport Advantage using `IBM Cloud Private 2.1.0.2 Docker`.  The part number is `CNR72EN`
+
+- Install a pre-req: `yum -y install policycoreutils-python`
+- Make `icp-docker-17.09_x86_64.bin` executable: `chmod +x icp-docker-17.09_x86_64.bin`
+- Run the install: `./icp-docker-17.09_x86_64.bin --install`
+
 # Installing Docker CE using the public Docker yum repository
+
+*WARNING:* For ICP 2.1.0.2 on RHEL, you must install Docker provided in Passport Advantage for ICP.  Search Passport Advantage using `IBM Cloud Private 2.1.0.2 Docker`.  The part number is `CNR72EN`
 
 You have two options for installing Docker:
 1. Install Docker only on the boot-master machine and let Docker be installed on all of the other cluster members as part of the ICP installation.
@@ -683,639 +567,6 @@ Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service 
 To stop docker:
 ```
 > systemctl stop docker
-```
-
-# Configure passwordless ssh among cluster/cloud members
-
-The "boot master" VM needs to have root access via ssh to the other members of the cloud.
-
-*NOTE:* In the description below, it is assumed that DNS is in use and the host names for the ICP cluster VMs are registered in the DNS.  If DNS is not in use, then the `/etc/hosts` files on each of the ICP cluster VMs must have been set up to map host names to IP addresses.  Hence, host names are used in the samples. (The ssh-copy-id command requires the use of host names.)
-
-*NOTE:* Substitute your actual host names In the sample commands in this section.
-For the ICP KC instructions to do this work, see [Sharing SSH keys among cluster nodes](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0/installing/ssh_keys.html)
-
-- Login to the boot-master node as root
-
-- On the boot-master, as root, from root’s home directory (/root) execute:
-```
-> ssh-keygen -b 4096 -f ~/.ssh/id_rsa -N ""
-```
-The above command requires no responses to prompts.
-You should see something like:
-```
-Generating public/private rsa key pair.
-Your identification has been saved in /root/.ssh/id_rsa.
-Your public key has been saved in /root/.ssh/id_rsa.pub.
-The key fingerprint is:
-REDACTED root@REDACTED
-The key's randomart image is:
-REDACTED
-```
-
-- Now, executing a directory listing on /root/.ssh should show two files: id_rsa, id_rsa.pub. (A known_hosts file may also be present.)
-```
-> ls -l ~/.ssh
-  total 8
-  -rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
-  -rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
-```
-- Using the `ssh-copy-id` command from root's home directory, copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which you are currently operating).
-
-*NOTE:* The copy of the SSH ID to other hosts requires the use of the target host name in the ssh-copy-id command.  Do not use an IP address, you will not be able to get past the authentication step when you attempt to enter the password for root on the target host.
-
-In the command below `<master>` is used as a placeholder for the actual boot-master fully qualified host name (FQDN).
-```
-> ssh-copy-id -i ~/.ssh/id_rsa.pub root@<master>
-```
-
-You will be prompted to confirm that you want to connect to the `<master>`. Then you will be prompted for root's password on `<master>`, which is the target for this first passwordless ssh configuration.
-
-*NOTE:* If you are not prompted to confirm that you want to connect to the target machine, and for the root password of the target machine, then make sure the target machine has a .ssh directory in /root.  The permissions on the .ssh directory should be 700. Also make sure you can ping the target host by host name.  (DNS or `/etc/hosts` on the boot-master needs to be configured to allow the target host name to be resolved.)
-
-- Now try logging into the machine, with: `ssh root@<master>` and check to make sure that only the key(s) you wanted were added.
-
-At this point you should see two additional files in the .ssh directory:
-```
-> ls -l ~/.ssh
-  total 16
-  -rw-------. 1 root root  402 Jun 30 12:17 authorized_keys
-  -rw-------. 1 root root 1675 Jun 30 12:11 id_rsa
-  -rw-r--r--. 1 root root  402 Jun 30 12:11 id_rsa.pub
-  -rw-r--r--. 1 root root  191 Jun 30 12:17 known_hosts
-```
--	Repeat for each additional server in the cluster/cloud.  (As above, you will need to answer yes to add the ECDSA key for each host to the known_hosts file and provide the root password of the target host.)
-
-In the commands below, `<proxy>` and `<worker_##>` is used as a placeholder for the fully qualified host names (FQDN) for machines in the cluster.
-```
-> ssh-copy-id -i ./.ssh/id_rsa.pub root@<proxy>
-> ssh-copy-id -i ./.ssh/id_rsa.pub root@<worker_01>
-> ssh-copy-id -i ./.ssh/id_rsa.pub root@<worker_02>
-  etc
-```
-
-- When this is complete, you should be able to ssh from the boot-master node to each of the other nodes as root without having to provide a password. You can test this by executing and ssh from the boot-master host to any of the other members of the ICP cluster:
-```
-[root@<master> ~]# ssh root@<proxy>
-Last login: Thu Jun 29 14:44:34 2017
-[root@<proxy> ~]# exit
-logout
-Connection to <proxy> closed.
-[root@<master> ~]# ssh root@<worker_01>
-Last login: Fri Jun 30 09:39:31 2017
-[root@<worker_01> ~]# exit
-logout
-Connection to <worker_01> closed.
-[root@<master> ~]#
-etc
-```
-If you cannot gain access via SSH without a password, check the known_hosts and authorized_keys files on the hosts other than the boot-master.
-
-# Install and configure a GlusterFS server cluster running in Docker
-
-If you are not going to use GlusterFS, then this section can be skipped.
-
-This section describes the steps for installation and configuration of a 3 node GlusterFS server cluster.  The GlusterFS server cluster is not included in the ICP cluster itself in order to keep the GlusterFS servers dedicated to the role of providing a file sharing service.
-
-Heketi is the administrative client for Gluster.  The section, [Install Heketi administration client for Gluster](#Install Heketi administration client for Gluster) desribes the installation and configuration of Heketi.
-
-The instructions in this section describe how to run Gluster from a docker container. Other approaches run Gluster "natively".  
-
-*NOTE:* It is recommended that the GlusterFS server cluster be created prior to the actual installation of ICP.  You may choose to incorporate a GlusterFS cluster after ICP is installed.
-
-A sample resource configuration for the GlusterFS VMs is summarized in the table below.
-
-| Machine Role     | Number |  vCPU/Core   | Memory (GB)  | Storage<br/>Disks x Size (GB) |
-|------------------|:------:|-------------:|-------------:|------------------------------:|
-|   GlusterFS      |  3+    |  4           |  16          |  1 x 40 (/dev/sda)<br/>1 x 128 (/dev/sdb)<br/>1 x 128 (/dev/sdc) |
-
-- During the VM creation using vCenter, you can add disks when you get to the "machine settings" screen.  At the bottom of the screen there is a "New devices" pull-down menu.  Select "Hard disk" and click the add button. (See figure below.)
-
-![Adding Hard Disk at VM creation](images/09_GlusterServerRHELInstall.png)
-
-![Gluster Server Disks (Sample)](images/10_GlusterDisksAtInstall.png)
-
-- The GlusterFS disks can be thin provisioned.
-
-- You can add disks to an already deployed VM from the vCenter console by opening the "Machine Settings" dialog and adding the disks as described above.
-
-- Only the system disk needs to be partitioned.  Heketi will do all the configuration of the storage drives.
-
-The following table is a summary of the system disk partitioning on a GlusterFS server.
-
-| File System Name          |  Mount Point      |  Size (GB)    |
-|:--------------------------|:------------------|--------------:|
-|   system (aka root)       |   /               |    32         |
-|   boot                    |   /boot           |   256 MB      |
-|   swap                    |                   |     8         |
-
-*NOTE:* The remainder of these instructions assume that Ansible is set up on an administrator machine or some machine that can be used for running Ansible command lines.  The Ansible hosts file is assumed to have a group defined named "gluster" with the GlusterFS servers in it.  In the example Ansible command lines, the default Ansible hosts file in `/etc/ansible/hosts` is used.  You may prefer to create a hosts file and pass its path in on the command line with the -i option.
-
-*NOTE:* It is assumed the user running Ansible has passwordless sudo root privileges on the GlusterFS servers.
-
-*NOTE:* In the Ansible commands the -b and --become options are synonyms.  Usually the module or shell command to be executed requires that the user privileges become elevated to root.
-
-*NOTE:* The simplest instructions assume the GlusterFS server VMs have public Internet access to get to the site where Docker can pull the latest GlusterFS image. If that is not the case, we provide alternate steps that assume only that the Ansible control machine has access to the public Internet.
-
-On each GlusterFS server in the GlusterFS cluster:
-- Set up yum repository for RHEL
-- Update RHEL
-- Install NTP, start and enable NTPD
-- Install yum-utils (if you want to use yum-config-manager)
-- Install bind-utils
-- Install Docker, start and enable Docker
-- Stop, disable firewalld
-- Create an "Ansible user", e.g., icpmaestro and include that user in the wheel group.
-- Modify the /etc/sudoers file (`visudo`) to allow the wheel group sudo any command without password.
-
-- Install the latest version of GlusterFS
-```
-ansible gluster -b -m shell -a "docker pull gluster/gluster-centos:latest"
-```
-
-If the GlusterFS VMs cannot get directly to the public Internet, then the following steps can be used to install GlusterFS.  We're assuming your Ansible control machine has Docker installed on it.
-
-- Pull the latest Gluster image on the Ansible control machine; save it; and push it to the GlusterFS server nodes using Ansible. (This step is a substitute for the previous step when the GlusterFS server VMs do not have access to the public Internet.)
-```
-docker pull gluster/gluster-centos:latest
-docker save gluster/gluster-centos:latest | gzip -c > gluster-centos.tar.gz
-ansible gluster -b -m copy -a 'src=gluster-centos.tar.gz dest=/tmp/gluster-centos.tar.gz'
-ansible gluster -b -m shell -a 'tar -xf /tmp/gluster-centos.tar.gz' -O | docker load'
-```
-- To check that the gluster image got loaded:
-```
-$ ansible gluster -b -m shell -a 'docker images'
-```
-
-- Create a `/var/lib/heketi` directory on the GlusterFS machines. Gluster mounts are to be persisted in `/var/lib/heketi/fstab` on each host.
-```
-$ ansible gluster -b -m file -a 'path=/var/lib/heketi state=directory'
-```
-
-- Start docker in privileged mode running gluster. (Most of the command below is bind mounting container "volumes" to host directories.) (For details on options used in the docker run command below, see Docker documentation: [docker container run](https://docs.docker.com/edge/engine/reference/commandline/container_run/))
-```
-$ ansible gluster -b -m shell -a 'docker run --restart always -v /etc/glusterfs:/etc/glusterfs:z -v /var/lib/glusterd:/var/lib/glusterd:z -v /var/log/glusterfs:/var/log/glusterfs:z -v /sys/fs/cgroup:/sys/fs/cgroup:ro -v /root/.ssh:/root/.ssh:z -v /var/lib/heketi:/var/lib/heketi:z -d --privileged=true --net=host -v /dev/:/dev gluster/gluster-centos:latest'
-```
-
-- To check that gluster is running on each GlusterFS machine, you can use the following command:
-```
-$ ansible gluster -b -m shell -a 'docker ps -a'
-```
-
-*NOTE:* For information about working with RHEL 7 kernel modules see the Red Hat documentation section [Working with Kernel Modules](https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/7/html/Kernel_Administration_Guide/chap-Documentation-Kernel_Administration_Guide-Working_with_kernel_modules.html)
-
-- Configure kernel to use the `dm_thin_pool` module.  (The `dm_thin_pool` module supports LVM thin provisioning. Kernel modules to be loaded at startup are listed in `*.conf` files in `/etc/modules-load.d`.)
-```
-ansible gluster -m shell -a 'modprobe dm_thin_pool' --become
-ansible gluster -m shell -a 'echo dm_thin_pool | tee -a /etc/modules-load.d/modules.conf' --become
-```
-If you want to check that dm_thin_pool got loaded in the docker image repository:
-```
-$ ansible gluster -b -m shell -a 'lsmod | grep dm_thin_pool'
-gluster03.yyy.zzz | SUCCESS | rc=0 >>
-dm_thin_pool           65565  0
-dm_persistent_data     67216  1 dm_thin_pool
-dm_bio_prison          15907  1 dm_thin_pool
-dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm_thin_pool
-
-gluster01.yyy.zzz | SUCCESS | rc=0 >>
-dm_thin_pool           65565  0
-dm_persistent_data     67216  1 dm_thin_pool
-dm_bio_prison          15907  1 dm_thin_pool
-dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm_thin_pool
-
-gluster02.yyy.zzz | SUCCESS | rc=0 >>
-dm_thin_pool           65565  0
-dm_persistent_data     67216  1 dm_thin_pool
-dm_bio_prison          15907  1 dm_thin_pool
-dm_mod                114430  11 dm_log,dm_persistent_data,dm_mirror,dm_bufio,dm_thin_pool
-
-```
-
-At this point, the GlusterFS server cluster is up and running and you can proceed with the ICP installation. (*TBD:* There are more steps needed to allocate storage for the ICP master node shared file systems before doing the actual ICP installation.)
-
-# Install "native" GlusterFS server
-
-This section describes the steps to installing the GlusterFS server directly on RHEL (not in a container).
-
-If you are using the GlusterFS server installed in a Docker container, (obviously) this section must be skipped.
-
-*NOTE:* The Gluster server topology and storage volumes do not need to be configured manually.  In a later section the hekeit-cli is used to configure the server topology based on a YAML configuration file.  The heketi-cli can then be used to define mountable storage volumes.  Many sources you find on the Internet describe extensive manual steps to configure storage devices and volumes.  You can ignore/skip all those configuration instructions.  The Gluster server machines need only to have raw disk devices defined on them.
-
-Installing GlusterFS server on RHEL rather than in a container may be a matter of preference and your level of comfort with containers vs native processes.  This section is for those who are more comfortable with working native RHEL processes.
-
-- A yum repository needs to be configured to get the GlusterFS, and Heketi RPMs.
-Here is a sample yum `gluster.repo` file that needs to be created in `/etc/yum.repos.d/`.
-```
-[Gluster_4.0]
-name=Gluster 3.13
-baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-4.0/
-gpgcheck=0
-enabled=1
-```
-*NOTE:* Go out to http://mirror.centos.org/ and walk down the `centos` and `storage` directory tree to find out the latest `gluster` release and update the `gluster.repo` `baseurl` accordingly.
-
-- Disable SE-Linux enforcement (*TBD:* I'm not convinced this is necessary.  Gluster doc does not indicate this is necessary.  Need to test installing and running with `SELINUX=enforcing`.)
-  - Edit /etc/selinux/config and set `SELINUX=disabled`
-  - Reboot (`shutdown -r now`)
-
-- Configure `dm_thin_pool` kernel module
-```
-> modprobe dm_thin_pool
-```
-
-- Configure a `dm_thin_pool` in a conf file in `/etc/modules-load.d/` to support setting it at machine reboot. (The files in `/etc/modules-load.d/` are used to configure the kernel when the machine boots.)
-```
-> echo dm_thin_pool >> /etc/modules-load.d/dm_thin_pool.conf
-```
-
-- Install glusterfs-server
-```
-> yum -y install glusterfs-server
-```
-
-- Enable and start the `glusterd` daemon.
-```
-> systemctl enable --now glusterd
-```
-
-- Configure passwordless ssh for root among the GlusterFS servers in the cluster.  (This is a multi-way configuration.  Each server needs to be able to ssh to the other servers in the cluster.) (*TBD* Add the detail of the commands.)
-
-- Configure firewalld to open gluster server ports (*TBD* For now, stop,disable firewalld.  See the Gluster Doc on ports that need to be open.)
-
-# Install "native" GlusterFS client
-
-*NOTE:* Ansible playbook to do this: `icp_install_glusterfs_client.yml` with supporting file `dm_thin_pool.conf`.
-
-See GlusterFS documentation for client installation: [Accessing Data: Setting up GlusterFS Clients](http://docs.gluster.org/en/latest/Administrator%20Guide/Setting%20Up%20Clients/)
-
-# Install Heketi on RHEL (aka "native" install)
-
-This section describes the installation of Heketi on RHEL.  Heketi and the Heketi client will be running directly on the VM rather than in Kubernetes pods.
-
-See [Managing Volumes using Heketi](https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.3/html/administration_guide/ch05s02) for Red Hat documentation on the Heketi installation and configuration.  
-
-- A yum repository needs to be configured to get the GlusterFS, and Heketi RPMs.
-Here is a sample yum `glusterfs.repo` file that needs to be created in `/etc/yum.repos.d/`.
-```
-[Gluster_4.0]
-name=Gluster 3.13
-baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-4.0/
-gpgcheck=0
-enabled=1
-```
-
-- It is assumed a yum repo has been configured that points to a GlusterFS repository.
-- Install Heketi server and Heketi CLI
-```
-> yum -y install heketi
-> yum -y install heketi-client
-```
-- Confirm that port 8080 is not already in use. (`netstat -an | grep 8080`)  The heketi server uses port 8080 by default, but that can be changed in the `/etc/heketi/heketi.json` configuration file.  (If you run the heketi server on an ICP master node, you will need to use a port other than 8080 since the ICP admin console process uses 8080.)
-
-- Make sure the command line options on the `ExecStart` property in `/usr/lib/systemd/system/heketi.service` use double-dash (--) rather than a single dash (-).  It is likely the only option will be `--config`.
-
-- Set up passwordless `ssh` between the heketi server node and all of the gluster server nodes for the gluster cluster to be managed.
-```
-> ssh-keygen -b 4096 -t rsa -f /etc/heketi/heketi_key -N ""
-> ssh-copy-id -i /etc/heketi/heketi_key.pub root@gluster##.xxx.yyy
-```
-where gluster##.xxx.yyy represents each of the VMs in your gluster server cluster.
-
-- Change the owner and group of the heketi keys to heketi.  (The heketi user got created as part of the heketi install.)
-```
-> chown heketi:heketi /etc/heketi/heketi_key*
-```
-
-- Modify the `/etc/heketi/heketi.json` file for your installation.
-  - Things to check in particular:
-    - port: something not already in use
-    - use_auth: true
-    - admin key
-    - user key
-    - executor: ssh
-    - sshexec:
-      - keyfile: `/etc/heketi/heketi_key`
-      - user: root
-      - port: 22
-      - fstab: `/etc/fstab`
-  - The kubeexec section can be ignored since sshexec is being used.
-  - The heketi database is in the default location `/var/lib/heketi/heketi.db`.
-  - The remainder of the options can be left at the defaults.
-
-- Enable and start the heketi server.
-```
-> systemctl enable --now heketi
-```
-
-- Smoke test for heketi server:
-```
-> curl http://localhost:8080/hello
-Hello from Heketi
-```
-In the above URL, you will need to use the port you configured for the Heketi server.
-
-*NOTE:* This native install of Heketi has a single point of failure in the `heketi.db` being located on the node where it gets installed.  *TBD:* Revisit this to create a `heketi-db` shared volume in GlusterFS after the initial installation of Heketi.  Stop Heketi.  Move the `heketi.db` file out of `/var/lib/heketi` to some temporary location. Mount the heketi-db shared volume on `/var/lib/heketi` and copy the existing `heketi.db` into the shared volume.  Heketi can then be installed on the other master nodes with that same shared volume mounted on `/var/lib/heketi`.  Only one heketi server an be running at any given time to avoid issues with multiple servers accessing the `heketi.db` file concurrently.  Hence, running the Heketi server in a Kubernetes pod is a stronger approach.
-
-## Things that can go wrong with the Heketi install
-
-### unknown shorthand flag: 'c'
-With Heketi 4.0.0, the service wouild fail to start.  The error in `/var/log/messages` was:
-```
-Error: unknown shorthand flag: 'c' in -config=/etc/heketi/heketi.json
-pvs-master01 heketi: unknown shorthand flag: 'c' in -config=/etc/heketi/heketi.json
-```
-There is nothing actually wrong with the heketi.json.  (You can paste the content into a JSON validator to convince yourself.)
-
-The problem is the -config option to the Heketi executable.  
-
-See https://bugzilla.redhat.com/show_bug.cgi?id=1439120  
-
-You need to edit the `/usr/lib/systemd/system/heketi.service` file and change the `-config` to `--config`.
-
-## Creating the GlusterFS topology using the native heketi-cli.
-
-- Create a topology.json file that represents your GlusterFS server cluster.
-
-*NOTE:* The GlusterFS documentation and other sources indicate the "manage" attribute for each hostname dictionary should be a fully qualified host name and the storage attribute for each host name should be an IP address.  *TBD:* Whether that is actually a strict requirement has not been fully confirmed.  Some deployments have shown that using IP addresses for both attributes also appears to work.
-
-Here is a sample topology.json for a 3 server cluster.
-```
-{
-  "clusters": [
-    {
-      "nodes": [
-        {
-          "node": {
-            "hostnames": {
-              "manage": [
-                "gluster01.yyy.zzz"
-              ],
-              "storage": [
-                "172.16.20.15"
-              ]
-            },
-            "zone": 1
-          },
-          "devices": [
-            "/dev/sdb",
-            "/dev/sdc"
-          ]
-        },
-        {
-          "node": {
-            "hostnames": {
-              "manage": [
-                "gluster02.yyy.zzz"
-              ],
-              "storage": [
-                "172.16.20.16"
-              ]
-            },
-            "zone": 1
-          },
-          "devices": [
-            "/dev/sdb",
-            "/dev/sdc"
-          ]
-        },
-        {
-          "node": {
-            "hostnames": {
-              "manage": [
-                "gluster03.yyy.zzz"
-              ],
-              "storage": [
-                "172.16.20.17"
-              ]
-            },
-            "zone": 1
-          },
-          "devices": [
-            "/dev/sdb",
-            "/dev/sdc"
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-If you tend to fat-finger JSON files, it is a good idea to run the `topology.json` content through a JSON validator. (It is easy to incorrectly edit JSON syntax.)  Search the Internet for a JSON validator to your liking.
-
-To get general usage help with the heketi-cli, use `heketi-cli --help`.
-
-To get more specific help use `heketi-cli command --help` where `command` is one of the heketi-cli commands.  (The "commands" are not verbs but rather an object type or class, e.g., topology, cluster, volume, node and device.)
-
-To get specific help for the "commands" associated with a given object type use `heketi-cli type command --help`, for example `heketi-cli topology load --help`.
-
-When working with heketi-cli it is very convenient to export values for the following environment variables:
-```
-> export HEKETI_CLI_SERVER=http://localhost:8081
-> export HEKETI_CLI_USER=admin
-> export HEKETI_CLI_KEY=passw0rd
-```
-
-*NOTE:* When providing the Heketi server URL, be sure not to include a trailing slash on the URL.  So for example `http://localhost:8081/` will lead to problems.  The trailing slash causes an issue for a volume create operation, for example.
-
-The above example assumes the Heketi server is listening on port 8081 rather than the default port 8080.  The port the Heketi server is using is defined in the heketi.json. In the above, the user and key are based on what is defined in the heketi.json that you configured before starting the Heketi server.  
-
-- Use the heketi-cli to load the topology.json file.
-```
-> heketi-cli topology load --json=topology.json
-```
-
-Obviously, the above command is assumed to have been run from the directory where the topology.json file is located.
-
-Once the topology has successfully loaded you can use `heketi-cli topology info` to see information about the topology.
-
-At this point you are ready to create mountable volumes that can be used by the ICP master nodes for shared storage.
-
-## Things that can go wrong with Heketi CLI
-
-### Error: Unable to get topology information: Unknown user
-This is caused by not having a --user argument or HEKETI_CLI_USER set.
-
-### Error: Unable to get topology information: signature is invalid
-
-This error may occur when you run:
-```
-heketi-cli topology load --json=topology.json
-```
-
-The above assumes the `topology.json` file is in the current directory.
-
-The "signature" in question has nothing to do with the content of the `topology.json` file or some digital signature it might be missing.
-
-When you run an heketi-cli command, and you have JWT authentication enabled (see your `heketi.json`), you need to provide a user and "key" (aka password or secret).  One way to provide the key is to set the environment variable, HEKETI_CLI_KEY.  You can also pass it in on the `heketi-cli` command line with the `--secret` option. (See `heketi-cli --help` usage info.)
-
-If the password/secret you provide does not match up with the user and key in the heketi.json file in current use by the Heketi service, then you will get the "signature is invalid" error.
-
-*NOTE:* If you change anything in the `heketi.json` file you need to restart the Heketi service (`systemctl restart heketi`) to pick up the changes.
-
-# Install Heketi administration client for Gluster in Kubernetes
-
-*NOTE:* The installation of Heketi in Kubernetes is very confusing.  This section is currently under review and should be taken as a collection of notes rather than verified guidance.
-
-If you are not using GlusterFS for the shared file service, this section can be skipped.
-
-If you installed Heketi directly on RHEL, then (obviously) this section can be skipped.
-
-This section describes the steps to install the Heketi administration client for GlusterFS in a Docker container managed by Kubernetes. Another option is to do a "native" Heketi installation.  See [Install Heketi on RHEL (aka "native" install)](#Install Heketi on RHEL (aka "native" install)).
-
-Public Heketi install guide: [Heketi Install for Kubernetes](https://github.com/heketi/heketi/blob/master/doc/admin/install-kubernetes.md)
-
-The Heketi client is installed on the boot-master machine.  (A Heketi client can be installed where you prefer, including on an administrator's desktop machine. The Heketi client obviously must have network access to the Gluster servers to be managed.)
-
-- Follow the instructions for the [Heketi install](https://github.com/heketi/heketi/blob/master/doc/admin/install-kubernetes.md).  (Ignore the GlusterFS installation instructions.  The GlusterFS install was done into docker containers on each of the GlusterFS servers. (See above section of this guide.) Important to note that the glusterfs install uses Docker only, not Kubernetes.  *TBD:* Should we create a separate Kubernetes cluster for GlusterFS?  That seems like overkill.  I would do a "native" GlusterFS install instead.)
-
-- Get the [Heketi CLI](https://github.com/heketi/heketi/releases) for the current release.  (*TBD:* The instructions mention that this has heketi-cli in it.  However, it is vague as to what it means to "install" the heketi-cli.  I'm not sure what it is used for.)
-
-- Extract the archive on the machine where you are doing the installation.  (Create a heketi directory in /root on master01 and extracted the archive there. `tar -xvf heketi-client-v5.0.1.linux.amd64.tar.gz`.  The root of everything in the archive is `heketi-client`, so no need to create a separate directory where the archive is extracted.)
-
-- *TBD:* Also cloned the heketi git hub.  There appears to be more useful content in the git repo than what comes with the release tar ball.  (The following clone command was executed from the /root/heketi staging directory.) Is this a reasonable step or unnecessary? Or should this be done instead of downloading and extracting the heketi tar ball? The heketi release tar ball has the heketi-cli executable in it.  But I'm not sure what that is used for.
-```
-git clone https://github.com/heketi/heketi heketi-git-hub
-```
-
-- Create a kubernetes service account.
-```
-kubectl create -f heketi-client/share/heketi/kubernetes/heketi-service-account.json
-```
-
-- Create a cluster role binding for the service account so it can administer the gluster servers.
-```
-kubectl create clusterrolebinding heketi-gluster-admin --clusterrole=edit --serviceaccount=default:heketi-service-account
-```
-
-- Create kubernetes secret:
-```
-kubectl create secret generic master01-root-ssh-key --from-file=/root/.ssh/id_rsa
-```
-*TDB:* What/where does this secret get used?  Looks like it should be referenced in the heketi.json config file, but I'm not sure how yet.  That's where the heketi executor is set and in this case `ssh` should be used for the executor.
-
-- Make a copy of the `heketi.json` to edit for the install.  (*TBD:* There are a number of `heketi.json` files in the git repo.  I started with the one in `<repo-clone>/etc/heketi.json` )
-
-- Things that may need to be changed in `heketi.json`:
-  - Server port: 8081  (8080 is used by the ICP console.)
-  - use_auth: True
-  - admin key, user key (*TBD:* Are these two secrets a password? Or the name of a kubernetes secret?  Looks like they are supposed to be a password.)
-  - glusterfs executor: ssh
-    - user: root  (*TBD:* Likely need to create a separate heketi user rather than use root.)
-    - key file: /root/.ssh/id_rsa
-    - fstab: (*TBD* Not sure what to use here. On the gluster server nodes we created a `/var/lib/heketi/` where `fstab` is intended to go. So for now, use `/var/lib/heketi/fstab`.)
-  - kubernetes exec (kubeexec)
-    - host: https:<master-vip>:8443
-    - cert: don't care (*TBD:* What would this be in a more realistic configuration.)
-    - insecure: true (*TBD:* Should be false in a realistic deployment.)
-    - user: admin
-    - password: admin
-    - namespace: default (*TBD:* Not sure what this should be.  Maybe `service`)
-    - fstab: `/var/lib/heketi/fstab` (*TBD:* Need to confirm this is the correct path.)
-  - auto_create_block_hosting_volume: false  (*TBD:* Confirm this is correct.  I'm pretty sure we don't want this.)
-  - block_hosting_volume_size: 100 (in GB)
-
-  - The next step in the heketi install guide is to create a secret based on the heketi.json.  (*TBD:* Not really sure what it means to use that whole config file to create a "secret". How is that secret used?)
-```
-kubectl create secret generic heketi-config-secret --from-file=./heketi.json
-```
-
-- Make a copy of `heketi-bootstrap.json` that comes in the `<repo-clone>/extras/kubernetes/`
-- Edit the `heketi-bootstrap.json` file to make sure it is what you want.
-  - Originally I had replicas set at 2.  But then realized that for the heketi bootrap service, likely I only need 1 replica.
-  - I changed all the port 8080 to 8081.  (*TBD:* Need to confirm.)
-  - There is an env var HEKETI_EXECUTOR that I changed to `ssh` from `kubernetes`.
-  - The names of some other things are in this file.  They match the names used in earlier commands.  If different names are used, then corresponding changes would need to be made in this file.
-- Then do the following:
-```
-kubectl create -f heketi-bootstrap.json
-```
-
-- The first run of the heketi-bootstrap create failed.  Below is the event list from `kubectl describe pods`:
-```
-Events:
-  Type     Reason                  Age              From                    Message
-  ----     ------                  ----             ----                    -------
-  Normal   Scheduled               4m               default-scheduler       Successfully assigned deploy-heketi-6f6dfb498-g52pb to 172.16.249.84
-  Normal   SuccessfulMountVolume   4m               kubelet, 172.16.249.84  MountVolume.SetUp succeeded for volume "db"
-  Normal   SuccessfulMountVolume   4m               kubelet, 172.16.249.84  MountVolume.SetUp succeeded for volume "config"
-  Normal   SuccessfulMountVolume   4m               kubelet, 172.16.249.84  MountVolume.SetUp succeeded for volume "heketi-service-account-token-jg4m2"
-  Warning  FailedCreatePodSandBox  4m (x7 over 4m)  kubelet, 172.16.249.84  Failed create pod sandbox.
-  Normal   SandboxChanged          4m (x7 over 4m)  kubelet, 172.16.249.84  Pod sandbox changed, it will be killed and re-created.
-  Warning  FailedSync              4m (x8 over 4m)  kubelet, 172.16.249.84  Error syncing pod
-
-```
-
-- To delete things you need to do the following:
-  - Delete the heketi deployment: `kubectl delete deployment deploy-heketi`
-  - Deleting the service as well: `kubectl delete service deploy-heketi`
-  - NOTE: Deleting the deployment, deletes the pod(s), but it doesn't delete the service.  (*TBD:* Not sure why deleting a deployment does not delete the service.)
-
-- Second try with only 1 replica.
-```
-kubectl create -f heketi-bootstrap.json
-```
-
-# Create persistent volumes for ICP master node shared file systems
-
-This section applies to an HA ICP deployment where there are 3 or 5 master nodes.  If you are doing a simple sandbox installation with a single master node, this section can be skipped.
-
-*NOTE:* The heketi-cli commands in this section assume that the following environment variables have been set appropriately:
-- HEKETI_CLI_SERVER
-- HEKETI_CLI_USER
-- HEKETI_CLI_KEY
-
-- Get the glusterfs cluster ID.  The topology info will have the cluster ID.
-```
-heketi-cli topology info
-```
-*NOTE:* The heketi doc recommends not providing a name for the created persistent volumes.  That is debatable. If you have a good naming convention that ensures uniqueness, then using a descriptive name seems like a good idea rather than using the default names that are generated strings which have no descriptive value.)
-
-- Create a volume for the master audit log.  In this example a 10GB volume is created.
-```
-> heketi-cli volume create --size=10 --clusters=042e3eb4b386b086c17d9d947e8ba885
-10GiB volume created for use by master nodes for shared audit log (mounted at /var/lib/icp/audit:
-Name: vol_de785f066ce0e0ce86c39c5fb920682c
-Size: 10
-Volume Id: de785f066ce0e0ce86c39c5fb920682c
-Cluster Id: 042e3eb4b386b086c17d9d947e8ba885
-Mount: 172.16.20.17:vol_de785f066ce0e0ce86c39c5fb920682c
-Mount Options: backup-volfile-servers=172.16.20.15,172.16.20.16
-Durability Type: replicate
-Distributed+Replica: 3
-```
-
-- Make note of the mountable volume host and name. That is what is used in the mount command and the entry in `/etc/fstab` on each of the master nodes. In the above example it is: `172.16.20.17:vol_de785f066ce0e0ce86c39c5fb920682c` You can replace the IP address with an actual hostname if you have an entry in DNS or `/etc/hosts` on the master nodes for the GlusterFS servers.
-
-- Mount the volume on each master node (Note the colon used to separate the backup servers rather than a comma.)
-```
-> mount -t glusterfs -o backup-volfile-servers=gluster01.xxx.yyy:gluster02.yyy.zzz gluster03.yyy.zzz:vol_de785f066ce0e0ce86c39c5fb920682c /var/lib/icp/audit
-```
-- Add a line to `/etc/fstab` (*TBD:* Does the backup-volfile-servers option work in fstab?)
-```
-gluster03.xxx.yyy:vol_de785f066ce0e0ce86c39c5fb920682c /var/lib/icp/audit glusterfs defaults,_netdev,backup-volfile-servers=gluster01.yyy.zzz:gluster02.yyy.zzz 0 0
-```
-
-- Create a volume for the master docker registry.  In this example a 50GB volume is created.
-```
-> heketi-cli volume create --size=50 --clusters=042e3eb4b386b086c17d9d947e8ba885
-Name: vol_ccdb21cfd1e83cf9c3299207f66fb705
-Size: 50
-Volume Id: ccdb21cfd1e83cf9c3299207f66fb705
-Cluster Id: 042e3eb4b386b086c17d9d947e8ba885
-Mount: 172.16.20.17:vol_ccdb21cfd1e83cf9c3299207f66fb705
-Mount Options: backup-volfile-servers=172.16.20.15,172.16.20.16
-Durability Type: replicate
-Distributed+Replica: 3
-```
-
-- Mount the volume on each master node (Note the colon used to separate the backup servers rather than a comma.)
-```
-> mount -t glusterfs -o backup-volfile-servers=gluster01.xxx.yyy:gluster02.yyy.zzz gluster03.yyy.zzz:vol_ccdb21cfd1e83cf9c3299207f66fb705 /var/lib/registry
-```
-
-- Add a line to `/etc/fstab` (*TBD:* Does the backup-volfile-servers option work in fstab?)
-```
-gluster03.xxx.yyy:vol_ccdb21cfd1e83cf9c3299207f66fb705 /var/lib/registry glusterfs defaults,_netdev,backup-volfile-servers=gluster01.yyy.zzz:gluster02.yyy.zzz 0 0
 ```
 
 # Install IBM Cloud Private v2.1
@@ -1667,6 +918,8 @@ Your RHEL yum repository is likely to have the Ansible RPM in the "extras" direc
 
 If you have access to the public Internet you can get Ansible RPMs via yum, here: https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/.
 
+NOTE: Install `yum-utils` to get `yum-config-manager`.
+
 To add the public Ansible yum repo do:
 ```
 > yum-config-manager --add-repo https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/
@@ -1877,6 +1130,8 @@ For example:
 
 # Helm basics
 It is useful to have Helm installed somewhere convenient.  Helm can be used to install applications that are described by Helm charts. Helm is the client for a server named Tiller.  ICP includes a Tiller server running in a pod.
+
+*NOTE:* As of ICP v2.1.0.2, the helm configuration is complicated by the use of encrypted connections.  Only the version of Helm supplied with ICP may be used.  (TBD Provide the links to the KC that describe the install and config of Helm.)
 
 *NOTE:* Be careful about working with a version of Helm that is more recent than the version of Tiller deployed in ICP.  It is recommended that you install the version of Helm that matches the version of Tiller.
 
@@ -2218,12 +1473,12 @@ Now there should be sufficient space available to grow the docker lib directory.
 - Configure DNS with cluster host names or create /etc/hosts on boot-master and copy to all nodes
 - Configure passwordless SSH for root from boot-master to all nodes, including boot-master
 - Install Ansible on boot-master
-- (optional) Configure an non-root Ansible user for all nodes
+- (optional) Configure a non-root Ansible user for all nodes
   - The Ansible user needs passwordless sudo on all nodes including boot-master.
   - Configure passwordless SSH for the non-root Ansible user including the boot-master.
   - Configuring a non-root Ansible user is commonly required due to restrictions on who has root.
 - Configure yum repos or RHS (preferred)
-- Update to latest RHEL RPMs (7.4) Reboot all nodes to pick up kernel updates.
+- Update to latest RHEL RPMs (e.g., 7.4) Reboot all nodes to pick up kernel updates.
 - Install NTP on all nodes
   - Start and enable ntpd service
 - Set vm.max_map_count on all nodes
