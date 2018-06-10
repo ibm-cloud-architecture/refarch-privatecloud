@@ -1,6 +1,8 @@
 Installing IBM Cloud private (ICP) in an AWS EC2 Environment
 ========================================
 
+# This document has now been superceded by the [ICP on AWS via Terraform](https://github.com/ibm-cloud-architecture/terraform-icp-aws) asset.  Please use this new asset for reference going forward, while this page will be available for archival purposes.  
+
 Assumptions
 -----------
 
