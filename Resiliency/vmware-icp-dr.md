@@ -4,21 +4,21 @@ IBM Cloud Private is a packaged software offering which is used to setup a priva
 
 ![Disaster recovery of ICP on Vmware](images/vmware-icp-dr.png)
 
-The Disaster Recovery site is being simulated using another Vmware VCS cluster with similar hardware. Site Recovery Manager (SRM) is used to manage the Disaster Recovery of the VMs. SRM is expected to recover:
+The Disaster Recovery site is being simulated using another VMware vCenter Server on IBM Cloud (VCS)  with similar hardware. VMware Site Recovery Manager (SRM) is used to manage the Disaster Recovery of the VMs. SRM is expected to recover:
 * Network
 * VMs used as Nodes of the cluster
 * Storage Volumes
 
-In addition to recovery of the VMs, the following Kubernetes state may need to be recovered if it the distributed state gets corrupted. Therefore it is a good practice to backup this state and restore it in the recovered VMs if needed. The backup and restore process is described in [ICP Component Backup](https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/components.md)
+In addition to recovery of the VMs, the following Kubernetes state may need to be recovered if the distributed state gets corrupted. Therefore it is a good practice to backup this state and restore it in the recovered VMs if needed. The backup and restore process is described in [ICP Component Backup](https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/components.md)
 
-* Etcd DB
+* etcd DB
 * Image Registry
 * Cloudant DB
 * MariaDB
 
 ## Test Environment Setup
 
-The primary site is hosted on a Vmware VCS cluster. These servers are hosted in an isolated environment which is accessible via a Jump server. This simulates an on-prem environment. The specs of the VCS clusters are as follows:
+The primary site is hosted on a VCS cluster. These servers are hosted in an isolated environment which is accessible via a Jump server. This simulates an on-prem environment. The specs of the VCS clusters are as follows:
 
 ```
 2 Vmware ESXi 6.5.0 Servers
@@ -27,42 +27,41 @@ The primary site is hosted on a Vmware VCS cluster. These servers are hosted in 
   - 4 TB Disk
 ```
 
-The following [Terraform scripts](https://github.com/jkwong888/terraform-icp-vmware/) were used to deploy a Kubernetes cluster. The VM template was preconfigured to allow ssh access from the Boot node. Since these VM were in an environment with no external access, the VM template was pre-populated.
+The following [Terraform scripts](https://github.com/jkwong888/terraform-icp-vmware/) were used to deploy a Kubernetes cluster. The VM template was preconfigured to allow SSH access from the Boot node. Since these VM were in an environment with no external access, the VM template was pre-populated.
 
 These terraform scripts were used to deploy the following VMs:
 
-* 3 Master Nodes (4 vcpu, 16 Gb mem)
-* 3 Proxy Nodes (1 vcpu, 2 Gb mem)
-* 3 Worker Nodes (2 vcpu, 8 Gb mem)
-* 3 Management Nodes (4 vcpu, 16 Gb mem)
+* 3 Master Nodes (4 vcpu, 16 Gb RAM)
+* 3 Proxy Nodes (1 vcpu, 2 Gb RAM)
+* 3 Worker Nodes (2 vcpu, 8 Gb RAM)
+* 3 Management Nodes (4 vcpu, 16 Gb RAM)
 
 An NFS server was setup to provide the shared storage needed on the Master nodes for the Registry. The same NFS server was also used to provide the PVs for the PVCs needed for Cloudant and MariaDB backups.
 
-Site Recovery Manager (SRM) is used to manage the Disaster Recovery of the VMs. In this test SRM was configured as follows, and these values should be adjusted based on time it takes to create a Replication Instance and Syncronization to the target site. :
+SRM is used to manage the Disaster Recovery of the VMs. In this test SRM was configured as follows, and these values should be adjusted based on time it takes to create a Replication Instance and Syncronization to the target site:
 
 * Recovery Point Objective of 4 Hours
 * Point in Time Replication Instances - 1 (older instances are deleted)
 * Recovery Time Objective 15 Minutes
 
-The following test applications is deployed to simulate a workload on the cluster. However these can be substituted with any other application that will be deployed in the environment needing DR.
+The following tests are deployed to simulate a workload on the cluster. However these can be substituted with any other application that will be deployed in the environment needing DR.
 
-* Script to generate persistent state as configmaps [here](https://github.com/hassenius/k8s-etcd-loadgenerator/blob/master/createConfigMaps.sh)
-* Script to add load to the worker nodes through deployment and draining of the worker nodes [here](https://github.com/hassenius/k8s-etcd-loadgenerator/blob/master/createConfigMaps.sh)
-
+* Script to generate persistent state as configmaps <https://github.com/ibm-cloud-architecture/icp-backup/blob/master/scripts/createConfigMaps.sh>
+* Script to add load to the worker nodes through deployment and draining of the worker nodes <https://github.com/hassenius/k8s-etcd-loadgenerator/blob/master/load-generator.sh>
 
 ## ICP Component Backup
 
 ### etcd
-The cluster state as stored in etcd was backuped up using etcdctl as described in the these [steps](https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/etcd.md) executed in one of the master nodes. In this DR scenario, SRM is expected to recover the master nodes and therefore the backup file was left on the master nodes in case it is needed to be restored. For a production deployment, the backup files should be stored off the cluster.
+The cluster state as stored in etcd was backuped up using etcdctl as described in the these steps <https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/etcd.md> executed in one of the master nodes. In this DR scenario, SRM is expected to recover the master nodes and therefore the backup file was left on the master nodes in case it is needed to be restored. For a production deployment, the backup files should be stored off the cluster.
 
 ### Registry
-Several images were added to the Docker registry as this was an isolated environment where the external registries were inaccessible. The registry is backed up by saving all contents of /var/lib/registry as described in these [steps](https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/registry.md). Since the private registry is hosted on a shared NFS file system which is expected to be available on the target environment, this step was skipped for this test.
+Several images were added to the Docker registry as this was an isolated environment where the external registries were inaccessible. The registry is backed up by saving all contents of `/var/lib/registry` as described in these <https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/registry.md>. Since the private registry is hosted on a shared NFS file system which is expected to be available on the target environment, this step was skipped for this test.
 
 ### Cloudant
-The Cloudant backup requires a PV and a PVC backed by an NFS share was created for backup up Cloudant data as described [here](https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/cloudant.md). Since an NFS share accessible on the target environment is being used, the backed up data was left on the NFS share. In this isolated environment, the Docker images needed for the Cloudant backup had to be populated in the private registry of the cluster.
+The Cloudant backup requires a PV and a PVC backed by an NFS share was created for backup up Cloudant data as described here <https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/cloudant.md>. Since an NFS share accessible on the target environment is being used, the backed up data was left on the NFS share. In this isolated environment, the Docker images needed for the Cloudant backup had to be populated in the private registry of the cluster.
 
 ### MariaDB
-Similar to Cloudant backup a PVC backed by an NFS share was created for backup of MariaDB data as described [here](https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/mariadb.md). The backup data was left on the NFS share to be used for restore in the target environment. Similar to Cloudant backup, the Docker images needed for MariaDB backup had to be populated in the private registry.
+Similar to Cloudant backup a PVC backed by an NFS share was created for backup of MariaDB data as described here <https://github.com/ibm-cloud-architecture/icp-backup/blob/master/docs/mariadb.md>. The backup data was left on the NFS share to be used for restore in the target environment. Similar to Cloudant backup, the Docker images needed for MariaDB backup had to be populated in the private registry.
 
 ## DR Test
 
