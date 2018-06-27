@@ -82,7 +82,7 @@ vgcreate vg_share /dev/sdb1
 lvcreate -n lv_share -l 100%FREE vg_share
   Logical volume "lv_share" created.
 ```
-- View the logical volume with `lvdisplay | less`
+- View the logical volume with `lvdisplay -S vgname=vg_share`
 ```
 --- Logical volume ---
  LV Path                /dev/vg_share/lv_share
@@ -129,6 +129,10 @@ mount /dev/vg_share/lv_share /share
 
 ## Install and configure NFS Server
 
+See RHEL 7 documentation for details: [Configuring the NFS Server](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/nfs-serverconfig)
+
+An NFS4 only server is configured.
+
 - The NFS server is installed with `nfs-utils`.
 
 ```
@@ -141,9 +145,19 @@ yum install -y nfs-utils
 ```
 The man page on `exports` provides all the options and ways that a file system can be exported to some collection of clients.  Wild card characters `*` and `?` may be used to define a collection of hosts.  In practice, the host name pattern would be such that only hosts in the ICP cluster could access the share.
 
+- Disable NFS2 and NFS3.
+  - Edit `/etc/sysconfig/nfs`
+  - Use: `RPCNFSDARGS="-N 2 -N 3 -U"`
+  - And: `RPCMOUNTDOPTS="-N 2 -N 3"`
+
+- Disable unneeded services:
+```
+> systemctl mask --now rpc-statd.service rpcbind.service rpcbind.socket
+```
+
 - Start and enable `nfs-server`
 ```
-systemctl enable nfs-server --now
+> systemctl enable nfs-server --now
 ```
 
 - Install `nfs-utils` on all other machines in the cluster.  This will provide all machines what is needed to mount the shared volume.

@@ -60,6 +60,8 @@ For step-by-step instructions when using a CA signed certificate see, [Specifyin
 
 For production deployments in particular, or any deployment where CA signed certificates are used the Certificate Authority domain (`cluster_CA_domain`) must be specified in the `config.yaml` file. The value of `cluster_CA_domain` is a fully qualified domain name (FQDN).
 
+The `cluster_CA_domain` is one of the names signed in the certificate and should be the host name that external users of the ICP console use in the URL to connect to the console.  The default cluster CA domain is based on the cluster name, e.g., `mycluster.icp`.
+
 # LDAP configuration  
 
 The Knowledge Center has a good section of the configuration of LDAP.  See [Configuring LDAP Connection](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/user_management/configure_ldap.html)

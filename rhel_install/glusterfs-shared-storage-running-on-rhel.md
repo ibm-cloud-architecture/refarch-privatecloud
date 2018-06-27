@@ -50,6 +50,7 @@ enabled=1
 ```
 > echo dm_thin_pool >> /etc/modules-load.d/dm_thin_pool.conf
 ```
+(*TBD:* If glusterfs does thin provisioning, how does that impact the alerting regarding free space?  What happens to the running pods that may need space when some new deployment hits gluster that exhausts its free space?  What happens if a new deployment needs more space than what is available? General monitoring, alerting considerations.)
 
 - Install glusterfs-server
 ```
@@ -65,9 +66,11 @@ enabled=1
 
 - Configure firewalld to open gluster server ports (*TBD* For now, stop,disable firewalld.  See the Gluster Doc on ports that need to be open.)
 
+For GlusterFS port information, see [Getting Started with Red Hat Gluster Storage Server](https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.1/html/administration_guide/chap-getting_started)
+
 # Install "native" GlusterFS client
 
-*NOTE:* Ansible playbook to do this: `icp_install_glusterfs_client.yml` with supporting file `dm_thin_pool.conf`.
+*NOTE:* Ansible playbook to do this: `icp_install_glusterfs_client.yml` with supporting file `dm_thin_pool.conf` and `fuse.conf`.
 
 See GlusterFS documentation for client installation: [Accessing Data: Setting up GlusterFS Clients](http://docs.gluster.org/en/latest/Administrator%20Guide/Setting%20Up%20Clients/)
 

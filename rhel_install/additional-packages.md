@@ -40,3 +40,5 @@ This section lists some software that is needed at some time or another and it i
 | dos2unix       | `yum -y install dos2unix`   | for cleaning up files that come from Windows            |
 | nano           | `yum -y install nano`       | Text editor many people prefer over `vi`   |
 | ansible        | `yum -y install ansible`    | for convenient multi-host automation<br/>Ansible is in RHEL `extras` or `epel` repo.<br/>`boot` node only |
+|wget   | yum -y install wget   | wget is generally useful for getting various artifacts  |
+|java   | TBD  | Java may be needed for keytool or other utilities   |

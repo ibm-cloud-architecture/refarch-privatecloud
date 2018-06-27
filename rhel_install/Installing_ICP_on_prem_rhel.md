@@ -311,7 +311,7 @@ This section describes the steps to update RHEL.
 
 If you are building a VM from scratch, then you should do a full RHEL update to pick up updates since the release of the RHEL image you are using for the initial install.
 
-It is assumed you have configured your VM with yum repositories.
+It is assumed you have configured your VM with yum repositories. See [Yum Repository Configuration](yum-repository-configuration.md)
 
 1. Do a yum update (`yum -y update`) - This gets all the latest patches for everything already installed.
 
@@ -909,14 +909,16 @@ The following directories should not exist on any nodes in the cluster/cloud:
 
 *NOTE:* When you are using an HA configuration you will have multiple master nodes using a shared volume mounted at `/var/lib/registry`.  You will probably need to unmount that volume on each master node (`umount /var/lib/registry`).  (*TBD:* It doesn't seem to be the case that `/var/lib/icp/audit` needs to be unmounted.)
 
-# Install Ansible
+# Getting started with Ansible
 Ansible is very useful for administration of a collection of machines such as an ICP cluster.  We recommend installing it to ease general administration of the ICP cluster.  
 
 See the Ansible documentation for [installation instructions](http://docs.ansible.com/ansible/latest/intro_installation.html#id26). The installation instructions are very detailed and complete for virtually every platform.
 
-Your RHEL yum repository is likely to have the Ansible RPM in the "extras" directory.  
+Your RHEL yum repository is likely to have the Ansible RPM in the "extras" directory. If so, then you don't need to get it from the public repository.
 
-If you have access to the public Internet you can get Ansible RPMs via yum, here: https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/.
+## Configuring the public Ansible yum repository
+
+If your RHEL yum repository doesn't have the Ansible RPM, or you want a newer version than what is available in your RHEL repo, then you can get Ansible from the public yum repository, here: https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/.
 
 NOTE: Install `yum-utils` to get `yum-config-manager`.
 
@@ -937,8 +939,9 @@ baseurl=https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/
 gpgcheck=0
 enabled=1
 ```
+## Installing Ansible
+Install yum from your RHEL "extras" repo, or the public Ansible repo, you configured in the previous section.
 
-Do the Ansible installation:
 ```
 > yum -y install ansible
 ```
@@ -958,7 +961,7 @@ The primary configuration tasks:
 - Use `ssh-copy-id` (or something that does the equivalent) to get the public key (`id_rsa.pub`) of the Ansible user on each Ansible control machine in the SSH `authorized_users` file for the Ansible user on each managed node.
 - Set up the Ansible `hosts` (in `/etc/ansible` by default) file to defined the managed nodes.
 
-*NOTE:* Use fully qualified domain names (FQDN) for the hosts when using the `ssh-copy-id` command or whatever you use to get the Ansible user's SSH key spread around to the managed nodes. If you use the short host name, you will likely get *The authenticity of host 'myhost.mysite.com (xxx.xxx.x.xx)' can't be established.* errors when you try something even as simple as an Ansible ping. Check the SSH `known_hosts` file for the Ansible user on the Ansible control machine to confirm that that the FQDN, and the IP address is listed with the host key if you are not sure about what will be recognized.
+*NOTE:* Use fully qualified domain names (FQDN) or the IP address for the hosts when using the `ssh-copy-id` command or whatever you use to get the Ansible user's SSH key spread around to the managed nodes. If you use the short host name, you will likely get *The authenticity of host 'myhost.mysite.com (xxx.xxx.x.xx)' can't be established.* errors when you try something even as simple as an Ansible ping. Check the SSH `known_hosts` file for the Ansible user on the Ansible control machine to confirm that that the FQDN, and the IP address is listed with the host key if you are not sure about what will be recognized.
 
 *NOTE:* A simple way to provide the Ansible user with passwordless sudo privileges to run any command is to add the Ansible user to the wheel group.  For RHEL the command, `usermod -a -G wheel <ansible_user>` will add the `<ansible_user>` to the wheel group.  You will likely need to edit the `/etc/sudoers` file (using `visudo`) to comment out the default `wheel` entry and uncomment the `NOPASSWD` `wheel` entry.  See sample below:
 ```
@@ -968,6 +971,10 @@ The primary configuration tasks:
 ## Same thing without a password
 %wheel  ALL=(ALL)       NOPASSWD: ALL
 ```
+
+- Edit the hosts file in `/etc/ansible/hosts` (convenient) or create your own hosts file that you provide as an argument on the command line (less convenient).
+
+- The ansible `ping` module is the simplest thing to use to smoke test that things are working as desired.
 
 # Docker basics
 
@@ -1467,6 +1474,7 @@ Now there should be sufficient space available to grow the docker lib directory.
 
 - Create the VMs
   - Allocate the disk to the file systems
+  - Disk for Docker (devicemapper, direct-lvm or overlay2?)
   - Most of the VMs are created by cloning the first one
 - Configure network on each VM with static IP
 - Set the hostname
@@ -1478,7 +1486,7 @@ Now there should be sufficient space available to grow the docker lib directory.
   - Configure passwordless SSH for the non-root Ansible user including the boot-master.
   - Configuring a non-root Ansible user is commonly required due to restrictions on who has root.
 - Configure yum repos or RHS (preferred)
-- Update to latest RHEL RPMs (e.g., 7.4) Reboot all nodes to pick up kernel updates.
+- Update to latest RHEL RPMs (e.g., 7.5) Reboot all nodes to pick up kernel updates.
 - Install NTP on all nodes
   - Start and enable ntpd service
 - Set vm.max_map_count on all nodes
@@ -1486,7 +1494,7 @@ Now there should be sufficient space available to grow the docker lib directory.
   - Ansible lineinfile path=`/etc/sysctl.conf` line='vm.max_map_count=262144' insertafter=EOF state=present
 - Install Docker on all nodes
   - Start and enable Docker service
-  - Ansible lineinfile path=`/lib/systemd/system/docker.service` line='MountFlags=False' insertafter=`StartLimitInterval=*` state=present
+  - Ansible lineinfile path=`/lib/systemd/system/docker.service` line='MountFlags=shared' insertafter=`StartLimitInterval=*` state=present
   - Restart docker on all nodes
 - Install ICP
   - Load docker images from ICP install tar ball on the boot-master node.
@@ -1497,5 +1505,5 @@ Now there should be sufficient space available to grow the docker lib directory.
   - Kick off the install
 - Install kubectl on all of the master nodes (at a minimum on the boot-master node)
   - `docker run --net=host -v /usr/local/bin:/data ibmcom/kubernetes:v1.9.1-ee cp /kubectl /data`
-- Install ICP CLI on boot master. (See [Installing the IBM Cloud Private CLI](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/manage_cluster/install_cli.html))
-- Install helm on the boot master.  (Particularly for ICP 2.1.0.2, see [Setting up Helm CLI](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html))
+- Install ICP CLI on boot master. (See [Installing the IBM Cloud Private CLI](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/manage_cluster/install_cli.html)) (TBD - need link for 2.1.0.3)
+- Install Helm on the boot master.  (Particularly for ICP 2.1.0.2, see [Setting up Helm CLI](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.2/app_center/create_helm_cli.html)) (TBD - need link for 2.1.0.3)

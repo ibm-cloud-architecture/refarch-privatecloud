@@ -1,6 +1,10 @@
-## Yum repository configuration
+# Yum repository configuration
 
-*NOTE:* A RHEL virtual machine provided for you will very likely already have a yum repository configured, most likely using a Red Hat Satellite (RHS) server.  This section is intended to provide guidance for those who need to configure a yum repository.
+It is a really good idea that all machines used for ICP have access to the RHEL yum repositories (`os`, `optional` and `extras` or `epel`) in order to install various RHEL packages that are pre-requisites for ICP.
+
+This document is intended to provide guidance for those who need to configure a yum repository.
+
+*NOTE:* A RHEL virtual machine provided for you will very likely already have a yum repository configured, most likely using a Red Hat Satellite (RHS) server.  
 
 *NOTE:* You may need to provide a userid and password as part of the yum repository URL. If you are using an ID with an @ character in it, e.g., an Internet email address, use %40 in place of the @ character.  Otherwise the repository URL is misinterpreted because an @ character marks the beginning of the host name in the URL.
 
@@ -37,11 +41,11 @@ Depending on how DNS is configured, you may need to add an entry in the `/etc/ho
 
 Once you have configured the yum repository you can do a quick test to confirm the configuration file is correct:
 ```
-yum repolist
+> yum repolist
 ```
 Yum caches its repository information as a performance enhancement. If you want to "clean" the cache to make sure you are not using stale information about yum repositories, use:
 ```
-yum clean all
+> yum clean all
 ```
 Once you have the desired yum repositories configured, you can proceed with any RHEL configuration that requires additional packages (rpms) to be installed.
 
