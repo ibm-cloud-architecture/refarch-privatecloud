@@ -1,20 +1,38 @@
 ### Integrating ICP with CEPH
 
-Starting with version 2.1.0.3, IBM Cloud Private supports dynamic storage provisioning using Ceph, code name "rook".
-
-Doing so requires an existing CEPH infrastructure.  This document will walk through installing Ceph and integrating it with ICP for dynamic storage provisioning.
-
 Ceph is short for "cephalopod", a class of mollusks of which the octopus is a member.  The octopus is used as the logo for Ceph and this name was chosen because the parallel processing nature of both the octopus and the software.
 
-CEPH requires physical block devices for its storage.  You can use separate partitions as your target devices, but in this document we will use raw block devices spanning a number of physical hosts.
+There are two ways of integrating ICP with Ceph.
 
-Management nodes should not run on the same physical nodes as storage nodes, so to implement this solution, you should use at least two servers (or VMs), one for hosting management nodes and one for hosting storage nodes.
+Starting with version 2.1.0.3, IBM Cloud Private supports running the entire Ceph environment within ICP utilizing local (hostpath) storage as raw disk for the OSD nodes.  This method will install all of Ceph as workloads running within ICP.  This mechanism (as of version 2.1.0.3) has a number of limitations as described in the [ibm-rook-rbd-cluster github article](https://github.com/IBM/charts/tree/master/stable/ibm-rook-rbd-cluster).
+
+For a more robust solution we will deploy a Ceph implementation outside of ICP and use that as the provider for a storage class which will allow any application to consume Ceph rbd dynamic storage.
+
+Doing so requires an external CEPH infrastructure.  This document will walk through installing Ceph and integrating it with ICP for dynamic storage provisioning.
+
+## Ceph Architecture
+
+Ceph requires physical block devices for its storage.  You can use separate partitions as your target devices, but in this document we will use raw block devices spanning a number of physical hosts.
+
+![Ceph Architecture](images/ceph_arch.png)
+
+TODO: Replace image with generic architecture image with only 3 storage/compute nodes.
+
+In the image, the number inside the database icon represents the number of available raw disks on that node.  Greyed out nodes indicate future expansion.
+
+This architecture represents a distributed storage architecture. Each node is connected to the network via two Mellanox ConnectX-4 cards configured for bonded 802.3ad link aggregation for 200Gb/s combined throughput.  This provides for a hyperconverged and highly available architecture for both storage and data network traffic.  OSD nodes do not host management functions and vice versa.
+
+The network architecture connecting these nodes is similar to that depicted in this diagram taken from the Cumulus documentation.
+
+![Network Architecture](images/mellanox_ha.png)
+
+All management nodes are redundant for high availability and management nodes should not run on the same physical nodes as storage nodes, so to implement this solution, you should use at least two servers (or VMs), one for hosting management nodes and one for hosting storage nodes.
 
 In a highly available environment, it is recommended to run three management nodes and at least three storage nodes so that it can handle the loss of a node.
 
 In this document we will use ubuntu as our host operating system.
 
-Our environment will consist of three management nodes and three storage nodes.
+Our environment will consist of three management nodes and three storage nodes (three of the eleven depicted on the image above).
 
 Each storage node has two available raw disks.  The operating system is installed on /dev/sda and /dev/sdb and /dev/sdc are available raw devices.
 
@@ -280,6 +298,7 @@ The result should look something like this:
  37   ssd   3.63869         osd.4     up  1.00000 1.00000
  38   ssd   3.63869         osd.5     up  1.00000 1.00000
 ```
+### Test your newly installed Ceph instance
 ## Create and mount a block device
 Block devices are the most commonly used types of storage provisioned by Ceph users.  Creating and using them is relatively easy once your environment is up and running.
 
@@ -329,5 +348,179 @@ sudo mkfs.ext4 -m0 /dev/rbd0
 ```
 mount /dev/rbd0 /mnt/myimage
 ```
+
+Now, if you do an ls on your newly mounted filesystem you should see a `lost+found` directory indicating the root of a partition.
+
+## Remove your test configuration
+1. Remove your test mount
+```
+umount /mnt/myimage
+```
+
+2. Remove the rbd image from your Ceph instance
+```
+sudo rbd unmap myimage --name client.admin
+```
+
+3. Remove the pool
+```
+sudo ceph osd pool delete rbd
+```
+
 ### Interating ICP with CEPH
-... Coming
+1. Create an rbd pool for use with ICP
+```
+sudo ceph osd pool create icp rbd 1024 1024
+```
+
+2. Create a new ceph user for use with ICP
+  ```
+  sudo ceph auth get-or-create client.icp mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=icp' -o ceph.client.kube.keyring
+  ```
+3. Retrieve the Ceph admin key as base64
+```
+sudo ceph auth get-key client.admin |base64
+```
+This should return something like: `QVFDSGhYZGIrcmc0SUJBQXd0Yy9pRXIxT1E1ZE5sMmdzRHhlZVE9PQ==`
+
+4. Retrieve the Ceph ICP key as base64
+```
+sudo ceph auth get-key client.icp |base64
+```
+This should return something like: `QVFERUlYNWJKbzlYR1JBQTRMVnU1N1YvWDhYbXAxc2tseDB6QkE9PQ==`
+
+5. Create a new file named ceph-secret.yaml with the following contents:
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ceph-secret
+  namespace: kube-system
+data:
+  key: QVFBOFF2SlZheUJQRVJBQWgvS2cwT1laQUhPQno3akZwekxxdGc9PQ==
+type: kubernetes.io/rbd
+```
+6. Create the secret in ICP
+Use the ICP UI to configure your kubectl client and create the 'ceph-secret' secret with the following command:
+```
+kubectl create -f ./ceph-secret.yaml
+```
+
+7. Create a new file named ceph-user-secret.yaml with the following contents:
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ceph-user-secret
+  namespace: default
+data:
+  key: QVFCbEV4OVpmaGJtQ0JBQW55d2Z0NHZtcS96cE42SW1JVUQvekE9PQ==
+type: kubernetes.io/rbd
+```
+Where data.key is the key retrieved from ceph for the client.icp user.
+
+8. Create the user secret in ICP
+Use the ICP UI to configure your kubectl client and create the 'ceph-user-secret' secret in the default namespace with the following command:
+```
+kubectl create -f ./ceph-user-secret.yaml
+```
+
+  **Important Note:** Because this user was created in the 'default' namespace (as noted in metadata.namespace above) This storage class can only be used in the default namespace.
+
+  To use Ceph dynamic provisioning in other namespaces you must create the same user secret in every namespace where you want to deploy Ceph storage.
+
+  Because the storage class specifically references "ceph-user-secret" the secret should always have this name no matter what namespace is used.
+
+9. Create the Ceph RBD Dynamic Storage Class
+Create a file named 'ceph-sc.yaml' with the following contents:
+```
+apiVersion: storage.k8s.io/v1beta1
+kind: StorageClass
+metadata:
+  name: ceph
+  annotations:
+     storageclass.beta.kubernetes.io/is-default-class: "true"
+provisioner: kubernetes.io/rbd
+parameters:
+  monitors: 10.10.0.1:6789,10.10.0.2:6789,10.10.0.3:6789  
+  adminId: admin  
+  adminSecretName: ceph-secret  
+  adminSecretNamespace: kube-system  
+  pool: icp  
+  userId: icp
+  userSecretName: ceph-user-secret
+  fsType: ext4
+  imageFormat: "2"
+  imageFeature: "layering"
+```
+Where parameters.monitors are the IP addresses and ports of all Ceph monitor nodes, comma separated.
+Remove metadata.annotations.storageclass.* if this should not be the default storage class.
+
+10. Test your new storage class by creating a new PV from the ceph pool.  Create a file named ceph-pvc.yaml with the following contents:
+```
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: ceph-claim
+spec:
+  accessModes:     
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+```
+Create the PV with the following command:
+```
+kubectl create -f ./ceph-pvc.yaml
+```
+
+Check the status of your new PVC:
+```
+kubectl get persistentvolumes
+```
+```
+root@master:/opt/icp/ceph# kubectl get persistentvolumes
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM                                       STORAGECLASS               REASON    AGE
+helm-repo-pv                               5Gi        RWO            Delete           Bound     kube-system/helm-repo-pvc                   helm-repo-storage                    6d
+image-manager-10.10.10.1                   20Gi       RWO            Retain           Bound     kube-system/image-manager-image-manager-0   image-manager-storage                6d
+logging-datanode-10.10.10.3                20Gi       RWO            Retain           Bound     kube-system/data-logging-elk-data-0         logging-storage-datanode             6d
+mongodb-10.10.10.1                         20Gi       RWO            Retain           Bound     kube-system/mongodbdir-icp-mongodb-0        mongodb-storage                      6d
+pvc-3b037115-a686-11e8-9387-5254006a2ffe   2Gi        RWO            Delete           Bound     default/ceph-pv-test                        ceph                                 1m
+```
+Look for a PV with a storage class of "ceph"
+
+or
+
+In the ICP UI, navigate to Platform->Storage and look for a PV of type "RBD":
+![Ceph PVC](images/ceph-pvc.png)
+
+List your created PVs from Ceph:
+On your ceph admin or monitor node execute:
+```
+sudo rbd list
+```
+
+You should see something like:
+```
+$ sudo rbd list
+kubernetes-dynamic-pvc-7d5c8c11-a687-11e8-9291-5254006a2ffe
+```
+
+Remove your test PVC with the following command:
+```
+kubectl delete -f ./ceph-pvc.yaml
+```
+
+11. To use your storage class with a deployment you must install the Ceph client on *all schedulable nodes*.  Execute the following on all ICP worker nodes:
+```
+apt-get install -y ceph-common
+```
+
+12. Copy /etc/ceph/ceph.conf and /etc/ceph/ceph.client.admin.keyring from your Ceph admin or monitor node to each worker node.
+From each worker node as root execute:
+```
+scp root@ceph-admin:/etc/ceph/ceph.conf /etc/ceph/
+scp root@ceph-admin:/etc/ceph/*.keyring /etc/ceph/
+```
+
+As of this writing, when creating a workload which consumes this storage class, ICP will create the PV, bind it to a PVC, but times out testing for availability.  We are still working out this final issue.
