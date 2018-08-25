@@ -79,7 +79,7 @@ The following commands should be run as the **root** user
 
 3. Enable running Ceph commands easier on other nodes
 
-  **Login as your ceph-deploy user** and create the following file at ~/.ssh/config
+  **Login as your ceph-deploy user** and create the following file at ~/.ssh/config.  You may need to create both the /home/ceph-deploy/.ssh directory and the config file.
 
   ```
   Host node1
