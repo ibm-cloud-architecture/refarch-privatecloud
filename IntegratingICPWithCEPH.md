@@ -195,127 +195,141 @@ ceph-deploy rgw create node1
 
   On the admin node edit /home/ceph-deploy/mycluster/ceph.conf file and update the mon_initial_members, mon_host, and public_network values to reflect the additional nodes.  The resulting file should look something like this:
 
-```
-[global]
-fsid = 264349d2-8eb0-4fb3-9992-bbef4c2759cc
-mon_initial_members = node1,node2,node3
-mon_host = 10.10.2.1,10.10.2.2,10.10.2.3
-public_network = 10.10.0.0/16
-auth_cluster_required = cephx
-auth_service_required = cephx
-auth_client_required = cephx
-```
-Then deploy the new nodes:
-```
-ceph-deploy --overwrite-conf mon add node2
-ceph-deploy --overwrite-conf mon add node3
-```
+  ```
+  [global]
+  fsid = 264349d2-8eb0-4fb3-9992-bbef4c2759cc
+  mon_initial_members = node1,node2,node3
+  mon_host = 10.10.2.1,10.10.2.2,10.10.2.3
+  public_network = 10.10.0.0/16
+  auth_cluster_required = cephx
+  auth_service_required = cephx
+  auth_client_required = cephx
+  ```
+
+  Then deploy the new nodes:
+
+  ```
+  ceph-deploy --overwrite-conf mon add node2
+  ceph-deploy --overwrite-conf mon add node3
+  ```
 
 10. Check the status of your cluster
-```
-sudo ceph -s
-```
-The result should look something like this:
-```
-  cluster:
-    id:     2fdde238-b426-4042-8cf3-6fc9a151cb9b
-    health: HEALTH_OK
 
-  services:
-    mon: 3 daemons, quorum node1,node2,node3
-    mgr: node1(active), standbys: node2, node3
-    osd: 6 osds: 6 up, 6 in
-    rgw: 1 daemon active
+  ```
+  sudo ceph -s
+  ```
 
-  data:
-    pools:   4 pools, 1280 pgs
-    objects: 221  objects, 1.2 KiB
-    usage:   54 GiB used, 11 TiB / 11 TiB avail
-    pgs:     1280 active+clean
-```
-You should see HEALTH_OK.  If not, look for your error message in the troubleshooting section below.
+  The result should look something like this:
 
-The likelihood is that your health message will say something like:
+  ```
+    cluster:
+      id:     2fdde238-b426-4042-8cf3-6fc9a151cb9b
+      health: HEALTH_OK
 
-```
-health: HEALTH_WARN
-   too few PGs per OSD (3 < min 30)
-```
-If you do not see this error, you can skip this section until you do see it (and you will).
+    services:
+      mon: 3 daemons, quorum node1,node2,node3
+      mgr: node1(active), standbys: node2, node3
+      osd: 6 osds: 6 up, 6 in
+      rgw: 1 daemon active
 
-A PG is a "placement group" and governs how data is stored in your environment.  A full discussion of how this works is beyond the scope of this document, but resolving the warning can be done without knowing all of the details.
+    data:
+      pools:   4 pools, 1280 pgs
+      objects: 221  objects, 1.2 KiB
+      usage:   54 GiB used, 11 TiB / 11 TiB avail
+      pgs:     1280 active+clean
+  ```
 
-For more information on this number see:
-* http://docs.ceph.com/docs/giant/rados/operations/placement-groups/
-* https://stackoverflow.com/questions/39589696/ceph-too-many-pgs-per-osd-all-you-need-to-know
+  You should see HEALTH_OK.  If not, look for your error message in the troubleshooting section below.
 
-There are two numbers that are important to modify to resolve this issue, the first is the PGs and the second is the PGPs.  The PG is the number of placement groups available and the PGP is the number that are applied to your implementation.  Any time you increase the PGs you should also increase the number of PGPs.
+  The likelihood is that your health message will say something like:
 
-The documentation recommends using PG numbers with powers of 2 (2, 4, 16, 32, 64, 128,...). The simple solution to this issue is to start with a smaller number, apply it and see what the status says.  If it is still too small, continue to apply ever larger powers of 2 until the warning goes away.
+  ```
+  health: HEALTH_WARN
+     too few PGs per OSD (3 < min 30)
+  ```
+  If you do not see this error, you can skip this section until you do see it (and you will).
 
-To change the number of PGs and PGPs, us the following command against every pool in your environment.
+  A PG is a "placement group" and governs how data is stored in your environment.  A full discussion of how this works is beyond the scope of this document, but resolving the warning can be done without knowing all of the details.
 
-To see the pools in your environment use the command:
+  For more information on this number see:
 
-```
-sudo ceph osd lspools
-```
+  * http://docs.ceph.com/docs/giant/rados/operations/placement-groups/
+  * https://stackoverflow.com/questions/39589696/ceph-too-many-pgs-per-osd-all-you-need-to-know
 
-Which should result in a list that looks something like this:
+  There are two numbers that are important to modify to resolve this issue, the first is the PGs and the second is the PGPs.  The PG is the number of placement groups available and the PGP is the number that are applied to your implementation.  Any time you increase the PGs you should also increase the number of PGPs.
 
-```
-1 .rgw.root
-2 default.rgw.control
-3 default.rgw.meta
-4 default.rgw.log
-```
+  The documentation recommends using PG numbers with powers of 2 (2, 4, 16, 32, 64, 128,...). The simple solution to this issue is to start with a smaller number, apply it and see what the status says.  If it is still too small, continue to apply ever larger powers of 2 until the warning goes away.
 
-For each pool in the list execute:
+  To change the number of PGs and PGPs, us the following command against every pool in your environment.
 
-```
-sudo ceph osd pool set [pool name] pg_num 64
-```
+  To see the pools in your environment use the command:
 
-Example:
+  ```
+  sudo ceph osd lspools
+  ```
 
-```
-sudo ceph osd pool set .rgw.root pg_num 32
-sudo ceph osd pool set .rgw.root pgp_num 32
-```
-Then check your status and see if you need to raise it further.  Continue increasing the number at the end of that command by powers of 2 until the warning goes away.
+  Which should result in a list that looks something like this:
 
-Once you have a healthy cluster you can start using your new storage.
+  ```
+  1 .rgw.root
+  2 default.rgw.control
+  3 default.rgw.meta
+  4 default.rgw.log
+  ```
 
-The following command will show you all of your storage devices and their status.
+  For each pool in the list execute:
 
-_Note:_ OSD = Object Storage Daemon
+  ```
+  sudo ceph osd pool set [pool name] pg_num 64
+  ```
 
-```
-sudo ceph osd tree
-```
-The result should look something like this:
-```
--1       192.85042 root default                           
--3        87.32849     host node4                         
- 0   ssd   3.63869         osd.0      up  1.00000 1.00000
- 1   ssd   3.63869         osd.1      up  1.00000 1.00000
- -5        47.30293     host node5                         
- 24   ssd   3.63869         osd.2     up  1.00000 1.00000
- 25   ssd   3.63869         osd.3     up  1.00000 1.00000
- -7        14.55475     host node6                         
- 37   ssd   3.63869         osd.4     up  1.00000 1.00000
- 38   ssd   3.63869         osd.5     up  1.00000 1.00000
-```
+  Example:
+
+  ```
+  sudo ceph osd pool set .rgw.root pg_num 32
+  sudo ceph osd pool set .rgw.root pgp_num 32
+  ```
+
+  Then check your status and see if you need to raise it further.  Continue increasing the number at the end of that command by powers of 2 until the warning goes away.
+
+  Once you have a healthy cluster you can start using your new storage.
+
+  The following command will show you all of your storage devices and their status.
+
+  _Note:_ OSD = Object Storage Daemon
+
+  ```
+  sudo ceph osd tree
+  ```
+
+  The result should look something like this:
+
+  ```
+  -1       192.85042 root default                           
+  -3        87.32849     host node4                         
+   0   ssd   3.63869         osd.0      up  1.00000 1.00000
+   1   ssd   3.63869         osd.1      up  1.00000 1.00000
+  -5        47.30293     host node5                         
+  24   ssd   3.63869         osd.2     up  1.00000 1.00000
+  25   ssd   3.63869         osd.3     up  1.00000 1.00000
+  -7        14.55475     host node6                         
+  37   ssd   3.63869         osd.4     up  1.00000 1.00000
+  38   ssd   3.63869         osd.5     up  1.00000 1.00000
+  ```
 ### Test your newly installed Ceph instance
+
 ## Create and mount a block device
+
 Block devices are the most commonly used types of storage provisioned by Ceph users.  Creating and using them is relatively easy once your environment is up and running.
 
 Block devices are known as rbd devices (Rados Block Device).  When you create a new block device and attach it to your filesystem it will show up as /dev/rbd0, /eev/rbd1, etc.
 
 Before you can create a block device you need to create a new pool in which they can be stored.
+
 ```
 sudo ceph osd pool create rbd 128 128
 ```
+
 _NOTE:_ The two numbers at the end of this command are the PG and PGP for this pool.  As a start, you should use the same values you used to get the health warning error to go away.  These values may need to be changed based on the size of your environment and number of pools as per the above discussion.
 
 Once your pool has been created you can then create a new image in that pool.  An image is block storage on which you can create a filesystem and is analogous to a virtual disk.
@@ -360,78 +374,98 @@ mount /dev/rbd0 /mnt/myimage
 Now, if you do an ls on your newly mounted filesystem you should see a `lost+found` directory indicating the root of a partition.
 
 ## Remove your test configuration
+
 1. Remove your test mount
+
 ```
 umount /mnt/myimage
 ```
 
 2. Remove the rbd image from your Ceph instance
+
 ```
 sudo rbd unmap myimage --name client.admin
 ```
 
 3. Remove the pool
+
 ```
 sudo ceph osd pool delete rbd
 ```
 
 ### Interating ICP with CEPH
+
 1. Create an rbd pool for use with ICP
-```
-sudo ceph osd pool create icp rbd 1024 1024
-```
+
+  ```
+  sudo ceph osd pool create icp rbd 1024 1024
+  ```
 
 2. Create a new ceph user for use with ICP
+
   ```
   sudo ceph auth get-or-create client.icp mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=icp' -o ceph.client.kube.keyring
   ```
+
 3. Retrieve the Ceph admin key as base64
-```
-sudo ceph auth get-key client.admin |base64
-```
-This should return something like: `QVFDSGhYZGIrcmc0SUJBQXd0Yy9pRXIxT1E1ZE5sMmdzRHhlZVE9PQ==`
+
+  ```
+  sudo ceph auth get-key client.admin |base64
+  ```
+
+  This should return something like: `QVFDSGhYZGIrcmc0SUJBQXd0Yy9pRXIxT1E1ZE5sMmdzRHhlZVE9PQ==`
 
 4. Retrieve the Ceph ICP key as base64
-```
-sudo ceph auth get-key client.icp |base64
-```
-This should return something like: `QVFERUlYNWJKbzlYR1JBQTRMVnU1N1YvWDhYbXAxc2tseDB6QkE9PQ==`
+
+  ```
+  sudo ceph auth get-key client.icp |base64
+  ```
+
+  This should return something like: `QVFERUlYNWJKbzlYR1JBQTRMVnU1N1YvWDhYbXAxc2tseDB6QkE9PQ==`
 
 5. Create a new file named ceph-secret.yaml with the following contents:
-```
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ceph-secret
-  namespace: kube-system
-data:
-  key: QVFBOFF2SlZheUJQRVJBQWgvS2cwT1laQUhPQno3akZwekxxdGc9PQ==
-type: kubernetes.io/rbd
-```
+
+  ```
+  apiVersion: v1
+  kind: Secret
+  metadata:
+    name: ceph-secret
+    namespace: kube-system
+  data:  
+    key: QVFBOFF2SlZheUJQRVJBQWgvS2cwT1laQUhPQno3akZwekxxdGc9PQ==
+  type: kubernetes.io/rbd
+  ```
+
 6. Create the secret in ICP
-Use the ICP UI to configure your kubectl client and create the 'ceph-secret' secret with the following command:
-```
-kubectl create -f ./ceph-secret.yaml
-```
+
+  Use the ICP UI to configure your kubectl client and create the 'ceph-secret' secret with the following command:
+
+  ```
+  kubectl create -f ./ceph-secret.yaml
+  ```
 
 7. Create a new file named ceph-user-secret.yaml with the following contents:
-```
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ceph-user-secret
-  namespace: default
-data:
-  key: QVFCbEV4OVpmaGJtQ0JBQW55d2Z0NHZtcS96cE42SW1JVUQvekE9PQ==
-type: kubernetes.io/rbd
-```
-Where data.key is the key retrieved from ceph for the client.icp user.
+
+  ```
+  apiVersion: v1
+  kind: Secret
+  metadata:  
+    name: ceph-user-secret
+    namespace: default
+  data:
+    key: QVFCbEV4OVpmaGJtQ0JBQW55d2Z0NHZtcS96cE42SW1JVUQvekE9PQ==
+  type: kubernetes.io/rbd
+  ```
+
+  Where data.key is the key retrieved from ceph for the client.icp user.
 
 8. Create the user secret in ICP
-Use the ICP UI to configure your kubectl client and create the 'ceph-user-secret' secret in the default namespace with the following command:
-```
-kubectl create -f ./ceph-user-secret.yaml
-```
+
+  Use the ICP UI to configure your kubectl client and create the 'ceph-user-secret' secret in the default namespace with the following command:
+
+  ```
+  kubectl create -f ./ceph-user-secret.yaml
+  ```
 
   **Important Note:** Because this user was created in the 'default' namespace (as noted in metadata.namespace above) This storage class can only be used in the default namespace.
 
@@ -440,95 +474,109 @@ kubectl create -f ./ceph-user-secret.yaml
   Because the storage class specifically references "ceph-user-secret" the secret should always have this name no matter what namespace is used.
 
 9. Create the Ceph RBD Dynamic Storage Class
-Create a file named 'ceph-sc.yaml' with the following contents:
-```
-apiVersion: storage.k8s.io/v1beta1
-kind: StorageClass
-metadata:
-  name: ceph
-  annotations:
-     storageclass.beta.kubernetes.io/is-default-class: "true"
-provisioner: kubernetes.io/rbd
-parameters:
-  monitors: 10.10.0.1:6789,10.10.0.2:6789,10.10.0.3:6789  
-  adminId: admin  
-  adminSecretName: ceph-secret  
-  adminSecretNamespace: kube-system  
-  pool: icp  
-  userId: icp
-  userSecretName: ceph-user-secret
-  fsType: ext4
-  imageFormat: "2"
-  imageFeature: "layering"
-```
-Where parameters.monitors are the IP addresses and ports of all Ceph monitor nodes, comma separated.
-Remove metadata.annotations.storageclass.* if this should not be the default storage class.
 
-10. Test your new storage class by creating a new PV from the ceph pool.  Create a file named ceph-pvc.yaml with the following contents:
-```
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: ceph-claim
-spec:
-  accessModes:     
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-```
-Create the PV with the following command:
-```
-kubectl create -f ./ceph-pvc.yaml
-```
+  Create a file named 'ceph-sc.yaml' with the following contents:
+  ```
+  apiVersion: storage.k8s.io/v1beta1
+  kind: StorageClass
+  metadata:
+    name: ceph
+    annotations:
+      storageclass.beta.kubernetes.io/is-default-class: "true"
+  provisioner: kubernetes.io/rbd
+  parameters:
+    monitors: 10.10.0.1:6789,10.10.0.2:6789,10.10.0.3:6789  
+    adminId: admin  
+    adminSecretName: ceph-secret  
+    adminSecretNamespace: kube-system  
+    pool: icp  
+    userId: icp
+    userSecretName: ceph-user-secret
+    fsType: ext4
+    imageFormat: "2"
+    imageFeature: "layering"
+  ```
 
-Check the status of your new PVC:
-```
-kubectl get persistentvolumes
-```
-```
-root@master:/opt/icp/ceph# kubectl get persistentvolumes
-NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM                                       STORAGECLASS               REASON    AGE
-helm-repo-pv                               5Gi        RWO            Delete           Bound     kube-system/helm-repo-pvc                   helm-repo-storage                    6d
-image-manager-10.10.10.1                   20Gi       RWO            Retain           Bound     kube-system/image-manager-image-manager-0   image-manager-storage                6d
-logging-datanode-10.10.10.3                20Gi       RWO            Retain           Bound     kube-system/data-logging-elk-data-0         logging-storage-datanode             6d
-mongodb-10.10.10.1                         20Gi       RWO            Retain           Bound     kube-system/mongodbdir-icp-mongodb-0        mongodb-storage                      6d
-pvc-3b037115-a686-11e8-9387-5254006a2ffe   2Gi        RWO            Delete           Bound     default/ceph-pv-test                        ceph                                 1m
-```
-Look for a PV with a storage class of "ceph"
+  Where parameters.monitors are the IP addresses and ports of all Ceph monitor nodes, comma separated.
 
-or
+  Remove metadata.annotations.storageclass.* if this should not be the default storage class.
 
-In the ICP UI, navigate to Platform->Storage and look for a PV of type "RBD":
-![Ceph PVC](images/ceph-pvc.png)
+10. Test your new storage class by creating a new PV from the ceph pool.
 
-List your created PVs from Ceph:
-On your ceph admin or monitor node execute:
-```
-sudo rbd list
-```
+  Create a file named ceph-pvc.yaml with the following contents:
 
-You should see something like:
-```
-$ sudo rbd list
-kubernetes-dynamic-pvc-7d5c8c11-a687-11e8-9291-5254006a2ffe
-```
+  ```
+  kind: PersistentVolumeClaim
+  apiVersion: v1
+  metadata:
+    name: ceph-claim
+  spec:
+    accessModes:     
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 2Gi
+  ```
 
-Remove your test PVC with the following command:
-```
-kubectl delete -f ./ceph-pvc.yaml
-```
+  Create the PV with the following command:
+
+  ```
+  kubectl create -f ./ceph-pvc.yaml
+  ```
+
+  Check the status of your new PVC:
+
+  ```
+  kubectl get persistentvolumes
+  ```
+
+  ```
+  root@master:/opt/icp/ceph# kubectl get persistentvolumes
+  NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS    CLAIM                                       STORAGECLASS               REASON    AGE
+  helm-repo-pv                               5Gi        RWO            Delete           Bound     kube-system/helm-repo-pvc                   helm-repo-storage                    6d
+  image-manager-10.10.10.1                   20Gi       RWO            Retain           Bound     kube-system/image-manager-image-manager-0   image-manager-storage                6d
+  logging-datanode-10.10.10.3                20Gi       RWO            Retain           Bound     kube-system/data-logging-elk-data-0         logging-storage-datanode             6d
+  mongodb-10.10.10.1                         20Gi       RWO            Retain           Bound     kube-system/mongodbdir-icp-mongodb-0        mongodb-storage                      6d
+  pvc-3b037115-a686-11e8-9387-5254006a2ffe   2Gi        RWO            Delete           Bound     default/ceph-pv-test                        ceph                                 1m
+  ```
+
+  Look for a PV with a storage class of "ceph"
+
+  or
+
+  In the ICP UI, navigate to Platform->Storage and look for a PV of type "RBD":
+  ![Ceph PVC](images/ceph-pvc.png)
+
+  List your created PVs from Ceph:
+
+  On your ceph admin or monitor node execute:
+  ```
+  sudo rbd list
+  ```
+
+  You should see something like:
+  ```
+  $ sudo rbd list
+  kubernetes-dynamic-pvc-7d5c8c11-a687-11e8-9291-5254006a2ffe
+  ```
+
+  Remove your test PVC with the following command:
+  ```
+  kubectl delete -f ./ceph-pvc.yaml
+  ```
 
 11. To use your storage class with a deployment you must install the Ceph client on *all schedulable nodes*.  Execute the following on all ICP worker nodes:
-```
-apt-get install -y ceph-common
-```
+  ```
+  apt-get install -y ceph-common
+  ```
 
 12. Copy /etc/ceph/ceph.conf and /etc/ceph/ceph.client.admin.keyring from your Ceph admin or monitor node to each worker node.
-From each worker node as root execute:
-```
-scp root@ceph-admin:/etc/ceph/ceph.conf /etc/ceph/
-scp root@ceph-admin:/etc/ceph/*.keyring /etc/ceph/
-```
 
-As of this writing, when creating a workload which consumes this storage class, ICP will create the PV, bind it to a PVC, but times out testing for availability.  We are still working out this final issue.
+  From each worker node as root execute:
+
+  ```
+  scp root@ceph-admin:/etc/ceph/ceph.conf /etc/ceph/
+  scp root@ceph-admin:/etc/ceph/*.keyring /etc/ceph/
+  ```
+
+  As of this writing, when creating a workload which consumes this storage class, ICP will create the PV, bind it to a PVC, but times out testing for availability.  We are still working out this final issue.
