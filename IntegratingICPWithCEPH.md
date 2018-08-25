@@ -59,25 +59,37 @@ The following commands should be run as the **root** user
   ```
   replace {ceph-stable-release} with the release ou would like to install e.g. mimic - `debian-mimic`
 
-3. Update and install
+3. Install ntp on all nodes
+  ```
+  apt-get install -y ntp
+  ```
+  If there is a local ntp server on your network, update /etc/ntp.conf with your local pool server and restart ntp.
+
+4. Install python on all nodes
+  ```
+  apt-get install -y python
+  ```
+
+5. Update and install
 
   ```
   apt-get update
   apt-get install -y ceph-deploy
   ```
 
-# Create a user and configure passwordless SSH and sudo
-1. Create a `ceph-deploy` user on all nodes.
+6. Create a `ceph-deploy` user on all nodes.
   ```
   useradd -m -s /bin/bash -c "Ceph deploy user" ceph-deploy
   echo "ceph-deploy:Passw0rd!" | sudo -S chpasswd
   ```
-2. Add ceph-deploy user to passwordless sudo
+7. Add ceph-deploy user to passwordless sudo on all nodes
   ```
     echo 'ceph-deploy   ALL=(root) NOPASSWD:ALL' |sudo EDITOR='tee -a' visudo
   ```
 
-3. Enable running Ceph commands easier on other nodes
+# Run the following commands as the ceph-deploy user
+
+8. Enable running Ceph commands easier on other nodes
 
   **Login as your ceph-deploy user** and create the following file at ~/.ssh/config.  You may need to create both the /home/ceph-deploy/.ssh directory and the config file.
 
@@ -102,7 +114,7 @@ Host node4
     User ceph-deploy
   ```
 
-4. Enable passwordless SSH for the ceph-deploy user from the admin node to all other nodes.  Execute these commands as the the ceph-deploy user.  Accept all defaults.
+9. Enable passwordless SSH for the ceph-deploy user from the admin node to all other nodes.  **Execute these commands as the the ceph-deploy user.**  Accept all defaults.
 
   ```
   ssh-keygen -t rsa -P ''
@@ -122,17 +134,6 @@ Host node4
   It will ask you for the password for the ceph-deploy user, answer with the password you created when you created the user.  When this is complete you should be able to execute `ssh ceph-deploy@node1` and get from the ceph-deploy user on the admin host to the remote host without providing a password.
 
   _IMPORTANT:_ Make sure you copy the ID back to the local node (node1) as well so the process can ssh back to itself.
-
-# Install ntp on all nodes
-```
-apt-get install -y ntp
-```
-If there is a local ntp server on your network, update /etc/ntp.conf with your local pool server and restart ntp.
-
-# Install python on all nodes
-```
-apt-get install -y python
-```
 
 ## Deploy Ceph
 Execute the following commands as the **ceph-deploy** user on the admin node.
@@ -167,30 +168,32 @@ ceph-deploy mgr create node1
 
 6. Deploy storage nodes
 
-The data should be the raw device name of an unused raw device installed in the host.  The final parameter is the hostname.  Execute this command once for every raw device and host in the environment.
-```
-ceph-deploy osd create --data /dev/sdb node4
-ceph-deploy osd create --data /dev/sdc node4
+  The data should be the raw device name of an unused raw device installed in the host.  The final parameter is the hostname.  Execute this command once for every raw device  and host in the environment.
 
-ceph-deploy osd create --data /dev/sdb node5
-ceph-deploy osd create --data /dev/sdc node5
+  ```
+  ceph-deploy osd create --data /dev/sdb node4
+  ceph-deploy osd create --data /dev/sdc node4
 
-ceph-deploy osd create --data /dev/sdb node6
-ceph-deploy osd create --data /dev/sdc node6
-```
+  ceph-deploy osd create --data /dev/sdb node5
+  ceph-deploy osd create --data /dev/sdc node5
+
+  ceph-deploy osd create --data /dev/sdb node6
+  ceph-deploy osd create --data /dev/sdc node6
+  ```
 
 7. Install a metadata server
 ```
 ceph-deploy mds create node1
 ```
 
-8. Deploy the object gateway (S3/Swift)
+8. Deploy the object gateway (S3/Swift) (optional)
 ```
 ceph-deploy rgw create node1
 ```
 
-9. Deploy mgr to standby nodes for HA
-On the admin node edit /home/ceph-deploy/mycluster/ceph.conf file and update the mon_initial_members, mon_host, and public_network values to reflect the additional nodes.  The resulting file should look something like this:
+9. Deploy mgr to standby nodes for HA (optional)
+
+  On the admin node edit /home/ceph-deploy/mycluster/ceph.conf file and update the mon_initial_members, mon_host, and public_network values to reflect the additional nodes.  The resulting file should look something like this:
 
 ```
 [global]
