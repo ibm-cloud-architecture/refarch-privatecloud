@@ -1,5 +1,7 @@
 ### Integrating ICP with CEPH
 
+**CAVEAT:** The final step for getting this to work has not yet been documented.  This process will get everything configured such that a PV is created and bound to a PVC, but for some reason which is yet to be determined, the test to make sure the storage is available fails.  This is currently being investigated and will be documented here when it is resolved.
+
 Ceph is short for "cephalopod", a class of mollusks of which the octopus is a member.  The octopus is used as the logo for Ceph and this name was chosen because the parallel processing nature of both the octopus and the software.
 
 There are two ways of integrating ICP with Ceph.
@@ -54,6 +56,7 @@ We will first install Ceph and test creating and mounting a block device.  Then 
   ```
   echo deb https://download.ceph.com/debian-{ceph-stable-release}/ $(lsb_release -sc) main | sudo tee /etc/apt/sources.list.d/ceph.list
   ```
+  replace {ceph-stable-release} with the release ou would like to install e.g. mimic - `debian-mimic`
 
 3. Update and install
 
