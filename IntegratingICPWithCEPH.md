@@ -45,6 +45,7 @@ We will first install Ceph and test creating and mounting a block device.  Then 
 ## Prepare for Ceph installation
 
 # Download and install ceph-deploy
+The following commands should be run as the **root** user
 1. Add the release Key
 
    ```
@@ -133,7 +134,7 @@ apt-get install -y python
 ```
 
 ## Deploy Ceph
-Execute these commands as the ceph-deploy user on the admin node.
+Execute the following commands as the **ceph-deploy** user on the admin node.
 
 1. Create the cluster
 From the ceph-deploy user's home directory:
