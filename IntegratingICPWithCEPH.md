@@ -12,15 +12,9 @@ Doing so requires an external CEPH infrastructure.  This document will walk thro
 
 ## Ceph Architecture
 
-Ceph requires physical block devices for its storage.  You can use separate partitions as your target devices, but in this document we will use raw block devices spanning a number of physical hosts.
+We will use a distributed storage architecture.  We will have three management nodes and three storage/compute nodes. Each storage/compute node has one disk with the operating system (/dev/sda) and two available raw disks for Ceph to consume (/dev/sdb, and /dev/sdc).
 
-![Ceph Architecture](images/ceph_arch.png)
-
-**TODO:** _Replace image with generic architecture image with only 3 storage/compute nodes._
-
-In the image, the number inside the database icon represents the number of available raw disks on that node.  Greyed out nodes indicate future expansion.
-
-This architecture represents a distributed storage architecture. Each node is connected to the network via two Mellanox ConnectX-4 cards configured for bonded 802.3ad link aggregation for 200Gb/s combined throughput.  This provides for a hyperconverged and highly available architecture for both storage and data network traffic.  OSD nodes do not host management functions and vice versa.
+Each node is connected to the network via two Mellanox ConnectX-4 cards configured for bonded 802.3ad link aggregation for 200Gb/s combined throughput.  This provides for a hyperconverged and highly available architecture for both storage and data network traffic.  OSD nodes do not host management functions and vice versa.
 
 The network architecture connecting these nodes is similar to that depicted in this diagram taken from the Cumulus documentation.
 
@@ -28,15 +22,11 @@ The network architecture connecting these nodes is similar to that depicted in t
 
 All management nodes are redundant for high availability and management nodes should not run on the same physical nodes as storage nodes, so to implement this solution, you should use at least two servers (or VMs), one for hosting management nodes and one for hosting storage nodes.
 
-In a highly available environment, it is recommended to run three management nodes and at least three storage nodes so that it can handle the loss of a node.
+In a highly available environment, it is recommended to run three management nodes and at least three storage nodes so that it can handle the loss of any single node.
 
-In this document we will use ubuntu as our host operating system.
+In this document we will use ubuntu 18.04 as our host operating system.
 
-Our environment will consist of three management nodes and three storage nodes (three of the eleven depicted on the image above).
-
-Each storage node has two available raw disks.  The operating system is installed on /dev/sda and /dev/sdb and /dev/sdc are available raw devices.
-
-The hosts are named node1 - node6, respectively, and node1 will be our admin node.  node2 and node3 will be additional managment nodes for HA and node4 - node6 will be storage nodes.
+The hosts are named node1 - node6, respectively, and node1 will be our admin node.  node2 and node3 will be additional management nodes for HA and node4 - node6 will be compute/storage nodes.
 
 We will first install Ceph and test creating and mounting a block device.  Then we will integrate with ICP.
 
