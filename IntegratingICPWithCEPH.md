@@ -1,7 +1,5 @@
 ### Integrating ICP with CEPH
 
-**CAVEAT:** The final step for getting this to work has not yet been documented.  This process will get everything configured such that a PV is created and bound to a PVC, but for some reason which is yet to be determined, the test to make sure the storage is available fails.  This is currently being investigated and will be documented here when it is resolved.
-
 Ceph is short for "cephalopod", a class of mollusks of which the octopus is a member.  The octopus is used as the logo for Ceph and this name was chosen because the parallel processing nature of both the octopus and the software.
 
 There are two ways of integrating ICP with Ceph.
@@ -18,7 +16,7 @@ Ceph requires physical block devices for its storage.  You can use separate part
 
 ![Ceph Architecture](images/ceph_arch.png)
 
-TODO: Replace image with generic architecture image with only 3 storage/compute nodes.
+**TODO:** _Replace image with generic architecture image with only 3 storage/compute nodes._
 
 In the image, the number inside the database icon represents the number of available raw disks on that node.  Greyed out nodes indicate future expansion.
 
@@ -469,7 +467,7 @@ sudo ceph osd pool delete rbd
 
   **Important Note:** Because this user was created in the 'default' namespace (as noted in metadata.namespace above) This storage class can only be used in the default namespace.
 
-  To use Ceph dynamic provisioning in other namespaces you must create the same user secret in every namespace where you want to deploy Ceph storage.
+  To use Ceph dynamic provisioning in other namespaces you must create the same user secret in every namespace where you want to deploy Ceph dynamic storage.
 
   Because the storage class specifically references "ceph-user-secret" the secret should always have this name no matter what namespace is used.
 
@@ -500,6 +498,8 @@ sudo ceph osd pool delete rbd
   Where parameters.monitors are the IP addresses and ports of all Ceph monitor nodes, comma separated.
 
   Remove metadata.annotations.storageclass.* if this should not be the default storage class.
+
+  **IMPORTANT:** As noted above, there will need to be a secret named `ceph-user-seret` in each of the namespaces where will use Ceph dynamic storage provisioning.  They should all be the same with the admin key for the *userId* user.
 
 10. Test your new storage class by creating a new PV from the ceph pool.
 
@@ -579,4 +579,25 @@ sudo ceph osd pool delete rbd
   scp root@ceph-admin:/etc/ceph/*.keyring /etc/ceph/
   ```
 
-  As of this writing, when creating a workload which consumes this storage class, ICP will create the PV, bind it to a PVC, but times out testing for availability.  We are still working out this final issue.
+13. Depending on the version of Ceph and kubernetes you are using you may get an error when attempting to deploy a pod using Ceph dynamic storage. The event will look something like this:
+
+```
+MountVolume.WaitForAttach failed for volume "pvc-f00434db-a8d6-11e8-9387-5254006a2ffe" : rbd: map failed exit status 110, rbd output: rbd: sysfs write failed In some cases useful info is found in syslog - try "dmesg | tail" or so. rbd: map failed: (110) Connection timed out
+```
+
+Further investigation into the syslog file on the worker node should show an entry something like this:
+
+```
+Aug 25 13:32:50 worker1 kernel: [745415.055916] libceph: mon0 10.10.2.1:6789 feature set mismatch, my 106b84a842a42 < server's 40106b84a842a42, missing 400000000000000
+```
+... along with a bunch of other error messages
+
+This error message indicates a missing feature flag in the Ceph client. The feature missing is CRUSH_TUNABLES5
+
+To resolve this issue execute the following command on your Ceph admin or monitor node:
+
+```
+sudo ceph osd crush tunables hammer
+```
+
+Your pod should now finish provisioning.
