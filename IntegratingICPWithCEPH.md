@@ -79,7 +79,7 @@ The following commands should be run as the **root** user
 
 6. Create a `ceph-deploy` user on all nodes.
   ```
-  useradd -m -s /bin/bash -c "Ceph deploy user" ceph-deploy
+  useradd -m -s /bin/bash -c "ceph deploy user" ceph-deploy
   echo "ceph-deploy:Passw0rd!" | sudo -S chpasswd
   ```
 7. Add ceph-deploy user to passwordless sudo on all nodes
