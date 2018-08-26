@@ -55,6 +55,8 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 
 See also the following article on working on storage in ICp: [Working with Storage](https://www.ibm.com/developerworks/community/blogs/fe25b4ef-ea6a-4d86-a629-6f87ccf4649e/entry/Working_with_storage?lang=en)
 
+[Creating a Ceph instance and integrating it with ICP for dynamic storage provisioning](IntegratingICPwithCeph.md)
+
 ### LDAP
 
 [Install OpenLDAP for ICP Integration](InstallAndConfigureOpenLDAP.md)
