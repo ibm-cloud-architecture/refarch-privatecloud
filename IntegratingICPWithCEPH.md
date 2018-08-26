@@ -14,6 +14,8 @@ Doing so requires an external CEPH infrastructure.  This document will walk thro
 
 We will use a distributed storage architecture.  We will have three management nodes and three storage/compute nodes. Each storage/compute node has one disk with the operating system (/dev/sda) and two available raw disks for Ceph to consume (/dev/sdb, and /dev/sdc).
 
+![Storage Architecture](images/ceph-arch.png)
+
 Each node is connected to the network via two Mellanox ConnectX-4 cards configured for bonded 802.3ad link aggregation for 200Gb/s combined throughput.  This provides for a hyperconverged and highly available architecture for both storage and data network traffic.  OSD nodes do not host management functions and vice versa.
 
 The network architecture connecting these nodes is similar to that depicted in this diagram taken from the Cumulus documentation.
