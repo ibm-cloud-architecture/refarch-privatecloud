@@ -573,23 +573,24 @@ sudo ceph osd pool delete rbd
 
 13. Depending on the version of Ceph and kubernetes you are using you may get an error when attempting to deploy a pod using Ceph dynamic storage. The event will look something like this:
 
-```
-MountVolume.WaitForAttach failed for volume "pvc-f00434db-a8d6-11e8-9387-5254006a2ffe" : rbd: map failed exit status 110, rbd output: rbd: sysfs write failed In some cases useful info is found in syslog - try "dmesg | tail" or so. rbd: map failed: (110) Connection timed out
-```
+  ```
+  MountVolume.WaitForAttach failed for volume "pvc-f00434db-a8d6-11e8-9387-5254006a2ffe" : rbd: map failed exit status 110, rbd output: rbd: sysfs write failed In some cases useful info is found in syslog - try "dmesg | tail" or so. rbd: map failed: (110) Connection timed out
+  ```
 
-Further investigation into the syslog file on the worker node should show an entry something like this:
+  Further investigation into the syslog file on the worker node should show an entry something like this:
 
-```
-Aug 25 13:32:50 worker1 kernel: [745415.055916] libceph: mon0 10.10.2.1:6789 feature set mismatch, my 106b84a842a42 < server's 40106b84a842a42, missing 400000000000000
-```
-... along with a bunch of other error messages
+  ```
+  Aug 25 13:32:50 worker1 kernel: [745415.055916] libceph: mon0 10.10.2.1:6789 feature set mismatch, my 106b84a842a42 < server's 40106b84a842a42, missing 400000000000000
+  ```
 
-This error message indicates a missing feature flag in the Ceph client. The feature missing is CRUSH_TUNABLES5
+  ... along with a bunch of other error messages
 
-To resolve this issue execute the following command on your Ceph admin or monitor node:
+  This error message indicates a missing feature flag in the Ceph client. The feature missing is CRUSH_TUNABLES5
 
-```
-sudo ceph osd crush tunables hammer
-```
+  To resolve this issue execute the following command on your Ceph admin or monitor node:
 
-Your pod should now finish provisioning.
+  ```
+  sudo ceph osd crush tunables hammer
+  ```
+
+  Your pod should now finish provisioning.
