@@ -270,7 +270,8 @@ ceph-deploy rgw create node1
   For each pool in the list execute:
 
   ```
-  sudo ceph osd pool set [pool name] pg_num 64
+  sudo ceph osd pool set [pool name] pg_num <number>
+  sudo ceph osd pool set [pool name] pgp_num <number>
   ```
 
   Example:
