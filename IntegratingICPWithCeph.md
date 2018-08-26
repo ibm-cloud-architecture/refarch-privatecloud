@@ -231,6 +231,8 @@ ceph-deploy rgw create node1
 
   You should see HEALTH_OK.  If not, look for your error message in the troubleshooting section below.
 
+  If you did not install the rados gateway (rgw) then you will not yet see any pools defined.
+
   The likelihood is that your health message will say something like:
 
   ```
