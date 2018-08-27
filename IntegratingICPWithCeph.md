@@ -1,4 +1,4 @@
-### Integrating ICP with CEPH
+### Integrating ICP with Ceph
 
 Ceph is short for "cephalopod", a class of mollusks of which the octopus is a member.  The octopus is used as the logo for Ceph and this name was chosen because the parallel processing nature of both the octopus and the software.
 
