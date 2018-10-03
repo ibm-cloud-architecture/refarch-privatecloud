@@ -129,7 +129,7 @@ Installation
 
     6.  Setup the docker stable repository and update the local cache
 
-        `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb\_release -cs) stable"`   
+        `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"`   
         `apt-get update`   
 
     7.  Install docker   
