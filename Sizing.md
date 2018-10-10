@@ -18,8 +18,8 @@ This cluster is listed as Medium Resilience with 3 Master nodes.  To make a Sand
 
 ## Medium ICP Environment	(Resilience Medium)							
 
-| :---: | :---: | :---: | :---: | :---: |
 | Node type | Number of nodes | CPU | Memory (GB) | Disk (GB) |
+| :---: | :---: | :---: | :---: | :---: |
 | Boot	| 1	| 2	| 8	| 250 |
 |	Master	| 3	| 16	| 32	| 500 |
 |	Management	| 2	| 16	| 32	| 500 |
