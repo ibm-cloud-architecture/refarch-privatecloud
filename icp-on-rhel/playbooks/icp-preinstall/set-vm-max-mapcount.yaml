@@ -1,0 +1,36 @@
+---
+# DESCRIPTION:
+# Set vm.max_map_count for docker, kubernetes
+#   vm.max_map_count=262144
+#   Set it in /etc/sysctl.conf to persist across reboots.
+#
+# INPUTS:
+#   vars:
+#     target_nodes - a regex string or group name that defines the hosts or
+#                    host group.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#
+# Root privilege is needed to run this configuration script.
+# The tasks where root is needed use the "become" option.
+#
+# Sample invocation:
+#   ansible-playbook set-vm-max-mapcount.yaml --extra-vars "target_nodes=worker0*"
+#
+#   The above invocation assumes the ansible hosts file has nodes with
+#   names that start with worker0, e.g., worker01, worker02, ...
+#
+
+- hosts: "{{ target_nodes }}"
+  tasks:
+    - name: "Set vm.max_mapp_count in sysctl.conf"
+      sysctl:
+        name: vm.max_map_count
+        value: 262144
+        sysctl_set: yes
+        state: present
+      become: True

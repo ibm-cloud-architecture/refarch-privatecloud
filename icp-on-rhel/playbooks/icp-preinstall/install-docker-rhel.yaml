@@ -1,0 +1,105 @@
+---
+#
+# Install docker and then start and enable it.
+#
+# NOTE: As of ICP v2.1.0.2 on RHEL it is required that Docker
+# available in Passport Advantage (or) eXtreme Leverage is used.
+# The install package is an executable binary.
+# It has a pre-req that may not be installed already: policycoreutils-python
+#
+# NOTE: This playbook assumes the Docker install executable is located
+# in /root/docker and named icp-docker-install.bin of the localhost when the
+# script is run.
+#
+# NOTE: Check the name of the docker install executable.  It is hard-wired
+# in the script below.
+#
+# NOTE: Ubuntu uses overlay2 by default.  Centos and RHEL do not.  The storage driver
+# is explicitly included on the ExecStart line of the docker.service file for clarity.
+#
+# NOTE: The MountFlags=shared is also explicitly included in the docker.service file
+# for clarity.  It could be left out all together.
+#
+# INPUTS:
+#   vars:
+#     target_nodes - a regex string or group name that defines the hosts or
+#                    host group.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#
+# Root privilege is needed to run this configuration script.
+# The tasks where root is needed use the "become" option.
+#
+# Sample invocation:
+#   ansible-playbook install-docker.yaml --extra-vars "target_nodes=worker0*"
+#
+#   The above invocation assumes the ansible hosts file has nodes with
+#   names that start with worker0, e.g., worker01, worker02, ...
+#
+#
+- hosts: "{{ target_nodes }}"
+  tasks:
+
+  - name: "Create destination directory for Docker install executable"
+    file:
+      path: /root/docker
+      state: directory
+      owner: root
+      group: root
+    become: True
+
+  - name: "Copy Docker executable to host"
+    copy:
+      src: /root/docker/icp-install-docker.bin
+      dest: /root/docker/icp-install-docker.bin
+      mode: u=rx,g=rx,o=rx
+    become: True
+
+  - name: "Install Docker"
+    shell: ./icp-install-docker.bin --install
+    args:
+      chdir: /root/docker
+      creates: /usr/bin/docker
+    become: True
+
+  - name: "Configure the logging options"
+    lineinfile:
+      dest: /lib/systemd/system/docker.service
+      backrefs: True
+      regexp: '^(ExecStart=/usr/bin/dockerd(?!.*[ \t]--log-opt max-size=10m --log-opt max-file=10[ \t\n]).*)$'
+      line: '\1 --log-opt max-size=10m --log-opt max-file=10'
+      state: present
+    become: True
+
+  - name: "Use overlay2 storage driver"
+    lineinfile:
+      dest: /lib/systemd/system/docker.service
+      backrefs: True
+      regexp: '^(ExecStart=/usr/bin/dockerd(?!.*[ \t]--storage-driver=overlay2[ \t\n]).*)$'
+      line: '\1 --storage-driver=overlay2'
+      state: present
+    become: True
+
+  - name: "Set MountFlags=shared"
+    lineinfile:
+      dest: /lib/systemd/system/docker.service
+      line: MountFlags=shared
+      insertafter: StartLimitInterval=*
+      state: present
+    become: True
+
+  - name: "Do a systemd daemon-reload to reload of changes to docker service file"
+    systemd:
+      daemon-reload: yes
+    become: True
+
+  - name: "Start and enable Docker service"
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    become: True
