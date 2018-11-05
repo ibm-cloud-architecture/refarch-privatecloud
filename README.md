@@ -4,7 +4,7 @@ This project provides prescriptive guidance on how to efficiently deploy and ope
 
 ## Architecture
 
-![Architecture](images/architecture1012.jpeg)
+![Architecture](images/architecture1012.jpg)
 
 ## Planning ICP clusters
 
