@@ -1,0 +1,14 @@
+---
+#
+# Add MountFlags=shared to /lib/systemd/system/docker.service
+#
+
+- hosts: "{{ target_nodes }}"
+  tasks:
+    - name: "Set MountFlags=shared"
+      lineinfile:
+        path: /lib/systemd/system/docker.service
+        line: MountFlags=shared
+        insertafter: StartLimitInterval=*
+        state: present
+      become: True

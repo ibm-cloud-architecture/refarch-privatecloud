@@ -1,0 +1,68 @@
+---
+# Description:
+#   Install GlusterFS client on target "gfs_clients". 
+#   Also add fuse.conf and dm_thin_pool.conf to proper places.
+#
+# INPUTS:
+#   vars:
+#     gfs_clients   - The regex string or the name of a group defined in the inventory 
+#                     that represents all of the nodes in the cluster that may be glusterfs 
+#                     clients.  (Usually that is every node in the ICP cluster, except maybe 
+#                     the proxies.) 
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#     The default inventory is in /etc/ansible/hosts.  The example invocation
+#     below uses the default inventory.
+#
+# In this playbook, the tasks where root is needed include the "become" option.
+# It is assumed the user running the script can be elevated to root on the target
+# hosts without providing a password.
+#
+# Sample invocation (all on one line):
+#   ansible-playbook icp-install-glusterfs-client.yaml --extra-vars "gfs_clients=icp-workers"
+#
+# NOTES:
+#   The "become" option needs to be specified with the tasks where it is needed,
+#   e.g., where docker is started or stopped.  We can't use --become on the command
+#   line because that leads to problems running things on the control host where
+#   an elevation of privilege is not actually needed.
+#
+# For GlusterFS documentation on client installation and configuration see:
+# "Accessing Data - Setting up GlusterFS Client"
+# URL: http://docs.gluster.org/en/latest/Administrator%20Guide/Setting%20Up%20Clients/
+#
+
+
+- hosts: "{{ gfs_clients }}"
+  tasks:
+    - name: "Install GlusterFS client"
+      package:
+        name: glusterfs-client
+        state: present
+      become: True
+
+    - name: "Configure dm_thin_pool kernel module"
+      shell: modprobe dm_thin_pool
+      become: True
+      
+    - name: "Persist dm_thin_pool for reboots"
+      copy: 
+        src: dm_thin_pool.conf
+        dest: /etc/modules-load.d/dm_thin_pool.conf
+      become: True
+      
+    - name: "Configure fuse kernel module"
+      shell: modprobe fuse
+      become: True
+      
+    - name: "Persist fuse for reboots"
+      copy: 
+        src: fuse.conf
+        dest: /etc/modules-load.d/fuse.conf
+      become: True
+
+...

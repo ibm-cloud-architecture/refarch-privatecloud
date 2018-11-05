@@ -1,0 +1,21 @@
+---
+# 
+# Install NTP on all nodes
+# Intended for use in the ICP installation process
+# 
+#
+
+- hosts: "{{ target_nodes }}"
+  tasks:
+    - name: "Install NTP"
+      package:
+        name: ntp
+        state: present
+      become: True
+
+    - name: "Start NTP"
+      service:
+        name: ntpd
+        state: started
+        enabled: yes
+      become: True

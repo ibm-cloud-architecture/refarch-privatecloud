@@ -1,0 +1,42 @@
+---
+# Description:
+#   Restart docker on the given hosts.
+#
+# WARNING: Restarting docker on all ICP master nodes at the same time 
+# is something to avoid.  Things can get pretty wedged if as Kubernetes
+# tries to maintain some running master node. If docker needs to be 
+# restarted on the master nodes, do so one node at a time.
+#
+# WARNING: At least with ICP 2.1.0.2 and 2.1.0.3, Kube DNS runs on the 
+# ICP management nodes. It is recommended that docker be restarted one 
+# management node at a time, otherwise the cluster will likely experience 
+# issues.
+#
+# INPUTS:
+#   vars:
+#     target_nodes - a regex string or group name that defines the hosts or
+#                    host group on which docker should be restarted.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#
+# Root privilege is needed to start/stop docker.
+# The tasks where root is needed use the "become" option.
+#
+# Sample invocation:
+#   ansible-playbook restart-docker.yaml --extra-vars "target_nodes=worker0*"
+#
+
+- hosts: "{{ target_nodes }}"
+
+  tasks:
+    - name: Ensure docker service restarted.
+      service: 
+        name: docker
+        state: restarted
+      become: True
+
+...
