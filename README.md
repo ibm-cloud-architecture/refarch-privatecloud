@@ -18,7 +18,7 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 
   * VMware:
     *  [Installing ICP with Ubuntu](Installing_ICp_on_prem_ubuntu.md)
-    *  [Installing ICP with RedHat Enterprise](rhel_install/README.md)  
+    *  [Installing ICP with RedHat Enterprise](icp-on-rhel/README.md)  
   * AWS: [Installing ICP on AWS](Installing_ICp_on_aws.md)
   * VirtualBox: [Installing ICP on VirtualBox](https://github.com/ibm-cloud-architecture/refarch-privatecloud-virtualbox)
   * OpenStack: [Installing ICP on OpenStack](OpenStack/Install_ICP_On_OpenStack.md)   
