@@ -394,31 +394,29 @@ sudo ceph osd pool delete rbd
 
 ### Interating ICP with CEPH
 
-1.
-
 1. Create an rbd pool for use with ICP
 
   ```
   sudo ceph osd pool create icp rbd 1024 1024
   ```
 
-1. Create a new ceph user for use with ICP
+2. Create a new ceph user for use with ICP
 
   ```
   sudo ceph auth get-or-create client.icp mon 'allow r' osd 'allow class-read object_prefix rbd_children, allow rwx pool=icp' -o ceph.client.kube.keyring
   ```
 
-1. To deploy images as this user, you will need to create a keyring file for your worker nodes.
+3. To deploy images as this user, you will need to create a keyring file for your worker nodes.
   ```
   sudo ceph auth get client.icp > ./ceph.client.icp.keyring
   ```
 
-1. Copy this keyring to /etc/ceph
+4. Copy this keyring to /etc/ceph
   ```
   cp ./ceph.client.icp.keyring /etc/ceph/
   ```
 
-1. Retrieve the Ceph admin key as base64
+5. Retrieve the Ceph admin key as base64
 
   ```
   sudo ceph auth get-key client.admin |base64
@@ -426,7 +424,7 @@ sudo ceph osd pool delete rbd
 
   This should return something like: `QVFDSGhYZGIrcmc0SUJBQXd0Yy9pRXIxT1E1ZE5sMmdzRHhlZVE9PQ==`
 
-1. Retrieve the Ceph ICP key as base64
+6. Retrieve the Ceph ICP key as base64
 
   ```
   sudo ceph auth get-key client.icp |base64
@@ -434,7 +432,7 @@ sudo ceph osd pool delete rbd
 
   This should return something like: `QVFERUlYNWJKbzlYR1JBQTRMVnU1N1YvWDhYbXAxc2tseDB6QkE9PQ==`
 
-1. Create a new file named ceph-secret.yaml with the following contents:
+7. Create a new file named ceph-secret.yaml with the following contents:
 
   ```
   apiVersion: v1
@@ -447,7 +445,7 @@ sudo ceph osd pool delete rbd
   type: kubernetes.io/rbd
   ```
 
-1. Create the secret in ICP
+8. Create the secret in ICP
 
   Use the ICP UI to configure your kubectl client and create the 'ceph-secret' secret with the following command:
 
@@ -455,7 +453,7 @@ sudo ceph osd pool delete rbd
   kubectl create -f ./ceph-secret.yaml
   ```
 
-1. Create a new file named ceph-user-secret.yaml with the following contents:
+9. Create a new file named ceph-user-secret.yaml with the following contents:
 
   ```
   apiVersion: v1
@@ -470,7 +468,7 @@ sudo ceph osd pool delete rbd
 
   Where data.key is the key retrieved from ceph for the client.icp user.
 
-1. Create the user secret in ICP
+10. Create the user secret in ICP
 
   Use the ICP UI to configure your kubectl client and create the 'ceph-user-secret' secret in the default namespace with the following command:
 
@@ -484,7 +482,7 @@ sudo ceph osd pool delete rbd
 
   Because the storage class specifically references "ceph-user-secret" the secret should always have this name no matter what namespace is used.
 
-1. Create the Ceph RBD Dynamic Storage Class
+11. Create the Ceph RBD Dynamic Storage Class
 
   Create a file named 'ceph-sc.yaml' with the following contents:
   ```
@@ -513,7 +511,7 @@ sudo ceph osd pool delete rbd
 
   **IMPORTANT:** As noted above, there will need to be a secret named `ceph-user-seret` in each of the namespaces where will use Ceph dynamic storage provisioning.  They should all be the same with the admin key for the *userId* user.
 
-1. Test your new storage class by creating a new PV from the ceph pool.
+12. Test your new storage class by creating a new PV from the ceph pool.
 
   Create a file named ceph-pvc.yaml with the following contents:
 
@@ -577,12 +575,12 @@ sudo ceph osd pool delete rbd
   kubectl delete -f ./ceph-pvc.yaml
   ```
 
-1. To use your storage class with a deployment you must install the Ceph client on *all schedulable nodes*.  Execute the following on all ICP worker nodes:
+13. To use your storage class with a deployment you must install the Ceph client on *all schedulable nodes*.  Execute the following on all ICP worker nodes:
   ```
   apt-get install -y ceph-common
   ```
 
-1. Copy /etc/ceph/ceph.conf, /etc/ceph/ceph.client.icp.keyring, and /etc/ceph/ceph.client.admin.keyring from your Ceph admin node to each worker node.
+14. Copy /etc/ceph/ceph.conf, /etc/ceph/ceph.client.icp.keyring, and /etc/ceph/ceph.client.admin.keyring from your Ceph admin node to each worker node.
 
   From each worker node as root execute:
 
@@ -595,7 +593,7 @@ sudo ceph osd pool delete rbd
 
   Copy these files to the boot node and use scp to move them to all worker nodes without having to login once for each worker node (assuming you have configured passwordless ssh from your boot node to all your worker nodes)
 
-`13`. Depending on the version of Ceph and kubernetes you are using you may get an error when attempting to deploy a pod using Ceph dynamic storage. The event will look something like this:
+15. Depending on the version of Ceph and kubernetes you are using you may get an error when attempting to deploy a pod using Ceph dynamic storage. The event will look something like this:
 
   ```
   MountVolume.WaitForAttach failed for volume "pvc-f00434db-a8d6-11e8-9387-5254006a2ffe" : rbd: map failed exit status 110, rbd output: rbd: sysfs write failed In some cases useful info is found in syslog - try "dmesg | tail" or so. rbd: map failed: (110) Connection timed out
