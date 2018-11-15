@@ -334,7 +334,7 @@ _NOTE:_ The two numbers at the end of this command are the PG and PGP for this p
 Once your pool has been created you can then create a new image in that pool.  An image is block storage on which you can create a filesystem and is analogous to a virtual disk.
 
 ```
-sudo rbd map myimage --size 10240 --image-feature layering
+sudo rbd map myimage -size 10240 --image-feature layering
 ```
 
 This command will create a new 10GB disk named "myimage" suitable for mounting on your filesystem.  The --size parameter is in MB.
