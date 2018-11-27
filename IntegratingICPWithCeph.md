@@ -1,4 +1,4 @@
-### Integrating ICP with Ceph
+# Installing Ceph and Integrating it with ICP
 
 Ceph is short for "cephalopod", a class of mollusks of which the octopus is a member.  The octopus is used as the logo for Ceph and this name was chosen because the parallel processing nature of both the octopus and the software.
 
@@ -315,9 +315,9 @@ ceph-deploy rgw create node1
   37   ssd   3.63869         osd.4     up  1.00000 1.00000
   38   ssd   3.63869         osd.5     up  1.00000 1.00000
   ```
-### Test your newly installed Ceph instance
+## Test your newly installed Ceph instance
 
-## Create and mount a block device
+### Create and mount a block device
 
 Block devices are the most commonly used types of storage provisioned by Ceph users.  Creating and using them is relatively easy once your environment is up and running.
 
@@ -334,10 +334,12 @@ _NOTE:_ The two numbers at the end of this command are the PG and PGP for this p
 Once your pool has been created you can then create a new image in that pool.  An image is block storage on which you can create a filesystem and is analogous to a virtual disk.
 
 ```
-sudo rbd map myimage -size 10240 --image-feature layering
+sudo rbd create myimage --size 10240 --image-feature layering
 ```
 
 This command will create a new 10GB disk named "myimage" suitable for mounting on your filesystem.  The --size parameter is in MB.
+
+To view the images in  your pool use `sudo rbd ls`
 
 Now, ssh to the machine on which you want to mount this image.
 
@@ -372,7 +374,7 @@ mount /dev/rbd0 /mnt/myimage
 
 Now, if you do an ls on your newly mounted filesystem you should see a `lost+found` directory indicating the root of a partition.
 
-## Remove your test configuration
+### Remove your test configuration
 
 1. Remove your test mount
 
@@ -392,7 +394,7 @@ sudo rbd unmap myimage --name client.admin
 sudo ceph osd pool delete rbd
 ```
 
-### Interating ICP with CEPH
+## Interating ICP with CEPH
 
 1. Create an rbd pool for use with ICP
 
