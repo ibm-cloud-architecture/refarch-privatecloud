@@ -6,7 +6,7 @@ This document provides a realistic summary of system requirements for the variou
 
 As an expedient you can create one machine that meets the maximum requirements of the management nodes and clone it.
 
-*NOTE:* This document reflects the hardware requirements for ICP v2.1.0.3.  The disk requirements for ICP v2.1.0.3 have changed from ICP v2.1.0.2. With ICP v2.1.0.3, the `/var` file system is used much more heavily because all of the content that was in `/opt` has moved to `/var`.  More details are provided in the body of this document.
+*NOTE:* This document reflects the hardware requirements for ICP v3.1.0.  
 
 Specifying the worker node resource requirements is obviously much more of an "it depends" endeavor.  The worker node requirements shown in this document are merely a suggestion.  More precise worker node requirements can only be determined based on the workloads to be run.
 
@@ -30,9 +30,9 @@ Suggested ICP development environment deployment resource allocations are descri
 - NFS server is used for application shared storage.  Disk needs to be sized appropriately.
 - All disks can be thin-provisioned.
 
-*NOTE:* The disk sizes in the above table are based on the ICP 2.1.0.3 Knowledge Center, [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.3/supported_system_config/hardware_reqs.html#disk).
+*NOTE:* The disk sizes in the above table are based on the ICP 3.1.0 Knowledge Center, [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.0/supported_system_config/hardware_reqs.html).
 
-*NOTE:* Additional disk space is added to the totals recommended for the ICP nodes in the ICP 2.1.0.3 KC to allow for separate file systems for `/home` (10 GB) and `/opt` (10 GB).
+*NOTE:* Additional disk space is added to the totals recommended for the ICP nodes in the ICP 3.1.0 KC to allow for separate file systems for `/home` (10 GB) and `/opt` (10 GB).
 
 # Summary of ICP development system requirements (high performance)
 
@@ -55,9 +55,9 @@ Suggested ICP high performance development environment deployment resource alloc
 - NFS server is used for application shared storage.  Disk needs to be sized appropriately.
 - All disks can be thin-provisioned.
 
-*NOTE:* The disk sizes in the above table are based on the ICP 2.1.0.3 Knowledge Center, [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.3/supported_system_config/hardware_reqs.html#disk).
+*NOTE:* The disk sizes in the above table are based on the ICP 3.1.0 Knowledge Center, [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.0/supported_system_config/hardware_reqs.html).
 
-*NOTE:* Additional disk space is added to the totals recommended for the ICP nodes in the ICP 2.1.0.3 KC to allow for separate file systems for `/home` (10 GB) and `/opt` (10 GB).
+*NOTE:* Additional disk space is added to the totals recommended for the ICP nodes in the ICP 3.1.0 KC to allow for separate file systems for `/home` (10 GB) and `/opt` (10 GB).
 
 *NOTE:* For simplicity, swap space size of 8 GB is used for calculating total disk size. For RHEL 7 swap space size guidelines see the chapter on [Swap Space](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/ch-swapspace).
 
@@ -67,9 +67,9 @@ Suggested ICP production deployment resource allocations are described in the ta
 
 *NOTE:* For RHEL 7.4 or later, and Docker 17.06 or later, the `overlay2` storage driver can be used on an `xfs` file system.  Older versions of Docker require the `devicemapper` storage driver using the `direct-lvm` mode.  When using `direct-lvm` it is convenient to use a disk dedicated to Docker. The recommended starting disk size is 100 GB.  Hence, the sizes in the storage requirements below.
 
-*NOTE:* ICP 2.1.0.3 ships with Docker 17.12. If you are using RHEL 7.4 or later, it is recommended that the `overlay2` storage-driver is used.  Make sure that option is set in the `config.yaml`.  Or if you install you install Docker independently of the ICP installation, be sure to configure `overlay2` for the storage driver.
+*NOTE:* ICP 3.1.0 ships with Docker 18.03. If you are using RHEL 7.4 or later, it is recommended that the `overlay2` storage-driver is used.  Make sure that option is set in the `config.yaml`.  Or if you install you install Docker independently of the ICP installation, be sure to configure `overlay2` for the storage driver.
 
-*NOTE:* If Docker can be installed using the `overlay2` storage driver, it is not necessary to allocate a separate disk for Docker storage.  The Docker file system does need to be `xfs` when the `overlay2` storage driver is used, which may mean that Docker needs a separate file system, if for example `ext4` is the generally preferred file system.
+*NOTE:* If Docker can be installed using the `overlay2` storage driver, it is not necessary to allocate a separate disk for Docker storage.  The Docker file system does need to be `xfs` when the `overlay2` storage driver is used. If `ext4` is the generally preferred file system in your organization, then Docker would need a separate `xfs` file system.
 
 For production deployments, particularly those where the ICP nodes will not have access to the Internet, it is recommended that the boot node be a separate VM.  The boot node typically is permitted to have access to the Internet to make it convenient to download software from places like GitHub and DockerHub and other sources of commonly used software.  The boot node can serve as an administrative server for the cluster.
 
@@ -91,21 +91,21 @@ For production deployments, particularly those where the ICP nodes will not have
 - GlusterFS servers are used for application shared storage.  Disk needs to be sized appropriately. The sizes in the table above are a suggested starting point.
 - All disks can be thin-provisioned.
 
-*NOTE:* The disk sizes in the above table are based on the ICP 2.1.0.3 Knowledge Center, [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.3/supported_system_config/hardware_reqs.html#disk).
+*NOTE:* The disk sizes in the above table are based on the ICP 3.1.0 Knowledge Center, [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.0/supported_system_config/hardware_reqs.html).
 
-*NOTE:* Additional disk space is added to the totals recommended for the ICP nodes in the ICP 2.1.0.3 KC to allow for separate file systems for `/home` (10 GB) and `/opt` (10 GB).
+*NOTE:* Additional disk space is added to the totals recommended for the ICP nodes in the ICP 3.1.0 KC to allow for separate file systems for `/home` (10 GB) and `/opt` (10 GB).
 
 *NOTE:* For simplicity and round numbers, swap space size of 10 GB is used for calculating total disk size. For RHEL 7 swap space size guidelines see the chapter on [Swap Space](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/ch-swapspace).
 
 # File system sizings
 
-See the ICP 2.1.0.3 Knowledge Center [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0.3/supported_system_config/hardware_reqs.html#disk)
+See the ICP 3.1.0 Knowledge Center [Hardware requirements and recommendations - Disk space requirements](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_3.1.0/supported_system_config/hardware_reqs.html)
 
 *NOTE:* For a production VM, be sure to use Logical Volume Manager (LVM) for all file systems other than those that require a physical partition, e.g., `/boot`, swap.
 
 *NOTE:* Lack of file system space particularly in `/var` is a common problem during the installation and upgrade/update of ICP.  Particularly on master and management nodes, the `/var/lib/docker` directory can consume 40 GB to 50 GB.  The `/var/lib/kubelet` directory typically consumes ~10 GB.
 
-*NOTE:* ICP 2.1.0.3 moves to using `/var` instead of `/var` and `/opt`.  The tables below reflect the recommendations for ICP 2.1.0.3.  If docker is using the `overlay2` storage driver, a separate disk is not necessary.  The sizing for the docker file system regardless of storage driver is recommended to start at 100 GB.
+*NOTE:* If docker is using the `overlay2` storage driver, a separate disk is not necessary.  The sizing for the docker file system regardless of storage driver is recommended to start at 100 GB.
 
 **ICP Master** nodes suggested file system partitioning:  
 

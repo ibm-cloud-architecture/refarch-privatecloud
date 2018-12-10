@@ -28,6 +28,11 @@ baseurl=https://releases.ansible.com/ansible/rpm/release/epel-7-x86_64/
 gpgcheck=0
 enabled=1
 ```
+
+## Python pre-req
+
+Python 2.7.x is needed for Ansible and for the ICP installation.  If your RHEL image does not have Python installed then it needs to be installed on the boot node and all cluster nodes.
+
 ## Installing Ansible
 Install yum from your RHEL "extras" repo, or the public Ansible repo, you configured in the previous section.
 

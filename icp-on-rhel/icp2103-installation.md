@@ -15,7 +15,7 @@ This document is focused on the steps for installing IBM Cloud Private v2.1.0.3.
 
 1. The product install archive and the Docker install executable should be available on the boot-master machine in `/root/icp` and `/root/docker` respectively. Typically, you would have downloaded the product archives from Passport Advantage (IBM customer) or eXtreme Leverage (IBM internal).  You can find the GA releases by searching on, *IBM Cloud Private*.
 
-1. The ICP Knowledge Center (KC) installation instructions for ICP Cloud Private "Cloud Native" are rooted in the section: [Intalling ICP Cloud Private Cloud Native environment](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.3/installing/install_containers.html). (Cloud Native and Enterprise editions differ only in that Enterprise comes with more IBM middleware software entitlements.)
+1. The ICP Knowledge Center (KC) installation instructions for ICP Cloud Private "Cloud Native" are rooted in the section: [Installing ICP Cloud Private Cloud Native environment](https://www.ibm.com/support/knowledgecenter/en/SSBS6K_2.1.0.3/installing/install_containers.html). (Cloud Native and Enterprise editions differ only in that Enterprise comes with more IBM middleware software entitlements.)
 
 1. On all VMs in the ICP cluster, if `firewalld` is running, stop it and disable it until after the ICP install completes.  (Use the ansible playbook to stop and disable the firewall on each VM.)
 

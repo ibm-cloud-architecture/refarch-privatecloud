@@ -1,14 +1,16 @@
 Configure a Private Docker Repository for IBM Cloud private Native or Enterprise Installation
 =============================================
 
-## Overview
-The installation of IBM Cloud private requires access to a repository of Docker images. For the CE installation the images are served from the public Docker Hub.
-This is not possible for installation of the Native or Enterprise editions. For those versions a very large tar file is copied to each node in the environment and
-loaded into each local Docker image repository.
+**NOTE: This document can be ignored starting with ICP 3.1.0.**
 
-In this document we will outline how to configure a private Docker registry on the boot node that can be used for installation in air-gap environments.
-This will help reduce the constraints on disk space and time required to copy the large image file. These instructions will work for any type of installation, single
-node, multi-node, HA, etc.
+## Overview
+The installation of IBM Cloud private requires access to a repository of Docker images. For the Community Edition (CE) installation the images are served from the public Docker Hub. The images needed for installation of the Native or Enterprise editions are not publicly available.
+
+For ICP versions prior to ICP 3.1.0, a very large tar file (~10GB) is copied to each node in the environment and loaded into each local Docker image repository.
+
+With the advent of ICP 3.1.0, the installation is done using a local Docker registry that is stood up by the inception installer early in the installation process.  Once the local registry is available and populated, images are pulled from that registry to each of the specialized node types in the cluster.  This approach provides a significant improvement in the efficiency of the installation.
+
+In this document we will outline how to configure a private Docker registry on the boot node that can be used for installation of ICP 2.1.0.3 in an air-gap environment.  Using a local Docker registry will help reduce the constraints on disk space and time required to copy the large image file. These instructions will work for any type of installation, single node, multi-node, HA, etc.
 
 *NOTE:* This approach applies only when the ICP cluster to be deployed is a homogeneous collection of VMs, i.e., all x86 or all PPC.  Likewise, this approach cannot be used if some worker nodes are s390x.
 

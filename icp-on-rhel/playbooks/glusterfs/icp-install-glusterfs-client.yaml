@@ -1,14 +1,14 @@
 ---
 # Description:
-#   Install GlusterFS client on target "gfs_clients". 
+#   Install GlusterFS client on target "target_nodes".
 #   Also add fuse.conf and dm_thin_pool.conf to proper places.
 #
 # INPUTS:
 #   vars:
-#     gfs_clients   - The regex string or the name of a group defined in the inventory 
-#                     that represents all of the nodes in the cluster that may be glusterfs 
-#                     clients.  (Usually that is every node in the ICP cluster, except maybe 
-#                     the proxies.) 
+#     target_nodes   - The regex string or the name of a group defined in the inventory
+#                     that represents all of the nodes in the cluster that may be glusterfs
+#                     clients.  (Usually that is every node in the ICP cluster, except maybe
+#                     the proxies.)
 #
 #     You can define the vars on the ansible-playbook command line using --extra-vars.
 #     Or define vars in your hosts inventory or any of the other ways to define
@@ -23,7 +23,7 @@
 # hosts without providing a password.
 #
 # Sample invocation (all on one line):
-#   ansible-playbook icp-install-glusterfs-client.yaml --extra-vars "gfs_clients=icp-workers"
+#   ansible-playbook icp-install-glusterfs-client.yaml --extra-vars "target_nodes=icp-workers"
 #
 # NOTES:
 #   The "become" option needs to be specified with the tasks where it is needed,
@@ -37,7 +37,7 @@
 #
 
 
-- hosts: "{{ gfs_clients }}"
+- hosts: "{{ target_nodes }}"
   tasks:
     - name: "Install GlusterFS client"
       package:
@@ -48,19 +48,19 @@
     - name: "Configure dm_thin_pool kernel module"
       shell: modprobe dm_thin_pool
       become: True
-      
+
     - name: "Persist dm_thin_pool for reboots"
-      copy: 
+      copy:
         src: dm_thin_pool.conf
         dest: /etc/modules-load.d/dm_thin_pool.conf
       become: True
-      
+
     - name: "Configure fuse kernel module"
       shell: modprobe fuse
       become: True
-      
+
     - name: "Persist fuse for reboots"
-      copy: 
+      copy:
         src: fuse.conf
         dest: /etc/modules-load.d/fuse.conf
       become: True

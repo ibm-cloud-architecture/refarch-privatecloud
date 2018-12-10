@@ -33,7 +33,7 @@ Installing GlusterFS server on RHEL rather than in a container may be a matter o
 Here is a sample yum `gluster.repo` file that needs to be created in `/etc/yum.repos.d/`.
 ```
 [Gluster_4.0]
-name=Gluster 3.13
+name=Gluster 4.0
 baseurl=http://mirror.centos.org/centos/7/storage/$basearch/gluster-4.0/
 gpgcheck=0
 enabled=1
@@ -63,6 +63,8 @@ enabled=1
 - Configure passwordless `ssh` for root among the GlusterFS servers in the cluster.  This is a multi-way configuration.  Each server needs to be able to `ssh` to the other servers in the cluster. If you are unfamiliar with the steps to configure passwordless `ssh` see [Configure passwordless ssh among cluster members](configure-passwordless-ssh.md).
 
 - Configure `firewalld` to open gluster server ports (See [Getting started with Red Hat Gluster Storage Server](https://access.redhat.com/documentation/en-us/red_hat_gluster_storage/3.1/html/administration_guide/chap-getting_started) for on ports that need to be open and the steps to configure `firewalld`.)
+
+**NOTE** Be sure to get the firewall configured properly.  If not you will see connection problems when you attempt to load the `toplogy.json` file to configure the servers.
 
 # Install "native" GlusterFS client
 
@@ -136,6 +138,7 @@ where gluster##.xxx.yyy represents each of the VMs in your gluster server cluste
 ```
 
 - Smoke test for heketi server:
+NOTE: If `heketi` is configured to require authentication the simple curl command does not respond.
 ```
 > curl http://localhost:8080/hello
 Hello from Heketi
@@ -291,6 +294,23 @@ If the password/secret you provide does not match up with the user and key in th
 
 *NOTE:* If you change anything in the `heketi.json` file you need to restart the Heketi service (`systemctl restart heketi`) to pick up the changes.
 
+### Can't connect to gluster server
+
+If the firewalls are not configured properly for use with glusterd and heketi, then you will get errors when you try to load the `topology.json`. The error message clearly states that connection was refused.
+
+### Multiple attempts to load the topology
+
+This note refers to Heketi 6.0.  Newer versions of Heketi may behave better.
+
+If multiple attempts to load the `topolgoy.json` are made and fail, then you will likely need to clean things up.  Be sure to use the `heketi-cli topology info` command to examine your topology.  If you see clusters defined with nothing in them, then delete them.  If you see clusters defined with fewer servers than you intended from the topology, then delete them.  
+
+# Deleting GlusterFS objects
+
+Every type of object supports a `delete` action/verb.  You may not delete a node unless that node has no devices.  In order to delete a device it must not have any volumes.  
+
+Before you can delete a device you need to `disable` it, then `remove`, then `delete`.
+
+It can be very tedious to delete a cluster that is populated with nodes and devices.
 
 # Using heketi-cli to create persistent volumes for ICP master node shared file systems
 

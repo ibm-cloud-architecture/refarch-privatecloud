@@ -24,6 +24,10 @@ The `epel` repo has Ansible and Docker pre-req packages in it.
 
 TBD - Does `s390x` (zLinux) have any particular `yum` repositories that should be configured?
 
+# Python
+
+Python 2.7.x is needed for Ansible and for the ICP installation.  If your RHEL image does not have Python installed then it needs to be installed on the boot node and all cluster nodes.
+
 # Additional packages to install
 
 This section lists some software that is needed at some time or another. These packages may not be part of a minimal RHEL server installation.
