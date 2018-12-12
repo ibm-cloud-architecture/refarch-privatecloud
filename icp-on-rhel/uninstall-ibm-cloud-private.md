@@ -1,11 +1,14 @@
 # Uninstall IBM Cloud Private
 
-This document describes the steps to uninstall ICP.  Starting with ICP v2.1.0.2 it is required that an uninstall be done after a failed installation attempt.
+*NOTE:* As of ICP 3.1.0 it is not required that an uninstall be done after every failed installation.  The installation process is more-or-less idempotent.
+
+The general rule, is that if the install failed gracefully, i.e., the error is reported in the install log and a final status of all the cluster nodes is reported, then an uninstall is not needed.  
+
 ```
-> docker run -e LICENSE=accept --net=host --rm -t -v $(pwd):/installer/cluster ibmcom/icp-inception:2.1.0.3-ee uninstall -v | tee logs/icp_uninstall.log
+> docker run -e LICENSE=accept --net=host --rm -t -v $(pwd):/installer/cluster ibmcom/icp-inception-amd64:3.1.0-ee uninstall -v
 ```
 
-The following directories should not exist on any nodes in the cluster/cloud:
+After the uninstall, the following directories should not exist on any nodes in the cluster/cloud:
 ```
 /var/lib/etcd/
 /var/lib/kubelet/

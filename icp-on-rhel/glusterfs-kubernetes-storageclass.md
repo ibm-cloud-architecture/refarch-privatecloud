@@ -1,4 +1,4 @@
-# Configure a Kubernetes StorageClass
+# Configure a Kubernetes StorageClass for GlusterFS
 
 In order to use the shared storage provided by the GlusterFS cluster, some additional Kubernetes artifacts need to be created.  The ICP cluster needs to be up and running in order to create these artifacts.
 

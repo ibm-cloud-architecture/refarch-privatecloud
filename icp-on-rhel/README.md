@@ -1,7 +1,7 @@
 IBM Cloud Private on Red Hat Enterprise Linux v7
 =============================================
 
-This is the top level document that serves as a guide to other documents that capture the installation of IBM Cloud Private v2.1.0.3 on Red Hat Enterprise Linux v7.5.
+This is the top level document that serves as a guide to other documents that capture the installation of IBM Cloud Private v3.1.0/v3.1.1 on Red Hat Enterprise Linux v7. (RHEL v7.3, 7.4 or 7.5)
 
 # ICP installation documents
 
@@ -19,23 +19,23 @@ This is the top level document that serves as a guide to other documents that ca
 
 [Special RHEL Configuration](special-rhel-configuration.md) - Things that need to be configured for IBM Cloud Private that are not usually part of a stock RHEL configuration.
 
-[Install Docker](rhel-install-docker-devicemapper-direct-lvm.md) Instructions for installing Docker using the installation executable provided with ICP at Passport Advantage (external) or eXtreme Leverage (IBM internal)
+[Install Docker](rhel-install-docker-using-overlay2-.md) Instructions for installing Docker using the installation executable provided with ICP at Passport Advantage (external) or eXtreme Leverage (IBM internal)
 
 [Outline for Sample HA Installation](sample-icp-ha-installation-step-by-step.md) - An outline of the steps involved in standing up an ICP environment.  Details for each step are not provided in this document.  See other documents for details.
 
-[Install ICP 2.1.0.3](icp2103-installation.md) - ICP 2.1.0.3 installation guide given all the pre-installation steps have been completed, i.e., *basic* and *special* RHEL configuration, Docker installation, etc.
+[Install ICP 3.1.0](icp310-installation.md) - ICP 3.1.0 installation guide given all the pre-installation steps have been completed, i.e., *basic* and *special* RHEL configuration, Docker installation, etc.  A document that describes the specific steps for an ICP 2.1.0.3 installation is still part of the collection, but no longer linked in this top level guide.
 
 [ICP `config.yaml` details](icp-config-yaml-details.md) Typical `config.yaml` settings used for non-HA and HA deployments of ICP.
 
 [GlusterFS for shared storage running on RHEL](glusterfs-shared-storage-running-on-rhel.md) - This document describes the installation of a GlusterFS cluster and the supporting Heketi server as well as the allocation of shared volumes for use by the ICP master nodes when an HA topology is deployed.
 
-[Configure Kubernetes Storage Class](configure-kubernetes-storageclass.md)
+[Configure Kubernetes Storage Class for GlussterFS](glusterfs-kubernetes-storageclass.md) Details on configuring a Kubernetes Storage Class that uses the GlusterFS provisioner that uses the Heketi server.
 
-[Update Prometheus Resources from Default Settings](update-prometheus-resources.md) - This document describes the resource updates made to the Prometheus deployment to resolve the out of memory issue that occurrs with larger ICP implementations.
+[Update Prometheus Resources from Default Settings](update-prometheus-resources.md) - This document describes the resource updates made to the Prometheus deployment to resolve the out of memory issue that occurs with larger ICP implementations.
 
 [Prometheus Alerts](https://github.com/ibm-cloud-architecture/CSMO-ICP/tree/master/prometheus/alerts_prometheus2.x) - This document provides a base set of alerts for ICP environments.
 
-[Kibana Updates](update-kibana-clustername.md) - This document provides a procedure to update Kibana to support custom cluster names. This is required if you change the **cluster_domain** setting in the config.yaml.
+[Kibana Updates](update-kibana-clustername.md) - This document provides a procedure to update Kibana to support custom cluster names. This is required if you change the **cluster_domain** setting in the `config.yaml`.
 
 # Additional documentation
 
@@ -47,7 +47,7 @@ This is the top level document that serves as a guide to other documents that ca
 
 [Yum Repository Configuration](yum-repository-configuration.md) - Guidance on configuring `yum` repositories for those not experienced with RHEL.
 
-[Install NTP](install-ntp.md) - Steps to install the `ntpd` should it be needed.  See also the Ansible `install-ntp.yaml` playbook in the `playbooks/icp-preinstall` directory.
+[Install NTP](install-ntp.md) - Steps to install the `ntpd`, should it be needed.  See also the Ansible playbook,  [`install-ntp.yaml`](playbooks/icp-preinstall/install-ntp.yaml).
 
 [Kubernetes Basics](kubernetes-basics.md) - Rudimentary Kubernetes information sufficient to get started in the context of using ICP.
 
