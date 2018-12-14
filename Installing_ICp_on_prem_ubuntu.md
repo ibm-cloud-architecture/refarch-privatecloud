@@ -1,8 +1,8 @@
-Install IBM Cloud private (Ubuntu)
-=============================================
+# Install IBM Cloud Private Enterprise Edition (ICP-EE) HA on Ubuntu
+*(with notes on deploying in an air-gapped environment)*
 
-This document provides practical guidance on installing ICp 2.1 Enterprise Edition on VMWare with Ubuntu based images.   
-For other other system requirement, please reference [IBM Cloud private Knowledge Center](https://www.ibm.com/support/knowledgecenter/SSBS6K_2.1.0).   
+This document provides practical guidance on installing ICp Enterprise Edition on VMWare with Ubuntu based images.   
+For more information, please reference the IBM Cloud Private Knowledge Base.
 
 ## IBM Cloud private Community  Edition vs Enterprise Edition
 There are two main differences between ICp Community Edition (CE) and Enterprise Edition (EE).
@@ -10,244 +10,405 @@ There are two main differences between ICp Community Edition (CE) and Enterprise
    * CE supports single node control plane while EE supports Highly Available Control Plane, with 3 or 5 master and proxy nodes
    * CE offers community support while EE offers SLAs and enterprise support
 
-This walkthrough will focus on installing the IBM Cloud private Enterprise Edition (ICP ee) on VMWare.
+This walkthrough will focus on installing the IBM Cloud private Enterprise Edition (ICP ee) on VMWare running in HA mode.  If you are running in an air-gapped environment with proxy access to the internet, notes throughout this document will explain how to configure the environment to support this configuration.
 
-
-## Install IBM Cloud private-ee
-Assumptions:
-------------
+## Assumptions:
 
 1.  **Overprovisioning**: The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
 
-    This means that whether you allocate 1 vCPU or 2 vCPUs, you are not using more capacity on the host to run the same workload.
+  This means that whether you allocate 1 vCPU or 2 vCPUs, you are not using more capacity on the host to run the same workload.
 
-    The same is the case for Memory. If you allocate 16GB of memory, but your VM is only using 2 GB of it, the host only allocates 2 GB.
-    Studies indicate that the average dedicated server only uses about 10 – 20% of its available capacity. Because of this, a cloud service may overprovision the amount of CPU and RAM on a host by a factor of as much as 10 and still provide optimal responsiveness to VMs it hosts.
+  The same is the case for Memory. If you allocate 16GB of memory, but your VM is only using 2 GB of it, the host only allocates 2 GB.
 
-    To add additional CPU and Memory resources to a guest (virtual machine) it must be shutdown and resources re-allocated. For this reason, we will allocate ample CPU and Memory for our virtual machines knowing that we will only be using what we need at any given time and it is better to have too much than too little.
+  Studies indicate that the average dedicated server only uses about 10 – 20% of its available capacity. Because of this, a cloud service may overprovision the amount of CPU and RAM on a host by a factor of as much as 10 and still provide optimal responsiveness to VMs it hosts.
 
-    Similarly, storage can normally be overprovisioned by a factor of 4 when all VMs are using thin provisioned disks. It is better to create a larger thinly provisioned disk than we think we may need than to create a smaller one and then have to come back later and increase the size or add additional disks to satisfy the need.
+  To add additional CPU and Memory resources to a guest (virtual machine) it must be shutdown and resources re-allocated. For this reason, we will allocate ample CPU and Memory for our virtual machines knowing that we will only be using what we need at any given time and it is better to have too much than too little.
 
-    If provisioning into a public cloud provider, this may not be the case depending on that providers billing model. If you are only charged for resources **used** then this model still works, but if you are billed for resources **allocated**, then you may want to make sure you request only what you need so you are not charged for resources you are not using.
+  Similarly, storage can normally be overprovisioned by a factor of 4 when all VMs are using thin provisioned disks. It is better to create a larger thinly provisioned disk than we think we may need than to create a smaller one and then have to come back later and increase the size or add additional disks to satisfy the need.
 
-    In this example we will use the former model and allocate ample resources so we do not have to come back later and add more.
+  If provisioning into a public cloud provider, this may not be the case depending on that providers billing model. If you are only charged for resources **used** then this model still works, but if you are billed for resources **allocated**, then you may want to make sure you request only what you need so you are not charged for resources you are not using.
 
-2.  Installation will be performed on Ubuntu 16.04.2 LTS server amd64. All commands will be for this platform.
+  In this example we will use the former model and allocate ample resources so we do not have to come back later and add more.
 
-3.  Installation must be done as root. Many commands must be run on all nodes. It is a big time saver to type the command into the terminal window on the master node and then, before hitting [enter], copy the command from the master window (including the carriage return), and then hit [enter] on the master node. You can then paste that command in the other windows to execute it on all other nodes.   
+1.  Installation will be performed on Ubuntu 16.04 LTS server amd64. All commands will be for this platform.
 
-4.  For simple demo/test purposes, the entire environment can be installed onto a single node, but this is not suitable for any amount of test or production use. The Topology for this implementation will have a combined boot and master server plus a proxy server and three worker nodes.
+1.  Installation must be done as root. Many commands must be run on all nodes. It is a big time saver to type the command into the terminal window on the master node and then, before hitting [enter], copy the command from the master window (including the carriage return), and then hit [enter] on the master node. You can then paste that command in the other windows to execute it on all other nodes.   
 
-    A short video tutorial for installing IBM Cloud private in a single node can be found on the developerWorks page at <https://www.ibm.com/developerworks/community/blogs/fe25b4ef-ea6a-4d86-a629-6f87ccf4649e/entry/Installing_your_cluster?lang=en>.
+1.  For simple demo/test purposes, the entire environment can be installed onto a single node, but this is not suitable for any amount of test or production use. The Topology for this implementation will have a combined boot and master server plus a proxy server and three worker nodes.
 
-5.  **HA/DR:** In this tutorial, we will be installing onto a VMware cluster made up of two hosts with DRS, vMotion, and HA enabled. This will provide for host based HA for our environment
+1.  **HA/DR:** In this tutorial, we will be installing an HA instance of ICP, but HA depends on more than just software in most environments.<br><br>For more information on the high availability aspects of the infrastructure see Appendix B.
 
-For more information on the high availability aspects of the infrastructure see Appendix B.
+## Prepare VM Templates for the Various Node Types
 
-For DR, we are using Tivoli Storage Manager (TSM) Data Protection for VMware.  It is configured to take a backup snapshot nightly and store the snapshot which can then be restored at a later time in the event of catastrophic failure.
+1.  Install two Ubuntu 16.04 Server x86_64 virtual machines to use as your templates nodes. The first template will be used for all master, management, and vulnerability advisor nodes.  The second will be for all proxy and worker nodes.
 
-Installation
-------------
+  **NOTE:** _You could use a single template rather than two, however, when cloning these templates to VMs you cannot change the size of the disk without significant pain.  Since different VMs need different disk sizes, you must either create two templates which contain the correct disk sizes, or provision all VMs with the master node disk size (500GB) and re-configigure the CPU and Memory requirements based on the node type when you deploy the VMs from these templates.  If disks are thin provisioned, there is no problem making all disks 500GB since they will not occupy space on the datastore which they do not need.  There is a risk, however, that you could over-provision your datastore to the point that the overall datastore disk runs out of space with no warning and all VMs on that datastore will start experiencing "out of space" errors even they should to have plenty of space available.  To reduce the possibility of causing this frustrating and sometimes difficult to troubelshoot problem, it is recommended to use two templates as we have specified here._
 
-1.  Install a single Ubuntu 16.04 Server amd 64 virtual machine on a single Virtual Machine. You can get the guest OS image from:   
+  You can get the guest OS image from:   <http://releases.ubuntu.com/>
 
-> <http://releases.ubuntu.com/16.04/ubuntu-16.04.2-server-amd64.iso>
->
-> CPUs: 4
-> Memory: 8GB
-> Disk: 100GB (Thin Provisioned)   
->       **Note:** All application storage (PersistentVolume [PV] storage) is via NFS and is external to this environment. There is no need to allocate additional storage for PV storage here.
->
-> Initially, configure the server for DHCP (if available). We will assign static IP’s later. If not available assign the static IP of your boot/master server here.
+  Master  Template:<br>
+>CPUs: 16<br>
+>Memory: 32GB<br>
+>Disk: 500GB (optionally, Thin Provisioned)<br>
 
-2. Enable root login remotely via ssh
+  Worker Template:
+>CPUs: 8<br>
+>Memory: 16<br>
+>Disk: 200GB (optionally, Thin Provisioned)<br>
+
+  **Note:** All infrastructure storage is hostPath, meaning, it will reside on the local VM's filesystem.  Workload storage (PersistentVolume [PV] storage) should *not* be hostPath for a number of reasons.  In this tutorial, workload storage is via NFS and is external to this environment. There is no need to allocate additional storage for PV storage here.
+
+  Initially, configure the server for DHCP (if available) so that we can clone these VMs without getting IP address conflicts, we will assign static IP’s later.<br><br>If DHCP is not available assign the static IP of your boot/master server now.  See below for instructions for setting a static IP address on an ubuntu 16.04 server.
+
+  **Execute the following commands on both template VMs**
+
+1. Enable root login remotely via ssh
 
     1. Set a password for the root user
         1. `sudo su -` \# provide your user password to get to the root shell
         2. `passwd` \# Set the root password
 
-        ![alt text](Installation/root-pwd.png "Root password")
-
     2.  Enable remote login as root
-        1. `sed -i 's/prohibit-password/yes/' /etc/ssh/sshd_config`
-        2. `systemctl restart ssh`
+        ```
+        sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
+        systemctl restart ssh
+        ```
 
-        ![alt text](Installation/remote-login.png "Remote login")
+1. For air-gapped environments only, you must set a proxy server to provide for internet access for installing needed packages including docker.  The easiest way to do this is to edit the /etc/profile file and add lines at the bottom such as:
+  ```
+  export http_proxy="http://myproxy.mydomain.com:3128"
+  export HTTP_PROXY="http://myproxy.mydomain.com:3128"
+  export https_proxy="http://myproxy.mydomain.com:3128"
+  export HTTPS_PROXY="http://myproxy.mydomain.com:3128"
+  export no_proxy="mycluster.icp,<ip of icp master node or master vip>,*.mydomain.com"
+  export NO_PROXY="mycluster.icp,<ip of icp master node or master vip>,*.mydomain.com"
+  ```
 
-3.  Update NTP (Network Time Protocol) settings to make sure time stays in sync
-    1.  `apt-get install -y ntp`
-    2.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
+  Do this on your boot node and then propagate to all other nodes in your environment.  You can either logout and log back in to enable to new envvars or just read the profile with a command like:
 
-    ![alt text](Installation/ntp.png "NTP")
+  `. /etc/profile`
 
-    After making configuration changes restart the NTP server with the command:
-    >`systemctl restart ntp`
+  **IMPORTANT:**
 
-    To test the status of your NTP servers, use the command:
-    >`ntpq -p`
+    a) Some applications may expect a lower case envvars and some may expect upper case. It is safest to provide both.
 
-    ![alt text](Installation/ntpq.png "ntpq -p")
+    b) A no_proxy envvar is required so that the ICP installer will not attempt to use the proxy setting to attach to ICP when doing the product installation.  After the vip is created, ICP will attempt to login to docker to push images.  **If the hostname and IP address of the vip are not in the no_proxy envvar the install will fail when docker attempts to reach these interfaces via the proxy.**
 
+    The ubuntu apt service does *not* respect the envvars you just created.  To get apt-get to work correctly in an air-gapped environment, you must create the file `/etc/apt/apt.conf` and in that file put the following lines:
 
-4.  Configure the Virtual Memory setting   
+    ```
+    Acquire::http::Proxy "http://proxy.mydomain.com:3128"
+    Acquire::https::Proxy "http://proxy.mydomain.com:3128"
+
+    ```
+
+    Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
+
+1.  Update NTP (Network Time Protocol) settings to make sure time stays in sync
+    1.  Get the latest apt updates and install ntp
+    ```
+    apt-get update
+    apt-get install -y ntp
+    ```
+
+    1.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
+
+      ![alt text](Installation/ntp.png "NTP")
+
+    1.  After making configuration changes restart the NTP server with the command:
+
+      `systemctl restart ntp`
+
+    1. Test the status of your NTP servers to make sure they are working.
+
+      Use the command:
+
+      `ntpq -p`
+
+      ![alt text](Installation/ntpq.png "ntpq -p")
+
+    **NOTE:** ICP requires all nodes be in time sync and most proxies will not support NTP. In an air-gapped environment, you must provide a local NTP server which can be used by all nodes to keep time in sync.
+
+    If you do not have an NTP server and cannot create one easily, you can use somethink like the excellent script provided at https://gist.github.com/jaytaylor/60c8a4e22431c4271200cab68186deb7 which can be added to the server's root crontab to run every minute and it will function to keep servers in sync.  This should only be used, however, if a local ntp service is not available.
+
+1.  If the ufw firewal is enabled, disable it. ICP will install iptables.
+
+1.  Configure the Virtual Memory setting (required for ELK)  
     1. Update the vm.max\_map\_count setting to 262144:
     `sysctl -w vm.max_map_count=262144`
 
-    2. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
+    1. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
     ![alt text](Installation/sysctl.png "sysctl")
 
-    3. To check the current value use the command:
+    1. To check the current value use the command:
     >   `sysctl vm.max_map_count`
 
-    ![alt text](Installation/sysctl-2.png "sysctl-2")
+      ![alt text](Installation/sysctl-2.png "sysctl-2")
 
-5.  Install docker
+1. Install the NFS common packages
+  ```
+  apt-get install -y nfs-common
+  ```
+
+1. Install python
+  ```
+  apt-get install -y python-setuptools
+  ```
+
+1.  Install docker
 
     1. Update your ubuntu repositories
 
-    >   `apt-get update`
+      ```
+      apt-get update
+      ```
 
-    2.  Install Linux image extra packages
+    1.  Install Linux image extra packages
 
-    >   `apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual`
+      ```
+      apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+      ```
 
-    3.  Install additional needed packages   
+    1.  Install additional needed packages   
 
-    >   `apt-get install -y apt-transport-https ca-certificates curl software-properties-common`
+      ```
+      apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+      ```
 
-    **NOTE**: These packages may all exist depending on what packages were included when the operating system installed. If they already exist, you will just see output indicating they already exist. If you assume they exist, however, and do not do this step and they are not there, the installation will fail.
+      **NOTE**: These packages may all exist depending on what packages were included when the operating system installed. If they already exist, you will just see output indicating they already exist. If you assume they exist, however, and do not do this step and they are not there, the installation will fail.
 
-    4.  Add Docker’s official GPG key
+    1.  Add Docker’s official GPG key
 
-        `curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -`
+        ```
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+        ```
 
-    5.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+    1.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
 
-        `apt-key fingerprint 0EBFCD88`
+      ```
+      apt-key fingerprint 0EBFCD88
+      ```
 
-    ![alt text](Installation/fingerprint.png "fingerprint")
+      ![alt text](Installation/fingerprint.png "fingerprint")
 
-    6.  Setup the docker stable repository and update the local cache
+    1.  Setup the docker stable repository and update the local cache
 
-        `add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"`   
-        `apt-get update`   
+        ```
+        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+        apt-get update
+        ```  
 
-    7.  Install docker   
+    1.  Install docker   
 
-        `apt-get install -y docker-ce`
+        ```
+        apt-get install -y docker-ce
+        ```
 
-    8.  Makes sure docker is running
+    1. In an air-gapped environment only, configure Docker to use the proxy server.
 
-        `docker run hello-world`   
-        This should downloaded the latest hello-world docker image version and put some text on the screen indicating a working installation.   
+      Docker must be able to reach the internet to be able to pull images from the IBM catalog and any other public repositories that are configured in the platform.  It is extremely important that the NO_PROXY section be correctly configured in the file below to prevent an installation failure caused by docker trying to use the proxy to hit the ICP vip interface.
 
-    9.  Install python and pip
+      The following instructions will create environment variables in the process space that runs the docker daemon which will tell it to use a proxy for some addresses and not for others.
 
-        `apt-get install -y python-setuptools`   
-        `easy_install pip`
+      ```
+      mkdir -p /etc/systemd/systedm/docker.service.d/
+      ```
 
+      Create a file in this directory named "http-proxy.conf" with contents similar to the following:
 
+      ```
+      [Service]
+      Environment="HTTP_PROXY=http://proxy.mydomain.com:3128" "NO_PROXY=.icp,localhost,172.16."
+      Environment="HTTPS_PROXY=http://proxy.mydomain.com:3128" "NO_PROXY=.icp,localhost,172.16."
+      ```
+      Replace the URL as needed for your environment.
 
+      Replace the NO_PROXY information for your installation and local environment.
 
-6.  Create VM template and start other virtual machines.   
+      Save the file, reload the daemon, and restart docker:
+
+      ```
+      systemctl daemon-reload
+      systemctl restart docker
+      ```
+
+    1. (optional) If the default docker bridge address (172.17.0.1/24) conflicts with your local environment you may need to change it's default subnet such that it uses something that is not already routable in the environment (e.g. 172.18.0.1/24).
+
+      To change the IP address of the docker bridge take the following steps:
+        1.  Create the path /etc/docker/, if needed
+        ```
+        mkdir -p /etc/docker/
+        ```
+
+        1. Create the file daemon.json in this directory with the following contents:
+        ```
+        {
+            "bip": "172.18.0.1/24"
+        }
+        ```
+        Change the CIDR to reflect a subnet and IP address that is not currently in use in your environment.
+
+        1. Restart Docker
+        ```
+        systemctl daemon-reload
+        systemctl restart docker
+        ```
+
+    1.  Makes sure docker is running and pulling correctly from the internet
+
+        ```
+        docker run hello-world
+        ```
+
+        This should downloaded the latest hello-world docker image version and put some text on the screen indicating a working installation.
+
+## Clone and Prepare Your Cluster VMs
+
+1.  Create VM templates and start other virtual machines.   
 
     Shutdown your VM   
     `shutdown -h now`
 
-    In the VMware vCenter Web Client, convert this VM to a template. We will use this template to provision any additional nodes we need in the environment including additional worker nodes as needed.
+    Clone your templates for each of the needed nodes in your cluster as specified below.  There is no need to create an actual "VMware template" from these existing VMs.  You can just clone them from an existing VM to a new VM. When doing this, you do not need to change the CPU or memory allocations from their defaults.
 
-    Create new VMs from your new template for each of the nodes in the cluster:
+      Note that you can create a minimal, non-HA environment by just using a single node for each below and VA is not required, but should be used if VA will be installed:
 
-    1.  cfc-boot-master
+      1.  master template -> icp-master1, icp-master2, icp-master3
 
-    2.  cfc-proxy
+      1.  master template -> icp-mgmt1, icp-mgmt2, icp-mgmt3
 
-    3.  cfc-worker1
+      1.  master template -> icp-va1, icp-va2, icp-va3
 
-    4.  cfc-worker2
+      1.  worker template -> icp-proxy1, icp-proxy2, icp-proxy3
 
-    5.  cfc-worker3
+      1.  worker template -> icp-worker1, icp-worker2, icp-worker3
 
-    If your network interface is configured for DHCP, boot all of the newly provisioned nodes and then, using the VMware console, login to each VM and reconfigure the hostname and add the appropriate static IP address.
+      1.  worker template -> icp-boot
 
-    If you do not have a DHCP server and configured the original VM with a static IP, you will need to boot each VM in turn configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
+    **IMPORTANT:** For HA, and to provide for workload persistent storage, you will also need an NFS node which does not need to be configured with any of the packages used by the above server (but will need the proxy information if being installed in an air-gapped environment).  If an enterprise NFS server already exists which can be used for this environment it can be used, otherwise, an additional NFS node will need to be created to support this environment.
 
-    For each of your new VMs perform the following tasks to change the IP address and hostname of your servers.
+    If creating a new NFS node, you can use the master template and change the CPU and Memory requirements to match the worker nodes.
+
+1. Configure your newly cloned VMs and set their hostnames and static IP addresses.
+
+  *Note:* The VMs can use DHCP assigned IP addresses, however, DHCP addresses are subject to change and if any addresses change your environment will break.  For a quick test environment, static IP's are not needed, however, for any kind of permanent environment, static IP addresses should be used.
+
+  If your network interface is configured for DHCP, boot all of the newly provisioned nodes and then, using the VMware console, login to each VM and reconfigure the hostname and add the appropriate static IP address.
+
+  *IMPORTANT:* If you do not have a DHCP server and configured your original VMs with a static IPs, you will need to boot each VM in turn, configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
+
+  Perform the following tasks to change the IP address and hostname on each respective node.
 
     1.  Change the hostname
-        Edit the file /etc/hostname with your favorite text editor (e.g. vim) and change the value to match the node: e.g. cfc-boot-master, cfc-proxy, cfc-worker1, cfc-worker2, and cfc-worker3, respectively.
+        ```
+        hostnamectl set-hostname <icp-master1>
+        ```
 
-        ![alt text](Installation/hostname.png "hostname")
+        Replace &lt;icp-master1&gt; with the new hostname for your node.
 
     2.  Modify /etc/network/interfaces to configure a static IP address
-        In our environment, we are using the IP addresses listed in the screenshot in step 2 above.
+        Your file should look something like this:
 
-        ![alt text](Installation/interfaces.png "interfaces")
+        ```
+        # This file describes the network interfaces available on your system
+        # and how to activate them. For more information, see interfaces(5).
 
-    3.  In ubuntu 16.04, resetting the network with the standard “systemctl restart networking” does not seem to change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
+        source /etc/network/interfaces.d/*
 
-        `shutdown -r now`
+        # The loopback network interface
+        auto lo
+        iface lo inet loopback
 
-7. Pre-load the ICP Installation tarball on all cluster nodes
-    **NOTE**: ICP enterprise edition (ee) loads all ICP docker containers into all docker instances on all nodes.
+        # The primary network interface
+        auto ens160
+        iface ens160 inet static
+          address 172.16.40.30
+          netmask 255.255.0.0
+          broadcast 172.16.255.255
+          gateway 172.16.255.250
+          dns-nameservers 172.16.0.11 172.16.0.17
+          dns-search csplab.local
+        ```
 
-    The ICP tarball containing these images is >3.6GB and ansible will copy the tarball to each node in sequence and import each into their respective docker repositories. As a result, when running the installer, the total install time for ICP will run in excess of 40 minutes, the majority of that time being this process of copying and loading images.
+    3.  In ubuntu 16.04, there seems to be a bug where resetting the network with the standard `systemctl restart networking` command does not change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
 
-    In order to shorten the installation time, the ICP EE tarball has been copied to all cluster nodes. We will kick off import of the ICP docker containers on all nodes at the same time to shorten the overal installation time.
+        ```
+        shutdown -r now
+        ```
 
-    ICP community edition (ce) only installs the specific containers that are needed for each cluster node and it pulls those from docker hub during installation. As a result, the installation of ce takes more like 6 - 10 minutes.
-
-    With docker now installed on each node, we can to import the ICP containers into the docker repository on each node and continue to work while this is completing. This will reduce the overall install time in the final step.
-
-      `tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz -O |docker load`   
-
-    **NOTES:** This step is not strictly necessary for any node other than the master node. If the needed containers do not exist in the other nodes, the tarball will be copied to those nodes and loaded into their docker repositories. The installer will do this action serially on each node which will result in an installation time in excess of 40 minutes. Preloading the images will significantly reduce the install time. By loading these images now, we can be continuing to configure the installation while these images are loading. By preloading them we will spend less time waiting for the install to complete later. This step is not necessary when installing ICP Community Edition.   
-
-8.  Configure passwordless SSH from the master node to all other nodes   
+1.  Configure passwordless SSH from the master node to all other nodes   
     You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
 
-    1.  Login as to the boot-master node as root
-        `cd ~`
+    1.  Login as to the boot node as root
+        ```
+        cd ~
+        ```
 
     2.  From root’s home directory execute:
-        `ssh-keygen -t rsa -P ''` \# Upper case P and two single quotes for no password
+        ```
+        ssh-keygen -t rsa -P ''     # Upper case P and two single quotes for no password
+        ```
 
         Accept the default location of /root/.ssh/id\_rsa for the new key file
 
-        Now, executing `ls .ssh` from root’s home directory should show three files: id_rsa, id_rsa.pub and known_hosts
+        Now, executing `ls ~/.ssh` should show three files: id_rsa, id_rsa.pub and known_hosts
 
-    3.  Copy the resulting id_rsa key file to each node in the cluster (including the boot-master node on which we are currently operating).
+    3.  Copy the resulting id_rsa key file from the boot node to each node in the cluster
 
-        1.  Copy to the master node (to the current node):
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-boot-master`   
+            `ssh-copy-id -i .ssh/id_rsa root@icp-master1`
 
-        2.  Repeat for each additional server:
+            `ssh-copy-id -i .ssh/id_rsa root@icp-master2`
 
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-proxy`
+            `ssh-copy-id -i .ssh/id_rsa root@icp-master3`
 
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-worker1`
+            ...
 
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-worker2`
+            `ssh-copy-id -i .ssh/id_rsa root@icp-worker3`
 
-            `ssh-copy-id -i .ssh/id_rsa root@cfc-worker3`
+            You will be required to type the root password for each node during this process, but not thereafter.
 
-
-        3.  When this is complete you should be able to ssh from the boot-master node to each of the other nodes without having to provide a password. You can test this by executing:
+        3.  When this is complete you should be able to ssh from the boot node to each of the other nodes without having to provide a password. Test this now by executing the following for each node in the cluster:
 
 
-            `ssh root@cfc-boot-master`
+            `ssh root@icp-master1`
 
-            `ssh root@cfc-worker1`
+            `ssh root@icp-master2`
 
-            `ssh root@cfc-worker2`
+            `ssh root@icp-master3`
 
-            `ssh root@cfc-worker3`
+            ...
 
-            If you cannot gain access via SSH without a password, ensure that you have enabled root login on each VM and have modified /etc/ssh/sshd\_config on each VM to allow remote login.
+            `ssh root@icp-worker3`
 
-        Your virtual machines are now ready to install CFC and now is a good time to take a snapshot of each VM in the cluster. In the event something goes wrong with the installation you can revert to this snapshot and try it again.[1]
+        Your virtual machines are now ready to install ICP and now is a good time to take a snapshot of each VM in the cluster. In the event something goes horribly wrong with the installation you can revert to this snapshot and try it again.  Snapshots slow down Virtual Machines by a factor of the number of shapshots that have been taken.  For this reason, it is not a good idea to leave a bunch of snapshots (or any, really) hanging around.  Once your installation is complete, you should consolidiate your disks to remove the snapshot.
 
-9. Prepare the installation files
+## Install ICP
+
+1. Load your icp tarball into your boot node's docker registry
+  Only on the boot node, load the inception image from the ICP tarball into boot node's local docker registry.
+    ```
+    tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz ibm-inception-amd64-3.1.1.tar -O |docker load
+    ```   
+  Note that this will take quite some time and a lot of disk space and memory because tar has to gunzip the entire tarball before it can extract any images.  This takes memory, filespace in /tmp, and quite a lot of time.  Please be patient.
+
+1. Find the name and tag of the current inception image
+  IBM releases a new version of ICP as often as every six weeks.  The specific version number (and even the full image name) can/will change with every release.  To find your release information execute the following command on the boot node:
+
+  ```
+  docker images -a |grep inception
+  ```
+
+  Which will result in something like this:
+
+  ```
+  ibmcom/icp-inception-amd64      3.1.1-ee      5f449d4b46ac      4 weeks ago     756MB
+  ```
+
+  In this case, the inception image name is "ibmcom/icp-inception-amd64" and the version tag is "3.1.1-ee".
+
+  In the following section, replace the image name and version tag with the ones you got when you issued the command above.
+
+1. Prepare the installation files
     1. Create a directory to hold installation configuration files
 
       ```
@@ -256,20 +417,18 @@ Installation
       ```
     2. Extract the installation configuration files
       ```
-      docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception:2.1.0-ee cp -r cluster /data
+      docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception-amd64:3.1.1-ee cp -r cluster /data
       ```
-      After this commond, you should have a folder /opt/icp/cluster.   
+      After this command, you should have a folder named /opt/icp/cluster.   
 
-	  3. (optional) Configure LDAP authentication (out of scope for bootcamp)
-	  4. (optional) Create one or more storage classes (out of scope for bootcamp)
 	  5. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
 
 		  ```
 		  mkdir -p  /opt/icp/cluster/images
-		  mv /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz /opt/icp/cluster/images/
+		  mv /opt/ibm-cloud-private-x86_64-3.1.1.tar.gz /opt/icp/cluster/images/
 		  ```
 
-	  6. (optional) If using IBM*Z nodes, add the x390x tarball to /opt/icp/cluster/images
+	  6. (optional) If using IBM*Z or power nodes, add the x390x and ppc tarballs to /opt/icp/cluster/images as well
 	  7. Copy the ssh key to the installation directory
 
 		  ```
@@ -278,31 +437,136 @@ Installation
 		  ```
 
 	  8. Configure the installation
-		   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes
+		   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes.  The result should look something like this:
 		        ```
-		        [master]
-		        10.0.0.1
-		        ```
-		        ```
-		        [worker]
-		        10.0.0.3
-		        10.0.0.4
-		        10.0.0.5
-		        ```
-		        ```
-		        [proxy]
-		        10.0.0.2
+            [master]
+            172.16.40.31
+            172.16.40.32
+            172.16.40.33
+
+            [worker]
+            172.16.40.40
+            172.16.40.41
+            172.16.40.42
+
+            [proxy]
+            172.16.40.34
+            172.16.40.35
+            172.16.40.36
+
+            [management]
+            172.16.40.37
+            172.16.40.38
+            172.16.40.39
+
+            [va]
+            172.16.40.43
+            172.16.40.44
+            172.16.40.45
 		        ```
 
-		   2. Edit the /opt/icp/cluster/config.yaml file
+1. Edit the /opt/icp/cluster/config.yaml file
 
-				Change *service_cluster_ip_range* to prevent network conflict
+  1.  Look at the default values specified for the network_cidr and service_clister_ip_range.  These values are never advertised outside the cluster and and are not reachable from outside the cluster, however, they should not conflict with any routable network in the enterprise:
 
-11. Deploy the ICP environment.
+    ```
+    ## Network in IPv4 CIDR format
+    network_cidr: 10.1.0.0/16
+
+    ## Kubernetes Settings
+    service_cluster_ip_range: 10.0.0.1/24
+  ```
+
+    If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
+
+    Also note that the default service cluster ip range is only 24 bits which will limit the number of services which can be defined to 254.  Extending this to a 16 bit subnet (a Class B network) will allow for 255^255 number of services.
+
+    Choose a subnet which is appropriate for the size of the implementation you expect to have.
+
+  1. Change the default admin password
+
+    ```
+    ## Advanced Settings
+    default_admin_user: admin
+    default_admin_password: IL0veIBM!
+    ```
+
+  1.  Configure the virtual interface addresses for the master and proxy nodes (HA installs only)
+    ```
+    ## High Availability Settings for master nodes
+    vip_iface: ens160
+    cluster_vip: 1.2.3.4
+
+    ## High Availability Settings for Proxy nodes
+    proxy_vip_iface: ens160
+    proxy_vip: 1.2.3.5
+    ```
+
+    The iface entries must reflect the network adapter name which should be used for the master and proxy node ingress points.  These are the IP address you will use to access your cluster and applications when the install is complete.
+
+    In a non-HA install (one master and one proxy), these values should be commented out and the IP address of the master and proxy nodes will be used.
+
+  1.  Specify which services you want to exclude:
+
+    ```
+    ## You can disable following services if they are not needed:
+    #   custom-metrics-adapter
+    #   image-security-enforcement
+    #   istio
+    #   metering
+    #   monitoring
+    #   service-catalog
+    #   storage-minio
+    #   storage-glusterfs
+    #   vulnerability-advisor
+    management_services:
+      istio: disabled
+    #  vulnerability-advisor: disabled
+      storage-glusterfs: disabled
+      storage-minio: disabled
+    ```
+
+    Comment out the services you want to **enable**.  Anything in the list is tagged as "disabled" and will not be installed.  By commenting out `vulnerability-advisor: disabled` we are saying that we want VA to be installed.
+
+  1.  If running in an air-gapped environment, add the following lines to the config.yaml file (location is irrelevant):
+
+    ```
+    # Proxy settings for air-gapped environment
+    tiller_http_proxy: http://proxy.mydomain.com:3128
+    tiller_https_proxy: http://proxy.mydomain.com:3128
+    ```
+
+    Change the URL to reflect the enterprise proxy server.  This will allow tiller to see catalog items in helm repositories on the internet (including the IBM repositories).  In an air-gapped environment, without this setting your catalog will be empty of any images other than those loaded into the local repository.
+
+1. In an HA environment, there are three directories which must be shared by all Master nodes.  These are /var/lib/registry, /var/lib/icp/audit, and /var/log/audit.
+
+  On your NFS server, create mount points for each of these paths e.g. ``/storage/registry`, ``/storage/icp/audit`, and ``/storage/log/audit`.
+
+  On each of the master nodes, mount the NFS mount points to the appropriate locations:
+
+  ```
+  mkdir -p /var/lib/registry
+  mkdir -p /var/lib/icp/audit
+  mkdir -p /var/log/audit
+
+  mount 2.3.4.5:/storage/registry /var/lib/registry
+  mount 2.3.4.5:/storage/icp/audit /var/lib/icp/audit
+  mount 2.3.4.5:/storage/log/audit /var/log/audit
+  ```
+
+  Update the /etc/fstab file so that the moutnes will be reestablished after a reboot.  The /etc/fstab entries should look something like this:
+
+  ```
+  172.16.40.49:/storage/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+  ```
+
+1. Deploy the ICP environment.
 
     ```
     cd /opt/icp/cluster
-    docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0-ee install
+    docker run --rm -t -e LICENSE=accept --net=host -v /opt/icp/cluster:/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee install -vvv |tee install.log
     ```
 
     Several minutes later you should have a deployed IBM Cloud private implementation.
@@ -314,7 +578,7 @@ Installation
 
       ```
       cd /opt/icp/cluster
-      docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0-s4-rc1-ee install -l <IP of worker node>,<IP of second worker node>[,...]
+      docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee install -l <IP of worker node>,<IP of second worker node>[,...]
       ```
 
 13. Uninstall an ICP environment.
@@ -323,7 +587,7 @@ Installation
 
     ```
     cd /opt/icp/cluster
-    docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception:2.1.0-ee uninstall
+    docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee uninstall
     ```
 
 Appendix A
@@ -349,7 +613,7 @@ Then move the file to a directory in your path:
 
 Next, create a new resource file in your home directory called .calicorc with the following contents:
 
-    `export ETCD_AUTHORITY=master.cfc:4001`
+    `export ETCD_AUTHORITY=mycluster.icp:4001`
     `export ETCD_SCHEME=https`
     `export ETCD_CA_CERT_FILE=/etc/cfc/conf/etcd/ca.pem`
     `export ETCD_CERT_FILE=/etc/cfc/conf/etcd/client.pem`
@@ -482,23 +746,3 @@ With this configuration, all resources are fully redundant and highly available 
 For DR purposes, a second datacenter (or more) with similar characteristics would need to be available. For the highest level of HA/DR, the environment would be spread across a hybrid environment made up of on-premises resources (such as is defined in this tutorial), and public/dedicated cloud environments from two or more cloud service providers.
 
 In this scenario, resources would be available regardless of the availability of any of the three cloud service providers. This would require site-to-site VPN connections between the on-prem resources and any cloud service providers to allow for direct network connectivtiy between all resources.
-
-Redundancy of the cluster itself is discussed in a separate document.
-
-Appendix C
-==========
-
-Useful Links
-------------
-
-Full instllation Instructions: <https://www.ibm.com/support/knowledgecenter/SS8TQM_1.1.0/installing/install_containers.html>
-
-Hardware Requirements: <https://www.ibm.com/support/knowledgecenter/SS8TQM_1.1.0/supported_system_config/hardware_reqs.html>
-
-Preparing VMs for deployment: <https://www.ibm.com/support/knowledgecenter/SS8TQM_1.1.0/installing/prep_cluster.html#task_rl4_knc_ww>
-
-ENDNOTES
-
-[1] It should also be noted that snapshots take up a lot of space and each new snapshot is a delta of changes since the last snapshot or initial version. The more snapshots you have the more disk space you use and the less efficient and performant your implementation will be.
-
-Since we are at a good stage now to which we may want to revert in the future if something goes wrong, it is also not a bad idea to remove any previous interim snapshots you may have taken. As a general rule, the fewer the number of snapshots the better.
