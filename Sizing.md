@@ -53,6 +53,9 @@ When determining the number of and resource configuration of your worker nodes, 
 - Consider the type of workload.  For instance Java workloads typically use 4 x CPU = Memory
 - Other application frameworks may be closer to 2 x CPU = Memory
 
+## Storage Consideration for Your Nodes
+Coming very soon!
+
 ## Proxy Nodes
 Considerations for proxy node sizing.  Proxy nodes can be added at any time.
 - For resource sizing, consider total resource sizing versus the # of nodes
