@@ -42,7 +42,7 @@ This cluster is listed as Medium Resilience with 3 master nodes.  Consider not c
 |	VA |	5	 | 6	| 24	| 500 |
 |	Worker | 7+	(Max:150)| 8	| 32	|400 |
 
-This cluster is listed as Highly Resilience with 5 master nodes.  The Workers included are shaped for Java workloads.  See the below section on **Consider Your Workload**.  To move this to a higher level of resilience (or zero RPO) you will be required to deploy and manage workload across multiple ICP clusters.  For very large clusters see the **Large Cluster Considerations** below.
+This cluster is listed as Highly Resilience with 5 master nodes.  Even with load balancing the API server, this does not necessarily increase performance due to increased "chatter" within the etcd cluster.  The Workers included are shaped for Java workloads.  See the below section on **Consider Your Workload**.  To move this to a higher level of resilience (or zero RPO) you will be required to deploy and manage workload across multiple ICP clusters.  For very large clusters see the **Large Cluster Considerations** below.
 
 > For all of the above, disk can be Thin Provisioned.
 
