@@ -22,7 +22,7 @@ This cluster is listed as Medium Resilience with 3 Master nodes.  To make a Sand
 | :---: | :---: | :---: | :---: | :---: |
 | Boot	| 1	| 2	| 8	| 250 |
 |	Master	| 3	| 16	| 32	| 500 |
-|	Management	| 2	| 16	| 32	| 500 |
+|	Management	| 3	| 8	| 32	| 500 |
 |	Proxy	| 3	| 4	| 16	| 400 |
 |	Worker - Java Workloads | 3+ (Max:20)	| 8	| 32	| 400 |
 |	Worker | 5+ (Max:70)| 8 | 32	| 400 |
@@ -54,7 +54,28 @@ When determining the number of and resource configuration of your worker nodes, 
 - Other application frameworks may be closer to 2 x CPU = Memory
 
 ## Storage Consideration for Your Nodes
-Coming very soon!
+The suggestion included here for disk configuration is by far not the minimum configuration, but by no means is it excessive for a production resilient cluster running a moderate workload.  If you would like to acheive more precise storage allocation for your non-master nodes there is not much risk.  However, we advise using the included values as a starting point for the masters.
+
+For each node in the ICP cluster configure 2 disks.:
+- 100GB for OS
+- 500GB for ICP
+
+The ICP disks should be fast with SSD storage being preferred.  Understand your hosting environment.  As an example, if you happen to be installing into an AWS environment:
+- Standard gp2 ebs disks are on SSD
+- Using multiple disks in an AWS environment does not lead to better performance as all read-write operations to the disks go through the same 10GB pipe, thus configuring any kind of striping or raid is not recommended.  Note:  The same may be true for other virtualized environments.
+- The recommendation for systems management in AWS is to separate OS from data. The ICP disk would be made into a volume group for Linux LVM allowing separate filesystems to be created for data and logs as well as expanding storage if it becomes necessary.
+ 
+It is advisable to further segment your storage usage in production environments as shown below:
+
+| Disk Size | Volume | File System | File System Size | ICP Node |
+| :---: | :---: | :---: | :---: | :---: |
+| 100G  | sda | / | 100G | All |
+| 500G  | icp_vg |  | 500GB | all |
+| | icp_vg-etcd_lv | /var/lib/etcd | 5GB | master |
+| | icp_vg-kube_lv | /var/lib/kubelet | 20GB | all |
+| | icp_vg-icp_lv | /var/lib/icp | 100GB | all |
+| | icp_vg-mysql_lv | /var/lib/mysql | 10GB | master |
+| | icp_vg-docker_lv | /var/lib/docker | 200GB | all |
 
 ## Proxy Nodes
 Considerations for proxy node sizing.  Proxy nodes can be added at any time.
