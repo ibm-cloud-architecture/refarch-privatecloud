@@ -36,7 +36,7 @@ This cluster is listed as Medium Resilience with 3 master nodes.  Consider not c
 | Node type | Number of nodes | CPU | Memory (GB) | Disk (GB) |
 | :---: | :---: | :---: | :---: | :---: |
 |	Boot	| 1	| 2	| 8	| 250 |
-|	Master | 5 | 16 | 32	| 500 |
+|	Master | 3 or 5 | 16 | 32	| 500 |
 |	Management	| 3	| 8	| 32 |	500 |
 |	Proxy |	3	| 4	| 16	| 250 |
 |	VA |	5	 | 6	| 24	| 500 |
@@ -76,6 +76,10 @@ It is advisable to further segment your storage usage in production environments
 | | icp_vg-icp_lv | /var/lib/icp | 100GB | all |
 | | icp_vg-mysql_lv | /var/lib/mysql | 10GB | master |
 | | icp_vg-docker_lv | /var/lib/docker | 200GB | all |
+| | icp_vg-audit_lv | /var/lib/icp/audit | 30GB | master (if enabled) |
+| | icp_vg-elkdata_lv | /var/lib/icp/logging/elk-data | 300GB | management |
+
+> For the **elk-data** volume, this depends largely on the number of management nodes and the amount of data you are managing.  You will have to measure your data requirements and then split across the management nodes.
 
 ## Proxy Nodes
 Considerations for proxy node sizing.  Proxy nodes can be added at any time.
