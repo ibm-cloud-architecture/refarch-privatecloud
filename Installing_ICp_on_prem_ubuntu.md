@@ -471,13 +471,11 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   1.  Look at the default values specified for the network_cidr and service_clister_ip_range.  These values are never advertised outside the cluster and and are not reachable from outside the cluster, however, they should not conflict with any routable network in the enterprise:
 
     ```
-
     ## Network in IPv4 CIDR format
     network_cidr: 10.1.0.0/16
 
     ## Kubernetes Settings
     service_cluster_ip_range: 10.0.0.1/24
-
     ```
 
     If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
@@ -489,17 +487,14 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   1. Change the default admin password
 
     ```
-
     ## Advanced Settings
     default_admin_user: admin
     default_admin_password: IL0veIBM!
-
     ```
 
   1.  Configure the virtual interface addresses for the master and proxy nodes (HA installs only)
 
     ```
-
     ## High Availability Settings for master nodes
     vip_iface: ens160
     cluster_vip: 1.2.3.4
@@ -507,7 +502,6 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     ## High Availability Settings for Proxy nodes
     proxy_vip_iface: ens160
     proxy_vip: 1.2.3.5
-
     ```
 
     The iface entries must reflect the network adapter name which should be used for the master and proxy node ingress points.  These are the IP address you will use to access your cluster and applications when the install is complete.
