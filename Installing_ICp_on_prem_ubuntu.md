@@ -298,6 +298,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   *IMPORTANT:* If you do not have a DHCP server and configured your original VMs with a static IPs, you will need to boot each VM in turn, configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
 
   Perform the following tasks to change the IP address and hostname on each respective node.
+
     1.  Change the hostname
       ```
       hostnamectl set-hostname <icp-master1>
