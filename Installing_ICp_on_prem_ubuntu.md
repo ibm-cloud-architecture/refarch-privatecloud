@@ -68,6 +68,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 1. Enable root login remotely via ssh
 
   1. Set a password for the root user
+
     1. `sudo su -` \# provide your user password to get to the root shell
     2. `passwd` \# Set the root password
 
