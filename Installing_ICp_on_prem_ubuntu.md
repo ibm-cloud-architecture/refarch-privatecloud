@@ -7,14 +7,15 @@ For more information, please reference the IBM Cloud Private Knowledge Base.
 ## IBM Cloud private Community  Edition vs Enterprise Edition
 There are two main differences between ICp Community Edition (CE) and Enterprise Edition (EE).
 
-   * CE supports single node control plane while EE supports Highly Available Control Plane, with 3 or 5 master and proxy nodes
-   * CE offers community support while EE offers SLAs and enterprise support
+  * CE supports single node control plane while EE supports Highly Available Control Plane, with 3 or 5 master and proxy nodes
+  * CE offers community support while EE offers SLAs and enterprise support
 
 This walkthrough will focus on installing the IBM Cloud private Enterprise Edition (ICP ee) on VMWare running in HA mode.  If you are running in an air-gapped environment with proxy access to the internet, notes throughout this document will explain how to configure the environment to support this configuration.
 
-## Assumptions:
+## Assumptions: 
 
-1.  **Overprovisioning**: The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
+1. **Overprovisioning**
+  The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
 
   This means that whether you allocate 1 vCPU or 2 vCPUs, you are not using more capacity on the host to run the same workload.
 
@@ -64,17 +65,19 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 1. Enable root login remotely via ssh
 
-    1. Set a password for the root user
-        1. `sudo su -` \# provide your user password to get to the root shell
-        2. `passwd` \# Set the root password
+  1. Set a password for the root user
+    1. `sudo su -` \# provide your user password to get to the root shell
+    2. `passwd` \# Set the root password
 
-    2.  Enable remote login as root
-        ```
-        sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
-        systemctl restart ssh
-        ```
+  2.  Enable remote login as root
+
+    ```
+    sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
+    systemctl restart ssh
+    ```
 
 1. For air-gapped environments only, you must set a proxy server to provide for internet access for installing needed packages including docker.  The easiest way to do this is to edit the /etc/profile file and add lines at the bottom such as:
+
   ```
   export http_proxy="http://myproxy.mydomain.com:3128"
   export HTTP_PROXY="http://myproxy.mydomain.com:3128"
@@ -90,9 +93,9 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   **IMPORTANT:**
 
-    a) Some applications may expect a lower case envvars and some may expect upper case. It is safest to provide both.
+  a) Some applications may expect a lower case envvars and some may expect upper case. It is safest to provide both.
 
-    b) A no_proxy envvar is required so that the ICP installer will not attempt to use the proxy setting to attach to ICP when doing the product installation.  After the vip is created, ICP will attempt to login to docker to push images.  **If the hostname and IP address of the vip are not in the no_proxy envvar the install will fail when docker attempts to reach these interfaces via the proxy.**
+  b) A no_proxy envvar is required so that the ICP installer will not attempt to use the proxy setting to attach to ICP when doing the product installation.  After the vip is created, ICP will attempt to login to docker to push images.  **If the hostname and IP address of the vip are not in the no_proxy envvar the install will fail when docker attempts to reach these interfaces via the proxy.**
 
     The ubuntu apt service does *not* respect the envvars you just created.  To get apt-get to work correctly in an air-gapped environment, you must create the file `/etc/apt/apt.conf` and in that file put the following lines:
 
@@ -105,27 +108,33 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
 
 1.  Update NTP (Network Time Protocol) settings to make sure time stays in sync
-    1.  Get the latest apt updates and install ntp
+
+  1.  Get the latest apt updates and install ntp
+
     ```
     apt-get update
     apt-get install -y ntp
     ```
 
-    1.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
+  1.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
-      ![alt text](Installation/ntp.png "NTP")
+    ![alt text](Installation/ntp.png "NTP")
 
-    1.  After making configuration changes restart the NTP server with the command:
+  1.  After making configuration changes restart the NTP server with the command:
 
-      `systemctl restart ntp`
+    ```
+    systemctl restart ntp
+    ```
 
-    1. Test the status of your NTP servers to make sure they are working.
+  1. Test the status of your NTP servers to make sure they are working.
 
-      Use the command:
+    Use the command:
 
-      `ntpq -p`
+    ```
+    ntpq -p
+    ```
 
-      ![alt text](Installation/ntpq.png "ntpq -p")
+    ![alt text](Installation/ntpq.png "ntpq -p")
 
     **NOTE:** ICP requires all nodes be in time sync and most proxies will not support NTP. In an air-gapped environment, you must provide a local NTP server which can be used by all nodes to keep time in sync.
 
@@ -134,23 +143,33 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 1.  If the ufw firewal is enabled, disable it. ICP will install iptables.
 
 1.  Configure the Virtual Memory setting (required for ELK)  
-    1. Update the vm.max\_map\_count setting to 262144:
-    `sysctl -w vm.max_map_count=262144`
 
-    1. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
-    ![alt text](Installation/sysctl.png "sysctl")
+   1. Update the vm.max\_map\_count setting to 262144:
 
-    1. To check the current value use the command:
-    >   `sysctl vm.max_map_count`
+     ```
+     sysctl -w vm.max_map_count=262144
+     ```
 
-      ![alt text](Installation/sysctl-2.png "sysctl-2")
+   1. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
+
+     ![alt text](Installation/sysctl.png "sysctl")
+
+   1. To check the current value use the command:
+
+    ```
+    sysctl vm.max_map_count
+    ```
+
+    ![alt text](Installation/sysctl-2.png "sysctl-2")
 
 1. Install the NFS common packages
+
   ```
   apt-get install -y nfs-common
   ```
 
 1. Install python
+
   ```
   apt-get install -y python-setuptools
   ```
