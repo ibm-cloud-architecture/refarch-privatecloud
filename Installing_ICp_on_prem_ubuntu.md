@@ -470,13 +470,13 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   1.  Look at the default values specified for the network_cidr and service_clister_ip_range.  These values are never advertised outside the cluster and and are not reachable from outside the cluster, however, they should not conflict with any routable network in the enterprise:
 
-    ```
-    ## Network in IPv4 CIDR format
-    network_cidr: 10.1.0.0/16
+  ```
+  ## Network in IPv4 CIDR format
+  network_cidr: 10.1.0.0/16
 
-    ## Kubernetes Settings
-    service_cluster_ip_range: 10.0.0.1/24
-    ```
+  ## Kubernetes Settings
+  service_cluster_ip_range: 10.0.0.1/24
+  ```
 
     If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
 
