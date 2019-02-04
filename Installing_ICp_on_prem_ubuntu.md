@@ -12,7 +12,8 @@ There are two main differences between ICp Community Edition (CE) and Enterprise
 
 This walkthrough will focus on installing the IBM Cloud private Enterprise Edition (ICP ee) on VMWare running in HA mode.  If you are running in an air-gapped environment with proxy access to the internet, notes throughout this document will explain how to configure the environment to support this configuration.
 
-## Assumptions: 
+## Assumptions:
+
 
 1. Overprovisioning
 
