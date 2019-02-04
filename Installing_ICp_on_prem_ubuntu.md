@@ -15,7 +15,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 ## Assumptions:
 
 
-1. Overprovisioning
+* Overprovisioning
 
   The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
 
@@ -33,13 +33,13 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   In this example we will use the former model and allocate ample resources so we do not have to come back later and add more.
 
-1.  Installation will be performed on Ubuntu 16.04 LTS server amd64. All commands will be for this platform.
+* Installation will be performed on Ubuntu 16.04 LTS server amd64. All commands will be for this platform.
 
-1.  Installation must be done as root. Many commands must be run on all nodes. It is a big time saver to type the command into the terminal window on the master node and then, before hitting [enter], copy the command from the master window (including the carriage return), and then hit [enter] on the master node. You can then paste that command in the other windows to execute it on all other nodes.   
+* Installation must be done as root. Many commands must be run on all nodes. It is a big time saver to type the command into the terminal window on the master node and then, before hitting [enter], copy the command from the master window (including the carriage return), and then hit [enter] on the master node. You can then paste that command in the other windows to execute it on all other nodes.   
 
-1.  For simple demo/test purposes, the entire environment can be installed onto a single node, but this is not suitable for any amount of test or production use. The Topology for this implementation will have a combined boot and master server plus a proxy server and three worker nodes.
+* For simple demo/test purposes, the entire environment can be installed onto a single node, but this is not suitable for any amount of test or production use. The Topology for this implementation will have a combined boot and master server plus a proxy server and three worker nodes.
 
-1.  **HA/DR:** In this tutorial, we will be installing an HA instance of ICP, but HA depends on more than just software in most environments.<br><br>For more information on the high availability aspects of the infrastructure see Appendix B.
+* **HA/DR:** In this tutorial, we will be installing an HA instance of ICP, but HA depends on more than just software in most environments.<br><br>For more information on the high availability aspects of the infrastructure see Appendix B.
 
 ## Prepare VM Templates for the Various Node Types
 
