@@ -438,7 +438,8 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 	  8. Configure the installation
 		   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes.  The result should look something like this:
-		        ```
+
+		   ```
             [master]
             172.16.40.31
             172.16.40.32
@@ -463,7 +464,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
             172.16.40.43
             172.16.40.44
             172.16.40.45
-		        ```
+		   ```
 
 1. Edit the /opt/icp/cluster/config.yaml file
 
@@ -475,7 +476,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     ## Kubernetes Settings
     service_cluster_ip_range: 10.0.0.1/24
-  ```
+    ```
 
     If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
 
