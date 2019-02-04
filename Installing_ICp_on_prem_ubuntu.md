@@ -299,44 +299,44 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   Perform the following tasks to change the IP address and hostname on each respective node.
 
-    1. Change the hostname
+  1. Change the hostname
 
-      ```
-      hostnamectl set-hostname <icp-master1>
-      ```
+    ```
+    hostnamectl set-hostname <icp-master1>
+    ```
 
-      Replace &lt;icp-master1&gt; with the new hostname for your node.
+    Replace &lt;icp-master1&gt; with the new hostname for your node.
 
-    2.  Modify /etc/network/interfaces to configure a static IP address
+  2.  Modify /etc/network/interfaces to configure a static IP address
 
-      Your file should look something like this:
+    Your file should look something like this:
 
-      ```
-      # This file describes the network interfaces available on your system
-      # and how to activate them. For more information, see interfaces(5).
+    ```
+    # This file describes the network interfaces available on your system
+    # and how to activate them. For more information, see interfaces(5).
 
-      source /etc/network/interfaces.d/*
+    source /etc/network/interfaces.d/*
 
-      # The loopback network interface
-      auto lo
-      iface lo inet loopback
+    # The loopback network interface
+    auto lo
+    iface lo inet loopback
 
-      # The primary network interface
-      auto ens160
-      iface ens160 inet static
-        address 172.16.40.30
-        netmask 255.255.0.0
-        broadcast 172.16.255.255
-          gateway 172.16.255.250
-          dns-nameservers 172.16.0.11 172.16.0.17
-          dns-search csplab.local
-      ```
+    # The primary network interface
+    auto ens160
+    iface ens160 inet static
+      address 172.16.40.30
+      netmask 255.255.0.0
+      broadcast 172.16.255.255
+      gateway 172.16.255.250
+      dns-nameservers 172.16.0.11 172.16.0.17
+      dns-search csplab.local
+    ```
 
-    3.  In ubuntu 16.04, there seems to be a bug where resetting the network with the standard `systemctl restart networking` command does not change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
+  3.  In ubuntu 16.04, there seems to be a bug where resetting the network with the standard `systemctl restart networking` command does not change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
 
-      ```
-      shutdown -r now
-      ```
+    ```
+    shutdown -r now
+    ```
 
 1.  Configure passwordless SSH from the master node to all other nodes   
     You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
