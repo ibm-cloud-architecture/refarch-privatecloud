@@ -301,9 +301,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   1. Change the hostname
 
-    ```
-    hostnamectl set-hostname <icp-master1>
-    ```
+    `hostnamectl set-hostname <icp-master1>
     Replace &lt;icp-master1&gt; with the new hostname for your node.
 
   2.  Modify /etc/network/interfaces to configure a static IP address
