@@ -300,7 +300,6 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   Perform the following tasks to change the IP address and hostname on each respective node.
 
   1. Change the hostname
-
     ```
     hostnamectl set-hostname <icp-master1>
     ```
@@ -310,7 +309,6 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   2.  Modify /etc/network/interfaces to configure a static IP address
 
     Your file should look something like this:
-
     ```
     # This file describes the network interfaces available on your system
     # and how to activate them. For more information, see interfaces(5).
@@ -333,7 +331,6 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     ```
 
   3.  In ubuntu 16.04, there seems to be a bug where resetting the network with the standard `systemctl restart networking` command does not change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
-
     ```
     shutdown -r now
     ```
