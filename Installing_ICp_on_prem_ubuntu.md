@@ -298,43 +298,43 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   *IMPORTANT:* If you do not have a DHCP server and configured your original VMs with a static IPs, you will need to boot each VM in turn, configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
 
   Perform the following tasks to change the IP address and hostname on each respective node.
-
     1.  Change the hostname
-        ```
-        hostnamectl set-hostname <icp-master1>
-        ```
+      ```
+      hostnamectl set-hostname <icp-master1>
+      ```
 
-        Replace &lt;icp-master1&gt; with the new hostname for your node.
+      Replace &lt;icp-master1&gt; with the new hostname for your node.
 
     2.  Modify /etc/network/interfaces to configure a static IP address
-        Your file should look something like this:
 
-        ```
-        # This file describes the network interfaces available on your system
-        # and how to activate them. For more information, see interfaces(5).
+      Your file should look something like this:
 
-        source /etc/network/interfaces.d/*
+      ```
+      # This file describes the network interfaces available on your system
+      # and how to activate them. For more information, see interfaces(5).
 
-        # The loopback network interface
-        auto lo
-        iface lo inet loopback
+      source /etc/network/interfaces.d/*
 
-        # The primary network interface
-        auto ens160
-        iface ens160 inet static
-          address 172.16.40.30
-          netmask 255.255.0.0
-          broadcast 172.16.255.255
+      # The loopback network interface
+      auto lo
+      iface lo inet loopback
+
+      # The primary network interface
+      auto ens160
+      iface ens160 inet static
+        address 172.16.40.30
+        netmask 255.255.0.0
+        broadcast 172.16.255.255
           gateway 172.16.255.250
           dns-nameservers 172.16.0.11 172.16.0.17
           dns-search csplab.local
-        ```
+      ```
 
     3.  In ubuntu 16.04, there seems to be a bug where resetting the network with the standard `systemctl restart networking` command does not change the IP address, rather it adds an additional IP address to the interface. Enabling the new IP will require a reboot.
 
-        ```
-        shutdown -r now
-        ```
+      ```
+      shutdown -r now
+      ```
 
 1.  Configure passwordless SSH from the master node to all other nodes   
     You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
@@ -385,6 +385,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 ## Install ICP
 
 1. Load your icp tarball into your boot node's docker registry
+
   Only on the boot node, load the inception image from the ICP tarball into boot node's local docker registry.
     ```
     tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz ibm-inception-amd64-3.1.1.tar -O |docker load
@@ -416,29 +417,32 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
       mkdir /opt/icp
       cd /opt/icp
       ```
+
     2. Extract the installation configuration files
+
       ```
       docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception-amd64:3.1.1-ee cp -r cluster /data
       ```
+
       After this command, you should have a folder named /opt/icp/cluster.   
 
-	  5. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
+    3. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
 
 		  ```
 		  mkdir -p  /opt/icp/cluster/images
 		  mv /opt/ibm-cloud-private-x86_64-3.1.1.tar.gz /opt/icp/cluster/images/
 		  ```
 
-	  6. (optional) If using IBM*Z or power nodes, add the x390x and ppc tarballs to /opt/icp/cluster/images as well
+    4. (optional) If using IBM*Z or power nodes, add the x390x and ppc tarballs to /opt/icp/cluster/images as well
 
-	  7. Copy the ssh key to the installation directory
+    5. Copy the ssh key to the installation directory
 
 		  ```
 		  cp ~/.ssh/id_rsa /opt/icp/cluster/ssh_key
 		  chmod 400 /opt/icp/cluster/ssh_key
 		  ```
 
-8. Configure the installation
+4. Configure the installation
 
   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes.  The result should look something like this:
 
@@ -485,13 +489,13 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     mount 2.3.4.5:/storage/log/audit /var/log/audit
     ```
 
-  Update the /etc/fstab file so that the moutnes will be reestablished after a reboot.  The /etc/fstab entries should look something like this:
+    Update the /etc/fstab file so that the moutnes will be reestablished after a reboot.  The /etc/fstab entries should look something like this:
 
-  ```
-  172.16.40.49:/storage/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
-  172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
-  172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
-  ```
+    ```
+    172.16.40.49:/storage/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+    172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+    172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+    ```
 
 1. Deploy the ICP environment.
 
