@@ -14,7 +14,8 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 ## Assumptions: 
 
-1. **Overprovisioning**
+1. Overprovisioning
+
   The way cloud services are designed to work is they only allocate as much resources to a virtual machine as is required for the current workload. Capacity is granted and removed as needed. For example, you may allocate 8 virtual CPUs to a VM, but that VM is actually only using the amount of GHz of processing power on the host machine as is needed to satisfy the demand.
 
   This means that whether you allocate 1 vCPU or 2 vCPUs, you are not using more capacity on the host to run the same workload.
