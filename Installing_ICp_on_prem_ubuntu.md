@@ -478,11 +478,11 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   service_cluster_ip_range: 10.0.0.1/24
   ```
 
-    If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
+  If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
 
-    Also note that the default service cluster ip range is only 24 bits which will limit the number of services which can be defined to 254.  Extending this to a 16 bit subnet (a Class B network) will allow for 255^255 number of services.
+  Also note that the default service cluster ip range is only 24 bits which will limit the number of services which can be defined to 254.  Extending this to a 16 bit subnet (a Class B network) will allow for 255^255 number of services.
 
-    Choose a subnet which is appropriate for the size of the implementation you expect to have.
+  Choose a subnet which is appropriate for the size of the implementation you expect to have.
 
   1. Change the default admin password
 
