@@ -157,104 +157,109 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 1.  Install docker
 
-    1. Update your ubuntu repositories
+  1. Update your ubuntu repositories
+
+    ```
+    apt-get update
+    ```
+
+  1.  Install Linux image extra packages
+
+    ```
+    apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
+    ```
+
+  1.  Install additional needed packages   
+
+    ```
+    apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    ```
+
+    **NOTE**: These packages may all exist depending on what packages were included when the operating system installed. If they already exist, you will just see output indicating they already exist. If you assume they exist, however, and do not do this step and they are not there, the installation will fail.
+
+  1.  Add Docker’s official GPG key
+
+    ```
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+    ```
+
+  1.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+
+    ```
+    apt-key fingerprint 0EBFCD88
+    ```
+
+    ![alt text](Installation/fingerprint.png "fingerprint")
+
+  1.  Setup the docker stable repository and update the local cache
 
       ```
+      add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
       apt-get update
-      ```
+      ```  
 
-    1.  Install Linux image extra packages
+  1.  Install docker   
 
-      ```
-      apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
-      ```
+    ```
+    apt-get install -y docker-ce
+    ```
 
-    1.  Install additional needed packages   
+  1. In an air-gapped environment only, configure Docker to use the proxy server.
 
-      ```
-      apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-      ```
+    Docker must be able to reach the internet to be able to pull images from the IBM catalog and any other public repositories that are configured in the platform.  It is extremely important that the NO_PROXY section be correctly configured in the file below to prevent an installation failure caused by docker trying to use the proxy to hit the ICP vip interface.
 
-      **NOTE**: These packages may all exist depending on what packages were included when the operating system installed. If they already exist, you will just see output indicating they already exist. If you assume they exist, however, and do not do this step and they are not there, the installation will fail.
+    The following instructions will create environment variables in the process space that runs the docker daemon which will tell it to use a proxy for some addresses and not for others.
 
-    1.  Add Docker’s official GPG key
+    ```
+    mkdir -p /etc/systemd/systedm/docker.service.d/
+    ```
 
-        ```
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-        ```
+    Create a file in this directory named "http-proxy.conf" with contents similar to the following:
 
-    1.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+    ```
+    [Service]
+    Environment="HTTP_PROXY=http://proxy.mydomain.com:3128" "NO_PROXY=.icp,localhost,172.16."
+    Environment="HTTPS_PROXY=http://proxy.mydomain.com:3128" "NO_PROXY=.icp,localhost,172.16."
+    ```
 
-      ```
-      apt-key fingerprint 0EBFCD88
-      ```
+    Replace the URL as needed for your environment.
 
-      ![alt text](Installation/fingerprint.png "fingerprint")
+    Replace the NO_PROXY information for your installation and local environment.
 
-    1.  Setup the docker stable repository and update the local cache
+    Save the file, reload the daemon, and restart docker:
 
-        ```
-        add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-        apt-get update
-        ```  
+    ```
+    systemctl daemon-reload
+    systemctl restart docker
+    ```
 
-    1.  Install docker   
+  1. (optional) If the default docker bridge address (172.17.0.1/24) conflicts with your local environment you may need to change it's default subnet such that it uses something that is not already routable in the environment (e.g. 172.18.0.1/24).
 
-        ```
-        apt-get install -y docker-ce
-        ```
-
-    1. In an air-gapped environment only, configure Docker to use the proxy server.
-
-      Docker must be able to reach the internet to be able to pull images from the IBM catalog and any other public repositories that are configured in the platform.  It is extremely important that the NO_PROXY section be correctly configured in the file below to prevent an installation failure caused by docker trying to use the proxy to hit the ICP vip interface.
-
-      The following instructions will create environment variables in the process space that runs the docker daemon which will tell it to use a proxy for some addresses and not for others.
+    To change the IP address of the docker bridge take the following steps:
+    1.  Create the path /etc/docker/, if needed
 
       ```
-      mkdir -p /etc/systemd/systedm/docker.service.d/
+      mkdir -p /etc/docker/
       ```
 
-      Create a file in this directory named "http-proxy.conf" with contents similar to the following:
+      1. Create the file daemon.json in this directory with the following contents:
 
-      ```
-      [Service]
-      Environment="HTTP_PROXY=http://proxy.mydomain.com:3128" "NO_PROXY=.icp,localhost,172.16."
-      Environment="HTTPS_PROXY=http://proxy.mydomain.com:3128" "NO_PROXY=.icp,localhost,172.16."
-      ```
-      Replace the URL as needed for your environment.
-
-      Replace the NO_PROXY information for your installation and local environment.
-
-      Save the file, reload the daemon, and restart docker:
-
-      ```
-      systemctl daemon-reload
-      systemctl restart docker
-      ```
-
-    1. (optional) If the default docker bridge address (172.17.0.1/24) conflicts with your local environment you may need to change it's default subnet such that it uses something that is not already routable in the environment (e.g. 172.18.0.1/24).
-
-      To change the IP address of the docker bridge take the following steps:
-        1.  Create the path /etc/docker/, if needed
-        ```
-        mkdir -p /etc/docker/
-        ```
-
-        1. Create the file daemon.json in this directory with the following contents:
         ```
         {
-            "bip": "172.18.0.1/24"
+          "bip": "172.18.0.1/24"
         }
         ```
+
         Change the CIDR to reflect a subnet and IP address that is not currently in use in your environment.
 
-        1. Restart Docker
+      1. Restart Docker
+
         ```
         systemctl daemon-reload
         systemctl restart docker
         ```
 
-    1.  Makes sure docker is running and pulling correctly from the internet
+      1.  Makes sure docker is running and pulling correctly from the internet
 
         ```
         docker run hello-world
@@ -291,11 +296,11 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 1. Configure your newly cloned VMs and set their hostnames and static IP addresses.
 
-  *Note:* The VMs can use DHCP assigned IP addresses, however, DHCP addresses are subject to change and if any addresses change your environment will break.  For a quick test environment, static IP's are not needed, however, for any kind of permanent environment, static IP addresses should be used.
+  **Note:** The VMs can use DHCP assigned IP addresses, however, DHCP addresses are subject to change and if any addresses change your environment will break.  For a quick test environment, static IP's are not needed, however, for any kind of permanent environment, static IP addresses should be used.
 
   If your network interface is configured for DHCP, boot all of the newly provisioned nodes and then, using the VMware console, login to each VM and reconfigure the hostname and add the appropriate static IP address.
 
-  *IMPORTANT:* If you do not have a DHCP server and configured your original VMs with a static IPs, you will need to boot each VM in turn, configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
+  **IMPORTANT:** If you do not have a DHCP server and configured your original VMs with a static IPs, you will need to boot each VM in turn, configuring each with its new IP address before booting the next to prevent having duplicate IP addresses on your network.
 
   Perform the following tasks to change the IP address and hostname on each respective node.
 
