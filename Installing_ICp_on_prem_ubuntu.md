@@ -65,20 +65,20 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 * Execute the following commands on both template VMs
 
-1. Enable root login remotely via ssh
+  1. Enable root login remotely via ssh
 
-  1. Set a password for the root user
+    1. Set a password for the root user
 
-    1. `sudo su -` \# provide your user password to get to the root shell
+      1. `sudo su -` \# provide your user password to get to the root shell
 
-    2. `passwd` \# Set the root password
+      2. `passwd` \# Set the root password
 
-  2.  Enable remote login as root
+    2.  Enable remote login as root
 
-```
-sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
-systemctl restart ssh
-```
+      ```
+      sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
+      systemctl restart ssh
+      ```
 
 1. For air-gapped environments only, you must set a proxy server to provide for internet access for installing needed packages including docker.  The easiest way to do this is to edit the /etc/profile file and add lines at the bottom such as:
 
