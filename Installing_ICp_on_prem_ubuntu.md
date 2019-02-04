@@ -409,6 +409,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   In the following section, replace the image name and version tag with the ones you got when you issued the command above.
 
 1. Prepare the installation files
+
     1. Create a directory to hold installation configuration files
 
       ```
@@ -429,6 +430,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 		  ```
 
 	  6. (optional) If using IBM*Z or power nodes, add the x390x and ppc tarballs to /opt/icp/cluster/images as well
+
 	  7. Copy the ssh key to the installation directory
 
 		  ```
@@ -436,132 +438,59 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 		  chmod 400 /opt/icp/cluster/ssh_key
 		  ```
 
-	  8. Configure the installation
-		   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes.  The result should look something like this:
+8. Configure the installation
 
-		   ```
-            [master]
-            172.16.40.31
-            172.16.40.32
-            172.16.40.33
-
-            [worker]
-            172.16.40.40
-            172.16.40.41
-            172.16.40.42
-
-            [proxy]
-            172.16.40.34
-            172.16.40.35
-            172.16.40.36
-
-            [management]
-            172.16.40.37
-            172.16.40.38
-            172.16.40.39
-
-            [va]
-            172.16.40.43
-            172.16.40.44
-            172.16.40.45
-		   ```
-
-1. Edit the /opt/icp/cluster/config.yaml file
-
-  1.  Look at the default values specified for the network_cidr and service_clister_ip_range.  These values are never advertised outside the cluster and and are not reachable from outside the cluster, however, they should not conflict with any routable network in the enterprise:
-
-  ```
-  ## Network in IPv4 CIDR format
-  network_cidr: 10.1.0.0/16
-
-  ## Kubernetes Settings
-  service_cluster_ip_range: 10.0.0.1/24
-  ```
-
-  If these values conflict, simply change them to something that does not, e.g. 10.100.0.0/16 and 10.101.0.0/16.
-
-  Also note that the default service cluster ip range is only 24 bits which will limit the number of services which can be defined to 254.  Extending this to a 16 bit subnet (a Class B network) will allow for 255^255 number of services.
-
-  Choose a subnet which is appropriate for the size of the implementation you expect to have.
-
-  1. Change the default admin password
+  1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes.  The result should look something like this:
 
     ```
-    ## Advanced Settings
-    default_admin_user: admin
-    default_admin_password: IL0veIBM!
+    [master]
+    172.16.40.31
+    172.16.40.32
+    172.16.40.33
+
+    [worker]
+    172.16.40.40
+    172.16.40.41
+    172.16.40.42
+
+    [proxy]
+    172.16.40.34
+    172.16.40.35
+    172.16.40.36
+
+    [management]
+    172.16.40.37
+    172.16.40.38
+    172.16.40.39
+
+    [va]
+    172.16.40.43
+    172.16.40.44
+    172.16.40.45
     ```
 
-  1.  Configure the virtual interface addresses for the master and proxy nodes (HA installs only)
+  1. In an HA environment, there are three directories which must be shared by all Master nodes.  These are /var/lib/registry, /var/lib/icp/audit, and /var/log/audit.
+
+    On your NFS server, create mount points for each of these paths e.g. ``/storage/registry`, ``/storage/icp/audit`, and ``/storage/log/audit`.
+
+    On each of the master nodes, mount the NFS mount points to the appropriate locations:
 
     ```
-    ## High Availability Settings for master nodes
-    vip_iface: ens160
-    cluster_vip: 1.2.3.4
+    mkdir -p /var/lib/registry
+    mkdir -p /var/lib/icp/audit
+    mkdir -p /var/log/audit
 
-    ## High Availability Settings for Proxy nodes
-    proxy_vip_iface: ens160
-    proxy_vip: 1.2.3.5
+    mount 2.3.4.5:/storage/registry /var/lib/registry
+    mount 2.3.4.5:/storage/icp/audit /var/lib/icp/audit
+    mount 2.3.4.5:/storage/log/audit /var/log/audit
     ```
-
-    The iface entries must reflect the network adapter name which should be used for the master and proxy node ingress points.  These are the IP address you will use to access your cluster and applications when the install is complete.
-
-    In a non-HA install (one master and one proxy), these values should be commented out and the IP address of the master and proxy nodes will be used.
-
-  1.  Specify which services you want to exclude:
-
-    ```
-    ## You can disable following services if they are not needed:
-    #   custom-metrics-adapter
-    #   image-security-enforcement
-    #   istio
-    #   metering
-    #   monitoring
-    #   service-catalog
-    #   storage-minio
-    #   storage-glusterfs
-    #   vulnerability-advisor
-    management_services:
-      istio: disabled
-    #  vulnerability-advisor: disabled
-      storage-glusterfs: disabled
-      storage-minio: disabled
-    ```
-
-    Comment out the services you want to **enable**.  Anything in the list is tagged as "disabled" and will not be installed.  By commenting out `vulnerability-advisor: disabled` we are saying that we want VA to be installed.
-
-  1.  If running in an air-gapped environment, add the following lines to the config.yaml file (location is irrelevant):
-
-    ```
-    # Proxy settings for air-gapped environment
-    tiller_http_proxy: http://proxy.mydomain.com:3128
-    tiller_https_proxy: http://proxy.mydomain.com:3128
-    ```
-
-    Change the URL to reflect the enterprise proxy server.  This will allow tiller to see catalog items in helm repositories on the internet (including the IBM repositories).  In an air-gapped environment, without this setting your catalog will be empty of any images other than those loaded into the local repository.
-
-1. In an HA environment, there are three directories which must be shared by all Master nodes.  These are /var/lib/registry, /var/lib/icp/audit, and /var/log/audit.
-
-  On your NFS server, create mount points for each of these paths e.g. ``/storage/registry`, ``/storage/icp/audit`, and ``/storage/log/audit`.
-
-  On each of the master nodes, mount the NFS mount points to the appropriate locations:
-
-  ```
-  mkdir -p /var/lib/registry
-  mkdir -p /var/lib/icp/audit
-  mkdir -p /var/log/audit
-
-  mount 2.3.4.5:/storage/registry /var/lib/registry
-  mount 2.3.4.5:/storage/icp/audit /var/lib/icp/audit
-  mount 2.3.4.5:/storage/log/audit /var/log/audit
-  ```
 
   Update the /etc/fstab file so that the moutnes will be reestablished after a reboot.  The /etc/fstab entries should look something like this:
 
   ```
   172.16.40.49:/storage/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
-172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
-172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+  172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
+  172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
   ```
 
 1. Deploy the ICP environment.
