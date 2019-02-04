@@ -43,21 +43,21 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 ## Prepare VM Templates for the Various Node Types
 
-1.  Install two Ubuntu 16.04 Server x86_64 virtual machines to use as your templates nodes. The first template will be used for all master, management, and vulnerability advisor nodes.  The second will be for all proxy and worker nodes.
+Install two Ubuntu 16.04 Server x86_64 virtual machines to use as your templates nodes. The first template will be used for all master, management, and vulnerability advisor nodes.  The second will be for all proxy and worker nodes.
 
   **NOTE:** _You could use a single template rather than two, however, when cloning these templates to VMs you cannot change the size of the disk without significant pain.  Since different VMs need different disk sizes, you must either create two templates which contain the correct disk sizes, or provision all VMs with the master node disk size (500GB) and re-configigure the CPU and Memory requirements based on the node type when you deploy the VMs from these templates.  If disks are thin provisioned, there is no problem making all disks 500GB since they will not occupy space on the datastore which they do not need.  There is a risk, however, that you could over-provision your datastore to the point that the overall datastore disk runs out of space with no warning and all VMs on that datastore will start experiencing "out of space" errors even they should to have plenty of space available.  To reduce the possibility of causing this frustrating and sometimes difficult to troubelshoot problem, it is recommended to use two templates as we have specified here._
 
   You can get the guest OS image from:   <http://releases.ubuntu.com/>
 
   Master  Template:<br>
->CPUs: 16<br>
->Memory: 32GB<br>
->Disk: 500GB (optionally, Thin Provisioned)<br>
+    >CPUs: 16<br>
+    >Memory: 32GB<br>
+    >Disk: 500GB (optionally, Thin Provisioned)<br>
 
   Worker Template:
->CPUs: 8<br>
->Memory: 16<br>
->Disk: 200GB (optionally, Thin Provisioned)<br>
+    >CPUs: 8<br>
+    >Memory: 16<br>
+    >Disk: 200GB (optionally, Thin Provisioned)<br>
 
   **Note:** All infrastructure storage is hostPath, meaning, it will reside on the local VM's filesystem.  Workload storage (PersistentVolume [PV] storage) should *not* be hostPath for a number of reasons.  In this tutorial, workload storage is via NFS and is external to this environment. There is no need to allocate additional storage for PV storage here.
 
@@ -65,18 +65,18 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   **Execute the following commands on both template VMs**
 
-1. Enable root login remotely via ssh
+    1. Enable root login remotely via ssh
 
-  1. Set a password for the root user
-    1. `sudo su -` \# provide your user password to get to the root shell
-    2. `passwd` \# Set the root password
+      1. Set a password for the root user
+        1. `sudo su -` \# provide your user password to get to the root shell
+        2. `passwd` \# Set the root password
 
-  2.  Enable remote login as root
+      2.  Enable remote login as root
 
-    ```
-    sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
-    systemctl restart ssh
-    ```
+        ```
+        sed -i 's/prohibit-password/yes/' /etc/ssh sshd_config
+        systemctl restart ssh
+        ```
 
 1. For air-gapped environments only, you must set a proxy server to provide for internet access for installing needed packages including docker.  The easiest way to do this is to edit the /etc/profile file and add lines at the bottom such as:
 
