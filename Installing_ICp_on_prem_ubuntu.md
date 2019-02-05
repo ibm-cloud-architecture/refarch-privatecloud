@@ -104,25 +104,28 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
 
-4.  Update NTP (Network Time Protocol) settings to make sure time stays in sync
-  1.  Get the latest apt updates and install ntp
+4. Update NTP (Network Time Protocol) settings to make sure time stays in sync
+  a. Get the latest apt updates and install ntp
+
     ```
     apt-get update
     apt-get install -y ntp
     ```
 
-  1.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
+  b.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
     ![alt text](Installation/ntp.png "NTP")
 
-  1.  After making configuration changes restart the NTP server with the command:
+  c.  After making configuration changes restart the NTP server with the command:
+	
     ```
     systemctl restart ntp
     ```
 
-  1. Test the status of your NTP servers to make sure they are working.
+  d. Test the status of your NTP servers to make sure they are working.
 
     Use the command:
+
     ```
     ntpq -p
     ```
