@@ -407,15 +407,17 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 ## Install ICP
 
-1. Load your icp tarball into your boot node's docker registry
+* Load your icp tarball into your boot node's docker registry
 
   Only on the boot node, load the inception image from the ICP tarball into boot node's local docker registry.
-    ```
-    tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz ibm-inception-amd64-3.1.1.tar -O |docker load
-    ```   
+	
+  ```
+  tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz ibm-inception-amd64-3.1.1.tar -O |docker load
+  ```   
+
   Note that this will take quite some time and a lot of disk space and memory because tar has to gunzip the entire tarball before it can extract any images.  This takes memory, filespace in /tmp, and quite a lot of time.  Please be patient.
 
-1. Find the name and tag of the current inception image
+* Find the name and tag of the current inception image
   IBM releases a new version of ICP as often as every six weeks.  The specific version number (and even the full image name) can/will change with every release.  To find your release information execute the following command on the boot node:
 
   ```
@@ -432,40 +434,40 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   In the following section, replace the image name and version tag with the ones you got when you issued the command above.
 
-1. Prepare the installation files
+* Prepare the installation files
 
-    1. Create a directory to hold installation configuration files
+  1. Create a directory to hold installation configuration files
 
-      ```
-      mkdir /opt/icp
-      cd /opt/icp
-      ```
+    ```
+    mkdir /opt/icp
+    cd /opt/icp
+    ```
 
-    2. Extract the installation configuration files
+  2. Extract the installation configuration files
 
-      ```
-      docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception-amd64:3.1.1-ee cp -r cluster /data
-      ```
+    ```
+    docker run -e LICENSE=accept --rm -v /opt/icp:/data ibmcom/icp-inception-amd64:3.1.1-ee cp -r cluster /data
+    ```
 
-      After this command, you should have a folder named /opt/icp/cluster.   
+    After this command, you should have a folder named /opt/icp/cluster.   
 
-    3. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
+  3. **Enterprise Edition only:** Move the ICP tarball to /opt/icp/cluster/images directory.
 
-		  ```
-		  mkdir -p  /opt/icp/cluster/images
-		  mv /opt/ibm-cloud-private-x86_64-3.1.1.tar.gz /opt/icp/cluster/images/
-		  ```
+    ```
+    mkdir -p  /opt/icp/cluster/images
+    mv /opt/ibm-cloud-private-x86_64-3.1.1.tar.gz /opt/icp/cluster/images/
+    ```
 
-    4. (optional) If using IBM*Z or power nodes, add the x390x and ppc tarballs to /opt/icp/cluster/images as well
+  4. (optional) If using IBM*Z or power nodes, add the x390x and ppc tarballs to /opt/icp/cluster/images as well
 
-    5. Copy the ssh key to the installation directory
+  5. Copy the ssh key to the installation directory
 
 		  ```
 		  cp ~/.ssh/id_rsa /opt/icp/cluster/ssh_key
 		  chmod 400 /opt/icp/cluster/ssh_key
 		  ```
 
-4. Configure the installation
+* Configure the installation
 
   1. Edit the /opt/icp/cluster/hosts file and enter the IP addresses of all nodes.  The result should look something like this:
 
@@ -520,33 +522,34 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=1800	0 0
     ```
 
-1. Deploy the ICP environment.
+* Deploy the ICP environment.
 
-    ```
-    cd /opt/icp/cluster
-    docker run --rm -t -e LICENSE=accept --net=host -v /opt/icp/cluster:/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee install -vvv |tee install.log
-    ```
+  ```
+  cd /opt/icp/cluster
+  docker run --rm -t -e LICENSE=accept --net=host -v /opt/icp/cluster:/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee install -vvv |tee install.log
+  ```
 
-    Several minutes later you should have a deployed IBM Cloud private implementation.
-    You can login to your new cluster with a browser attach to https://10.0.0.1:8443 with credentials admin/admin.   
-    ![ICp console](Installation/icpconsole.png "console")
+  Several minutes later you should have a deployed IBM Cloud private implementation.
+  You can login to your new cluster with a browser attach to https://10.0.0.1:8443 with credentials admin/admin.   
 
-12. Add a worker node to an ICP cluster
-    To dynamically add a worker node to an existing implementation, prepare the VM exactly as the original installation, update the /etc/hosts file with the IP and hostname of the new worker node and execute the install command with the -l option:
+  ![ICp console](Installation/icpconsole.png "console")
 
-      ```
-      cd /opt/icp/cluster
-      docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee install -l <IP of worker node>,<IP of second worker node>[,...]
-      ```
+* Add a worker node to an ICP cluster
+  To dynamically add a worker node to an existing implementation, prepare the VM exactly as the original installation, update the /etc/hosts file with the IP and hostname of the new worker node and execute the install command with the -l option:
 
-13. Uninstall an ICP environment.
+  ```
+  cd /opt/icp/cluster
+  docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee install -l <IP of worker node>,<IP of second worker node>[,...]
+  ```
 
-    To uninstall ICP use the exact same container but run the uninstall command
+* Uninstall an ICP environment.
 
-    ```
-    cd /opt/icp/cluster
-    docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee uninstall
-    ```
+  To uninstall ICP use the exact same container but run the uninstall command
+
+  ```
+  cd /opt/icp/cluster
+  docker run --rm -t -e LICENSE=accept --net=host -v "$(pwd)":/installer/cluster ibmcom/icp-inception-amd64:3.1.1-ee uninstall
+  ```
 
 Appendix A
 ==========
