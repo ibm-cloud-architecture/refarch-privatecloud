@@ -95,14 +95,14 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   b) A no_proxy envvar is required so that the ICP installer will not attempt to use the proxy setting to attach to ICP when doing the product installation.  After the vip is created, ICP will attempt to login to docker to push images.  **If the hostname and IP address of the vip are not in the no_proxy envvar the install will fail when docker attempts to reach these interfaces via the proxy.**
 
-    The ubuntu apt service does *not* respect the envvars you just created.  To get apt-get to work correctly in an air-gapped environment, you must create the file `/etc/apt/apt.conf` and in that file put the following lines:
+  The ubuntu apt service does *not* respect the envvars you just created.  To get apt-get to work correctly in an air-gapped environment, you must create the file `/etc/apt/apt.conf` and in that file put the following lines:
 
-    ```
-    Acquire::http::Proxy "http://proxy.mydomain.com:3128"
-    Acquire::https::Proxy "http://proxy.mydomain.com:3128"
-    ```
+  ```
+  Acquire::http::Proxy "http://proxy.mydomain.com:3128"
+  Acquire::https::Proxy "http://proxy.mydomain.com:3128"
+  ```
 
-    Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
+  Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
 
 4.  Update NTP (Network Time Protocol) settings to make sure time stays in sync
   1.  Get the latest apt updates and install ntp
