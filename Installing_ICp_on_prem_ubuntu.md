@@ -60,12 +60,9 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   Initially, configure the server for DHCP (if available) so that we can clone these VMs without getting IP address conflicts, we will assign static IP’s later.<br><br>If DHCP is not available assign the static IP of your boot/master server now.  See below for instructions for setting a static IP address on an ubuntu 16.04 server.
 
-2. Execute the following commands on both template VMs
-
-  \# Enable root login remotely via ssh
+2. Execute the following commands on both template VMs. This enables root login remotely via ssh
 
   a. Set a password for the root user
-
     1. `sudo su -` \# provide your user password to get to the root shell
     2. `passwd` \# Set the root password
 
