@@ -86,8 +86,8 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   Do this on your boot node and then propagate to all other nodes in your environment.  You can either logout and log back in to enable to new envvars or just read the profile with a command like:
 
   ```
-	. /etc/profile
-	```
+  . /etc/profile
+  ```
 
   **IMPORTANT:**
 
