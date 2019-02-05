@@ -108,20 +108,20 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   a. Get the latest apt updates and install ntp
 
-    ```
-    apt-get update
-    apt-get install -y ntp
-    ```
+  ```
+  apt-get update
+  apt-get install -y ntp
+  ```
 
   b.  If using an internal NTP server, edit /etc/ntp.conf and add your internal server to the list and then restart the ntp server. In the following configuration, the server is configured to use a local NTP server (ntp.csplab.local) and fall back to public servers if that server is unavailable.
 
-    ![alt text](Installation/ntp.png "NTP")
+  ![alt text](Installation/ntp.png "NTP")
 
   c.  After making configuration changes restart the NTP server with the command:
 
-    ```
-    systemctl restart ntp
-    ```
+  ```
+  systemctl restart ntp
+  ```
 
   d. Test the status of your NTP servers to make sure they are working.
 
