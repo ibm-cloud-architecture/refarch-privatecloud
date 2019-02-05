@@ -360,51 +360,50 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     shutdown -r now
     ```
 
-1.  Configure passwordless SSH from the master node to all other nodes   
+* Configure passwordless SSH from the master node to all other nodes   
     You should now have all of your hosts prepared, named properly, and containing the proper IP addresses. The next step is to configure passwordless SSH between the boot-master node and the other nodes. You first need to create a passwordless SSH key that can be used across the implementation:
 
-    1.  Login as to the boot node as root
-        ```
-        cd ~
-        ```
+  1.  Login as to the boot node as root
+    ```
+    cd ~
+    ```
 
-    2.  From root’s home directory execute:
-        ```
-        ssh-keygen -t rsa -P ''     # Upper case P and two single quotes for no password
-        ```
+  2.  From root’s home directory execute:
+    ```
+    ssh-keygen -t rsa -P ''     # Upper case P and two single quotes for no password
+    ```
 
-        Accept the default location of /root/.ssh/id\_rsa for the new key file
+    Accept the default location of /root/.ssh/id\_rsa for the new key file
 
-        Now, executing `ls ~/.ssh` should show three files: id_rsa, id_rsa.pub and known_hosts
+    Now, executing `ls ~/.ssh` should show three files: id_rsa, id_rsa.pub and known_hosts
 
-    3.  Copy the resulting id_rsa key file from the boot node to each node in the cluster
+  3.  Copy the resulting id_rsa key file from the boot node to each node in the cluster
 
-            `ssh-copy-id -i .ssh/id_rsa root@icp-master1`
+    `ssh-copy-id -i .ssh/id_rsa root@icp-master1`
 
-            `ssh-copy-id -i .ssh/id_rsa root@icp-master2`
+    `ssh-copy-id -i .ssh/id_rsa root@icp-master2`
 
-            `ssh-copy-id -i .ssh/id_rsa root@icp-master3`
+    `ssh-copy-id -i .ssh/id_rsa root@icp-master3`
 
-            ...
+    ...
 
-            `ssh-copy-id -i .ssh/id_rsa root@icp-worker3`
+    `ssh-copy-id -i .ssh/id_rsa root@icp-worker3`
 
-            You will be required to type the root password for each node during this process, but not thereafter.
+    You will be required to type the root password for each node during this process, but not thereafter.
 
-        3.  When this is complete you should be able to ssh from the boot node to each of the other nodes without having to provide a password. Test this now by executing the following for each node in the cluster:
+  4.  When this is complete you should be able to ssh from the boot node to each of the other nodes without having to provide a password. Test this now by executing the following for each node in the cluster:
 
+    `ssh root@icp-master1`
 
-            `ssh root@icp-master1`
+    `ssh root@icp-master2`
 
-            `ssh root@icp-master2`
+    `ssh root@icp-master3`
 
-            `ssh root@icp-master3`
+    ...
 
-            ...
+    `ssh root@icp-worker3`
 
-            `ssh root@icp-worker3`
-
-        Your virtual machines are now ready to install ICP and now is a good time to take a snapshot of each VM in the cluster. In the event something goes horribly wrong with the installation you can revert to this snapshot and try it again.  Snapshots slow down Virtual Machines by a factor of the number of shapshots that have been taken.  For this reason, it is not a good idea to leave a bunch of snapshots (or any, really) hanging around.  Once your installation is complete, you should consolidiate your disks to remove the snapshot.
+    Your virtual machines are now ready to install ICP and now is a good time to take a snapshot of each VM in the cluster. In the event something goes horribly wrong with the installation you can revert to this snapshot and try it again.  Snapshots slow down Virtual Machines by a factor of the number of shapshots that have been taken.  For this reason, it is not a good idea to leave a bunch of snapshots (or any, really) hanging around.  Once your installation is complete, you should consolidiate your disks to remove the snapshot.
 
 ## Install ICP
 
