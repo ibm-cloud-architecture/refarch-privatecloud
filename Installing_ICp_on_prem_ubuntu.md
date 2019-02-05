@@ -211,10 +211,10 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   f.  Setup the docker stable repository and update the local cache
 
-      ```
-      add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-      apt-get update
-      ```  
+    ```
+    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    apt-get update
+    ```  
 
   g.  Install docker   
 
