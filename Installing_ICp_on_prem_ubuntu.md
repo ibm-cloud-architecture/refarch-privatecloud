@@ -254,36 +254,37 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   i. (optional) If the default docker bridge address (172.17.0.1/24) conflicts with your local environment you may need to change it's default subnet such that it uses something that is not already routable in the environment (e.g. 172.18.0.1/24).
 
     To change the IP address of the docker bridge take the following steps:
+
     1.  Create the path /etc/docker/, if needed
 
       ```
       mkdir -p /etc/docker/
       ```
 
-      1. Create the file daemon.json in this directory with the following contents:
+    1. Create the file daemon.json in this directory with the following contents:
 
-        ```
-        {
-          "bip": "172.18.0.1/24"
-        }
-        ```
+      ```
+      {
+        "bip": "172.18.0.1/24"
+      }
+      ```
 
-        Change the CIDR to reflect a subnet and IP address that is not currently in use in your environment.
+      Change the CIDR to reflect a subnet and IP address that is not currently in use in your environment.
 
-      1. Restart Docker
+    1. Restart Docker
 
-        ```
-        systemctl daemon-reload
-        systemctl restart docker
-        ```
+      ```
+      systemctl daemon-reload
+      systemctl restart docker
+      ```
 
-      1.  Makes sure docker is running and pulling correctly from the internet
+    1.  Makes sure docker is running and pulling correctly from the internet
 
-        ```
-        docker run hello-world
-        ```
+      ```
+      docker run hello-world
+      ```
 
-        This should downloaded the latest hello-world docker image version and put some text on the screen indicating a working installation.
+      This should downloaded the latest hello-world docker image version and put some text on the screen indicating a working installation.
 
 ## Clone and Prepare Your Cluster VMs
 
