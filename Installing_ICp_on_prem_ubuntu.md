@@ -100,7 +100,6 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     ```
     Acquire::http::Proxy "http://proxy.mydomain.com:3128"
     Acquire::https::Proxy "http://proxy.mydomain.com:3128"
-
     ```
 
     Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
