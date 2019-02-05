@@ -118,7 +118,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     ![alt text](Installation/ntp.png "NTP")
 
   c.  After making configuration changes restart the NTP server with the command:
-	
+
     ```
     systemctl restart ntp
     ```
@@ -137,19 +137,19 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     If you do not have an NTP server and cannot create one easily, you can use somethink like the excellent script provided at https://gist.github.com/jaytaylor/60c8a4e22431c4271200cab68186deb7 which can be added to the server's root crontab to run every minute and it will function to keep servers in sync.  This should only be used, however, if a local ntp service is not available.
 
-5.  If the ufw firewall is enabled, disable it. ICP will install iptables.
-6.  Configure the Virtual Memory setting (required for ELK)  
-   1. Update the vm.max\_map\_count setting to 262144:
+5. If the ufw firewall is enabled, disable it. ICP will install iptables.
+6. Configure the Virtual Memory setting (required for ELK)  
+  a. Update the vm.max\_map\_count setting to 262144:
 
-     ```
-     sysctl -w vm.max_map_count=262144
-     ```
+    ```
+    sysctl -w vm.max_map_count=262144
+    ```
 
-   1. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
+  b. Make the changes permanent by adding the following line to the bottom of the /etc/sysctl.conf file:
 
-     ![alt text](Installation/sysctl.png "sysctl")
+    ![alt text](Installation/sysctl.png "sysctl")
 
-   1. To check the current value use the command:
+  c. To check the current value use the command:
 
     ```
     sysctl vm.max_map_count
@@ -173,19 +173,19 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 9.  Install docker
 
-  1. Update your ubuntu repositories
+  a. Update your ubuntu repositories
 
     ```
     apt-get update
     ```
 
-  1.  Install Linux image extra packages
+  b.  Install Linux image extra packages
 
     ```
     apt-get install -y linux-image-extra-$(uname -r) linux-image-extra-virtual
     ```
 
-  1.  Install additional needed packages   
+  c.  Install additional needed packages   
 
     ```
     apt-get install -y apt-transport-https ca-certificates curl software-properties-common
@@ -193,13 +193,13 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     **NOTE**: These packages may all exist depending on what packages were included when the operating system installed. If they already exist, you will just see output indicating they already exist. If you assume they exist, however, and do not do this step and they are not there, the installation will fail.
 
-  1.  Add Docker’s official GPG key
+  d. Add Docker’s official GPG key
 
     ```
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
     ```
 
-  1.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
+  e.  Verify that the key fingerprint is 9DC8 5822 9FC7 DD38 854A E2D8 8D81 803C 0EBF CD88
 
     ```
     apt-key fingerprint 0EBFCD88
@@ -207,20 +207,20 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     ![alt text](Installation/fingerprint.png "fingerprint")
 
-  1.  Setup the docker stable repository and update the local cache
+  f.  Setup the docker stable repository and update the local cache
 
       ```
       add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
       apt-get update
       ```  
 
-  1.  Install docker   
+  g.  Install docker   
 
     ```
     apt-get install -y docker-ce
     ```
 
-  1. In an air-gapped environment only, configure Docker to use the proxy server.
+  h. In an air-gapped environment only, configure Docker to use the proxy server.
 
     Docker must be able to reach the internet to be able to pull images from the IBM catalog and any other public repositories that are configured in the platform.  It is extremely important that the NO_PROXY section be correctly configured in the file below to prevent an installation failure caused by docker trying to use the proxy to hit the ICP vip interface.
 
@@ -249,7 +249,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     systemctl restart docker
     ```
 
-  1. (optional) If the default docker bridge address (172.17.0.1/24) conflicts with your local environment you may need to change it's default subnet such that it uses something that is not already routable in the environment (e.g. 172.18.0.1/24).
+  i. (optional) If the default docker bridge address (172.17.0.1/24) conflicts with your local environment you may need to change it's default subnet such that it uses something that is not already routable in the environment (e.g. 172.18.0.1/24).
 
     To change the IP address of the docker bridge take the following steps:
     1.  Create the path /etc/docker/, if needed
