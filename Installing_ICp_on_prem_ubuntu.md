@@ -288,32 +288,31 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
 ## Clone and Prepare Your Cluster VMs
 
-1.  Create VM templates and start other virtual machines.   
+* Create VM templates and start other virtual machines.   
 
-    Shutdown your VM   
-    `shutdown -h now`
+  Shutdown your VM: `shutdown -h now`
 
-    Clone your templates for each of the needed nodes in your cluster as specified below.  There is no need to create an actual "VMware template" from these existing VMs.  You can just clone them from an existing VM to a new VM. When doing this, you do not need to change the CPU or memory allocations from their defaults.
+  Clone your templates for each of the needed nodes in your cluster as specified below.  There is no need to create an actual "VMware template" from these existing VMs.  You can just clone them from an existing VM to a new VM. When doing this, you do not need to change the CPU or memory allocations from their defaults.
 
-      Note that you can create a minimal, non-HA environment by just using a single node for each below and VA is not required, but should be used if VA will be installed:
+  Note that you can create a minimal, non-HA environment by just using a single node for each below and VA is not required, but should be used if VA will be installed:
 
-      1.  master template -> icp-master1, icp-master2, icp-master3
+  1.  master template -> icp-master1, icp-master2, icp-master3
 
-      1.  master template -> icp-mgmt1, icp-mgmt2, icp-mgmt3
+  1.  master template -> icp-mgmt1, icp-mgmt2, icp-mgmt3
 
-      1.  master template -> icp-va1, icp-va2, icp-va3
+  1.  master template -> icp-va1, icp-va2, icp-va3
 
-      1.  worker template -> icp-proxy1, icp-proxy2, icp-proxy3
+  1.  worker template -> icp-proxy1, icp-proxy2, icp-proxy3
 
-      1.  worker template -> icp-worker1, icp-worker2, icp-worker3
+  1.  worker template -> icp-worker1, icp-worker2, icp-worker3
 
-      1.  worker template -> icp-boot
+  1.  worker template -> icp-boot
 
-    **IMPORTANT:** For HA, and to provide for workload persistent storage, you will also need an NFS node which does not need to be configured with any of the packages used by the above server (but will need the proxy information if being installed in an air-gapped environment).  If an enterprise NFS server already exists which can be used for this environment it can be used, otherwise, an additional NFS node will need to be created to support this environment.
+  **IMPORTANT:** For HA, and to provide for workload persistent storage, you will also need an NFS node which does not need to be configured with any of the packages used by the above server (but will need the proxy information if being installed in an air-gapped environment).  If an enterprise NFS server already exists which can be used for this environment it can be used, otherwise, an additional NFS node will need to be created to support this environment.
 
-    If creating a new NFS node, you can use the master template and change the CPU and Memory requirements to match the worker nodes.
+  If creating a new NFS node, you can use the master template and change the CPU and Memory requirements to match the worker nodes.
 
-1. Configure your newly cloned VMs and set their hostnames and static IP addresses.
+* Configure your newly cloned VMs and set their hostnames and static IP addresses.
 
   **Note:** The VMs can use DHCP assigned IP addresses, however, DHCP addresses are subject to change and if any addresses change your environment will break.  For a quick test environment, static IP's are not needed, however, for any kind of permanent environment, static IP addresses should be used.
 
