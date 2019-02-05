@@ -40,7 +40,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 * **HA/DR:** In this tutorial, we will be installing an HA instance of ICP, but HA depends on more than just software in most environments.<br><br>For more information on the high availability aspects of the infrastructure see Appendix B.
 
 ## Prepare VM Templates for the Various Node Types
-1. Install two Ubuntu 16.04 Server x86_64 virtual machines to use as your templates nodes. The first template will be used for all master, management, and vulnerability advisor nodes.  The second will be for all proxy and worker nodes.
+* Install two Ubuntu 16.04 Server x86_64 virtual machines to use as your templates nodes. The first template will be used for all master, management, and vulnerability advisor nodes.  The second will be for all proxy and worker nodes.
 
   **NOTE:** _You could use a single template rather than two, however, when cloning these templates to VMs you cannot change the size of the disk without significant pain.  Since different VMs need different disk sizes, you must either create two templates which contain the correct disk sizes, or provision all VMs with the master node disk size (500GB) and re-configigure the CPU and Memory requirements based on the node type when you deploy the VMs from these templates.  If disks are thin provisioned, there is no problem making all disks 500GB since they will not occupy space on the datastore which they do not need.  There is a risk, however, that you could over-provision your datastore to the point that the overall datastore disk runs out of space with no warning and all VMs on that datastore will start experiencing "out of space" errors even they should to have plenty of space available.  To reduce the possibility of causing this frustrating and sometimes difficult to troubelshoot problem, it is recommended to use two templates as we have specified here._
 
@@ -60,7 +60,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   Initially, configure the server for DHCP (if available) so that we can clone these VMs without getting IP address conflicts, we will assign static IP’s later.<br><br>If DHCP is not available assign the static IP of your boot/master server now.  See below for instructions for setting a static IP address on an ubuntu 16.04 server.
 
-2. Execute the following commands on both template VMs. This enables root login remotely via ssh
+* Execute the following commands on both template VMs. This enables root login remotely via ssh
 
   a. Set a password for the root user
 
@@ -74,7 +74,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   systemctl restart ssh
   ```
 
-3. For air-gapped environments only, you must set a proxy server to provide for internet access for installing needed packages including docker.  The easiest way to do this is to edit the /etc/profile file and add lines at the bottom such as:
+* For air-gapped environments only, you must set a proxy server to provide for internet access for installing needed packages including docker.  The easiest way to do this is to edit the /etc/profile file and add lines at the bottom such as:
 
   ```
   export http_proxy="http://myproxy.mydomain.com:3128"
@@ -105,7 +105,8 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
   ```
 
   Replace "mydomain.com" with your local domain.  There should be no need for a no_proxy entry since all ubuntu packages are pulled from the internet.
-4. Update NTP (Network Time Protocol) settings to make sure time stays in sync
+
+* Update NTP (Network Time Protocol) settings to make sure time stays in sync
 
   a. Get the latest apt updates and install ntp
 
@@ -138,8 +139,8 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     If you do not have an NTP server and cannot create one easily, you can use somethink like the excellent script provided at https://gist.github.com/jaytaylor/60c8a4e22431c4271200cab68186deb7 which can be added to the server's root crontab to run every minute and it will function to keep servers in sync.  This should only be used, however, if a local ntp service is not available.
 
-5. If the ufw firewall is enabled, disable it. ICP will install iptables.
-6. Configure the Virtual Memory setting (required for ELK)  
+* If the ufw firewall is enabled, disable it. ICP will install iptables.
+* Configure the Virtual Memory setting (required for ELK)  
   a. Update the vm.max\_map\_count setting to 262144:
 
     ```
@@ -158,7 +159,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     ![alt text](Installation/sysctl-2.png "sysctl-2")
 
-7. Install the NFS common packages
+* Install the NFS common packages
 
   ```
   apt-get install -y nfs-common
@@ -166,13 +167,13 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
   **NOTE:** If you will be using Ceph, gluster, or other such storage, it is a good idea to go ahead and install the needed packages here as well so that you will have access to those systems after installation.
 
-8. Install python
+* Install python
 
   ```
   apt-get install -y python-setuptools
   ```
 
-9.  Install docker
+* Install docker
 
   a. Update your ubuntu repositories
 
