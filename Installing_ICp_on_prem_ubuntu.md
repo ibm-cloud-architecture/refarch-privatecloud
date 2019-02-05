@@ -255,13 +255,13 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     To change the IP address of the docker bridge take the following steps:
 
-    1.  Create the path /etc/docker/, if needed
+    * Create the path /etc/docker/, if needed
 
       ```
       mkdir -p /etc/docker/
       ```
 
-    1. Create the file daemon.json in this directory with the following contents:
+    * Create the file daemon.json in this directory with the following contents:
 
       ```
       {
@@ -271,14 +271,14 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
       Change the CIDR to reflect a subnet and IP address that is not currently in use in your environment.
 
-    1. Restart Docker
+    * Restart Docker
 
       ```
       systemctl daemon-reload
       systemctl restart docker
       ```
 
-    1.  Makes sure docker is running and pulling correctly from the internet
+    * Makes sure docker is running and pulling correctly from the internet
 
       ```
       docker run hello-world
