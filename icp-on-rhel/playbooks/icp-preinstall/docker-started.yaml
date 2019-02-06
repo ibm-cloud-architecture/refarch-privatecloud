@@ -1,0 +1,32 @@
+---
+# Description:
+#   Make sure docker is started on the given hosts.
+#
+# INPUTS:
+#   vars:
+#     target_nodes - a regex string or group name that defines the hosts or
+#                    host group on which docker should be restarted.
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#
+# Root privilege is needed to start/stop docker.
+# The tasks where root is needed use the "become" option.
+#
+# Sample invocation:
+#   ansible-playbook docker-status.yaml --extra-vars "target_nodes=worker0*"
+#
+
+- hosts: "{{ target_nodes }}"
+
+  tasks:
+    - name: Make sure docker is started
+      service: 
+        name: docker
+        state: started
+      become: True
+
+...

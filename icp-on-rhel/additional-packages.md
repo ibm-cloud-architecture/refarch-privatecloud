@@ -51,5 +51,6 @@ This section lists some software that is needed at some time or another. These p
 |wget            | yum -y install wget   | wget is generally useful for getting various artifacts  |
 |nfs             | yum -y install nfs-utils   | Needed if you want to use NFS client or server   |
 |java   | yum -y install `<java_package>`  | Where `<java_package>` is dependent on JDK/JRE version.<br/>Java may be needed for keytool or other utilities.<br/>`boot` node only   |
+|PyYAML   | yum -y install PyYAML   | Needed for Terraform automation  |
 
 *NOTE:* java will be openjdk7 or openjdk8 for ppc and s390x, and will not provide a JIT. This might be perceived as a performance issue, and can be resolved by switching to the IBM JDK & JRE.

@@ -67,7 +67,7 @@ OPTIONS=layer2=1
 IPADDR=xxx.xxx.xxx.xxx
 # PREFIX=16 equivalent NETMASK=255.255.0.0
 PREFIX=16
-GATEWAY xxx.xxx.xxx.xxx
+GATEWAY=xxx.xxx.xxx.xxx
 
 # DNS servers
 # By default the DNS servers get copied to /etc/resolv.conf
@@ -176,7 +176,7 @@ This section describes the steps to add entries to the `/etc/hosts` file of each
 
 - For each VM in the cluster, edit `/etc/hosts` and add an entry for each VM in the cluster.
 
-In some circumstances you can edit `/etc/hosts` once on the boot-master and then `scp` the hosts file to the other members of the cluster. This expedient is only feasible if the all VMs in the cluster are freshly deployed VMs and they all have the same content in `/etc/hosts` when they are initially deployed, e.g., the default content.  
+In some circumstances you can edit `/etc/hosts` once on the `boot` node and then `scp` the hosts file to the other members of the cluster. This expedient is only feasible if the all VMs in the cluster are freshly deployed VMs and they all have the same content in `/etc/hosts` when they are initially deployed, e.g., the default content.  
 
 ## Check the file system sizing
 

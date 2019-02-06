@@ -130,7 +130,7 @@ You may want to include a `version` attribute in `config.yaml`.  If you do, be s
 
 Likewise, you may want to include a `backup_version` attribute value in the `config.yaml`.  Again, make sure the value of `backup_version` makes sense for the docker registry in use in that it matches the tag on the images that are intended to be the backup version.  Setting the `backup_version` is relevant when doing an upgrade to an existing deployment.
 
-*NOTE:* For "separation of concerns" reasons, we do not recommend included support for shared storage file systems as part of the ICP deployment.  ICP and a shared storage provider very likely have different life cycles and different resource and administrative concerns that are best kept separated. Hence, any shared storage provider configuration in the `config.yaml` can be ignored. For example all of the GlusterFS configuration in `config.yml` can be ignored when the GlusterFS servers are set up outside the ICP cluster.
+*NOTE:* For "separation of concerns" reasons, we do not recommend including support for shared storage file systems as part of the ICP deployment.  ICP and a shared storage provider very likely have different life cycles and different resource and administrative concerns that are best kept separated. Hence, any shared storage provider configuration in the `config.yaml` can be ignored. For example all of the GlusterFS configuration in `config.yml` can be ignored when the GlusterFS servers are set up outside the ICP cluster.
 
 ## Other things that you may need to check
 

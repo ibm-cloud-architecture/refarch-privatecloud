@@ -76,12 +76,6 @@ For example:
 docker run -it -e LICENSE=accept ibmcom/icp-inception-amd64:3.1.0-ee /bin/bash
 ```
 
-## Getting a shell inside the icp-inception container
-
-The command below will open a shell console in a container for the given docker image.  (You will need to use an appropriate image name for the local docker registry.)
-```
-> docker run -e LICENSE=accept --net=host --rm -it -v "$(pwd)":/installer/cluster --entrypoint=/bin/bash ibmcom/icp-inception:2.1.0.3-ee
-```
 ## Delete docker containers using an image with a given tag
 When you get a list of all containers (running and terminated) using `docker ps -a`, the first column is the container ID, which is the primary argument to `docker rm`, that removes a container.
 
