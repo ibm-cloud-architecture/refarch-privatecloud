@@ -1,0 +1,100 @@
+---
+#
+# Install docker and then start and enable it.
+#
+# NOTE: The docker install executable hit an error when running on CentOS.
+# This script installs docker directly from the CentOS docker RPM repository.
+#
+# On CentOS container-selinux needed to be installed.
+# On CentOS policycoreutils-python may not be installed depending on what
+# kind of image was used to install the OS.
+#
+# NOTE: Ubuntu uses overlay2 by default.  Centos and RHEL do not.  The storage driver
+# is explicitly included on the ExecStart line of the docker.service file for clarity.
+#
+# NOTE: The MountFlags=shared is also explicitly included in the docker.service file
+# for clarity.  It could be left out all together.
+#
+# INPUTS:
+#   vars:
+#     target_nodes - a regex string or group name that defines the hosts or
+#                    host group.
+#
+#     docker_build - The string defining which build of docker to install
+#                  e.g., docker-ce-17.12.1.ce-1.el7.centos.x86_64
+#
+#     You can define the vars on the ansible-playbook command line using --extra-vars.
+#     Or define vars in your hosts inventory or any of the other ways to define
+#     Ansible variables.
+#     The --inventory option can be used to provide a path to an inventory file
+#     on the ansible-playbook command line.
+#
+# Root privilege is needed to run this configuration script.
+# The tasks where root is needed use the "become" option.
+#
+# Sample invocation (all on one line):
+#   ansible-playbook install-docker-centos.yaml
+#          --extra-vars "target_nodes=worker0*
+#                        docker_build=docker-ce-17.12.1.ce-1.el7.centos.x86_64"
+#
+#   The above invocation assumes the ansible hosts file has nodes with
+#   names that start with worker0, e.g., worker01, worker02, ...
+#
+#
+- hosts: "{{ target_nodes }}"
+  tasks:
+  - name: "Configure CentOS yum repo for Docker"
+    shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+    args:
+      creates: /etc/yum.repos.d/docker-ce.repo
+    become: True
+
+  - name: "Install container-selinux"
+    package:
+      name: container-selinux
+      state: present
+    become: True
+
+  - name: "Install Docker"
+    package:
+      name: "{{ docker_build }}"
+      state: present
+    become: True
+
+  - name: "Configure the logging options"
+    lineinfile:
+      dest: /lib/systemd/system/docker.service
+      backrefs: True
+      regexp: '^(ExecStart=/usr/bin/dockerd(?!.*[ \t]--log-opt max-size=10m --log-opt max-file=10[ \t\n]).*)$'
+      line: '\1 --log-opt max-size=10m --log-opt max-file=10'
+      state: present
+    become: True
+
+  - name: "Use overlay2 storage driver"
+    lineinfile:
+      dest: /lib/systemd/system/docker.service
+      backrefs: True
+      regexp: '^(ExecStart=/usr/bin/dockerd(?!.*[ \t]--storage-driver=overlay2[ \t\n]).*)$'
+      line: '\1 --storage-driver=overlay2'
+      state: present
+    become: True
+
+  - name: "Set MountFlags=shared"
+    lineinfile:
+      dest: /lib/systemd/system/docker.service
+      line: MountFlags=shared
+      insertafter: StartLimitInterval=*
+      state: present
+    become: True
+
+  - name: "Do a systemd daemon-reload to reload of changes to docker service file"
+    systemd:
+      daemon-reload: yes
+    become: True
+
+  - name: "Start and enable Docker service"
+    service:
+      name: docker
+      state: started
+      enabled: yes
+    become: True

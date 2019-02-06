@@ -1,0 +1,18 @@
+---
+# 
+# Install nfs-utils  on all nodes
+#
+# Sample invocation: 
+#   ansible-playbook install-nfs-utils.yaml --extra-vars "target_nodes=icp"
+#
+#   The above assumes a group named icp is defined in /etc/ansible/hosts.
+#
+
+- hosts: "{{ target_nodes }}"
+  tasks:
+    - name: "Install nfs-utils"
+      package:
+        name: nfs-utils
+        state: present
+      become: True
+

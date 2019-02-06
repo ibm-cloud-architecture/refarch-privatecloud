@@ -10,6 +10,49 @@ The NFS provisioner plugin for dynamic storage allocation is not as mature as ot
 
 [RHEL Starting and Stopping the NFS server](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/storage_administration_guide/s1-nfs-start)
 
+An NFS server can share any existing file system.  In a production scenario you would want the NFS server to be using a dedicated file system and very likely dedicated disks.  For sandbox scenarios the NFS server can export a directory on any existing file system.
+
+## Install and configure NFS Server
+
+- The NFS server is installed with `nfs-utils`.
+
+```
+yum install -y nfs-utils
+```
+
+*NOTE:* The following assumes a a directory created in `/` named `storage`.
+
+- Edit the `/etc/exports` file to export the `/storage` directory.  For simple scenarios `/storage` may not be a dedicated file system.  
+
+Add a line such as the following:
+- Ising a wildcard domain name
+```
+/storage *.my.subnet.local(rw,sync,no_root_squash)
+```
+- Using a network CIDR:
+```
+/storage 172.16.52.0/24(rw,sync,no_root_squash)
+```
+
+The man page on `exports` provides all the options and ways that a file system can be exported to some collection of clients.  Wild card characters `*` and `?` may be used to define a collection of hosts.  In practice, the host name pattern would be such that only hosts in the ICP cluster could access the share.
+
+- Start and enable `nfs-server`
+```
+systemctl enable nfs-server --now
+```
+
+## NFS client configuration
+
+- Install `nfs-utils` on all other machines in the cluster.  This will provide all machines what they need to mount the shared volume.
+
+TBD - need a description of `/etc/fstab` entries; mount command.
+
+If the `ansible` `mount` module is used to configure the NFS clients, everything gets configured including the immediate mount and the proper entry in `/etc/fstab`.  See the `mount-nfs-share.yaml` playbook in `playbooks/nfs`.
+
+# Using a dedicated disk and file system
+
+The remaining sections of this document describe how to configure a raw disk to be a file system for NFS export.  A production NFS server would used dedicated disks for the file systems that it exports.
+
 ## Adding and formatting a disk
 
 Many articles can be found with an Internet search on the topic of logical volume management.  A particularly good one is [How to Manage and Create LVM Using vgcreate, lvcreate and lvextend Commands – Part 11](https://www.tecmint.com/manage-and-create-lvm-parition-using-vgcreate-lvcreate-and-lvextend/)

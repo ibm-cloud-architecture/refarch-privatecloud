@@ -1,0 +1,31 @@
+---
+# Description:
+#   Playbook to mount an nfs shared file system on the target nodes.
+#
+# Assumptions:
+#   1. Shared file system provider is NFS. The mount is wired to -t nfs
+#
+# INPUTS:
+#   target_nodes   - a regular expression that matches the target node names
+#                    or the name of a group in the host inventory.
+#   share_point    - Host name or IP address and share point path in the form:
+#                      <ip_address>:<share_point>
+#                      e.g., nfs-server:/storage
+#   mount_point    - Local mount point, e.g., /mnt/storage
+#
+# Sample invocation:
+#   ansible-playbook mount-nfs-share.yml --extra-vars "target_nodes=icp share_point=nfs-server:/storage mount_point=/mnt/storage"
+#
+
+- hosts: "{{ target_nodes }}"
+  tasks:
+    # NOTE: mount creates the mount point if not present
+    - name: Mount the NFS shared storage
+      mount:
+        src: "{{ share_point }}"
+        path: "{{ mount_point }}"
+        state: mounted
+        fstype: nfs4
+      become: True
+
+...

@@ -64,3 +64,15 @@ ftp://<userid>:<password>@<repo_host>:/redhat/rhs6/server/7/7Server/x86_64/optio
 If you inspect the yum repository, you will notice that the `<uuid1>-updateinfo.xml.gz` and `<uuid2>-primary.xml.gz` files have a new UUID.
 
 A `yum clean all` will likely clean up such errors.
+
+# Use you and subscription manager commands
+
+To see all yum repos (enabled and disabled):
+```
+yum repolist all
+```
+
+To enable a disabled repo:
+```
+subscription-manager repo 
+```

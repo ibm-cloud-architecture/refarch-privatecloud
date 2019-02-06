@@ -1,0 +1,37 @@
+---
+# Description:
+#   Playbook to unmount /var/lib/registry and /var/lib/icp/audit on the master nodes.
+#   In an HA topology there are multiple master nodes and the private registry and the 
+#   directory used for audit logs needs to be mounted on a shared file system so that
+#   each of the master nodes can access these shared files.
+#
+#   Unfortunately, the uninstall scripts are not prepared to handle the unmounting
+#   of these directories. 
+#
+# INPUTS:
+#   master_nodes   - a regular expression that matches the master node names
+#                    or the name of a group in the host inventory that is the
+#                    master node group. 
+#
+# Sample invocation:
+#   ansible-playbook unmount-master-shared-file-systems.yml --extra-vars "master_nodes=master0*"
+# or using the vars defined in icp-cluster-vars.yml:
+#   ansible-playbook unmount-master-shared-file-systems.yml --extra-vars @icp-cluster-vars.yml
+#
+
+- hosts: "{{ master_nodes }}"
+
+  tasks:
+    - name: Unmount the private registry directory
+      mount: 
+        path: /var/lib/registry
+        state: unmounted
+      become: True
+
+    - name: Unmount audit log directory
+      mount: 
+        path: /var/lib/icp/audit
+        state: unmounted
+      become: True
+
+...

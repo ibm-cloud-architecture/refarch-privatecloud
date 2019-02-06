@@ -1,0 +1,84 @@
+---
+# Description:
+#   Playbook to mount /var/lib/registry on the master nodes
+#   Mounting /var/lib/registry is done either before or after an ICP install 
+#   for an HA topology with 3 or more master nodes.
+#
+#   On the master nodes /var/lib/registry is mounted on shared storage.
+#
+# NOTE: The Ansible mount module doesn't support backup-volfile-servers option.
+#       Hence, the mount command needs to be used.
+#
+# Assumptions:
+#   1. Shared file system provider is GlusterFS. The mount is wired with -t glusterfs
+# 
+# INPUTS:
+#   master_nodes   - a regular expression that matches the master node names
+#                    or the name of a group in the host inventory that is the
+#                    master node group. 
+#
+#   registry_backup_volfile_servers - A colon separated list of host names or IP addresses 
+#     for the GlusterFS servers excluding the IP address of the server that is serving the 
+#     volume to be mounted.
+#
+#   registry_mount_point   - Host name or IP address and volume mount point in the form:
+#                              <ip_address>:<volume_name>
+#                            for /var/lib/registry
+#
+#   audit_backup_volfile_servers - A colon separated list of host names or IP addresses 
+#     for the GlusterFS servers excluding the IP address of the server that is serving the 
+#     volume to be mounted.
+#
+#   audit_mount_point      - Host name or IP address and volume mount point in the form:
+#                              <ip_address>:<volume_name>
+#                            for /var/lib/cfc/audit
+#
+# If you are using GlusterFS, the mount point information for a shared volume is available
+# using:
+#   heketi-cli volume info
+# To list all volumes use:
+#   heketi-cli volume list 
+#
+# Edit the icp-cluster-vars.yml file that should be included with this script to define
+# the input variables. (It is too much to type on the command line.)
+#
+# Sample invocation:
+#   ansible-playbook mount-master-shared-file-systems.yml --extra-vars @icp-cluster-vars.yml
+#
+
+- hosts: "{{ master_nodes }}"
+  tasks:
+    - name: Make the /var/lib/registry directory for the mount point
+      file: path=/var/lib/registry state=directory
+      become: True
+
+      # mountpoint returns 0 if the directory path is a mount point.
+      # mountpoint returns 1 if the directory path is not a mount point.
+    - name: Check to see if private registry already mounted.
+      command: mountpoint -q /var/lib/registry
+      register: registry_stat
+      failed_when: false
+      changed_when: false
+
+      # Ansible mount module doesn't support the backup-volfile-servers mount option.
+    - name: Mount the GlusterFS shared storage for the registry
+      shell: mount -t glusterfs -o backup-volfile-servers={{ registry_backup_volfile_servers }}  {{ registry_mount_point }} /var/lib/registry
+      when: registry_stat.rc == 1
+      become: True
+
+    - name: Make the /var/lib/icp/audit directory for the mount point
+      file: path=/var/lib/icp/audit state=directory
+      become: True
+
+    - name: Check to see if audit log directory already mounted.
+      command: mountpoint -q /var/lib/icp/audit
+      register: auditdir_stat 
+      failed_when: false
+      changed_when: false
+
+    - name: Mount the GlusterFS shared storage for the audit log directory
+      shell: mount -t glusterfs -o backup-volfile-servers={{ audit_backup_volfile_servers }}  {{ audit_mount_point }} /var/lib/icp/audit
+      when: auditdir_stat.rc == 1
+      become: True
+
+...

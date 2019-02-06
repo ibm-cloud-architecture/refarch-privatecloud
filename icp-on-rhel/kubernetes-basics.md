@@ -69,6 +69,8 @@ kubectl get pods --namesapce=kube-system
 
 *NOTE:* If you want to see the terminated pods, i.e., those that have completed or errored out, then use the `-a (--show-all)` option with the `get` command.
 
+Shorthand for `--namespace` is `-n`, e.g., `-n kube-system`
+
 ### Get info about a pod
 ```
 kubectl describe pod <pod_name>
