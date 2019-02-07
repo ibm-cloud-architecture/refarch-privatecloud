@@ -38,7 +38,7 @@ This cluster is listed as Medium Resilience with 3 master nodes.  Consider not c
 |	Boot	| 1	| 2	| 8	| 250 |
 |	Master | 3 or 5 | 16 | 32	| 500 |
 |	Management	| 3	| 8	| 32 |	500 |
-|	Proxy |	3	| 4	| 16	| 250 |
+|	Proxy |	3	| 4	| 16	| 400 |
 |	VA |	5	 | 6	| 24	| 500 |
 |	Worker | 7+	(Max:150)| 8	| 32	|400 |
 
