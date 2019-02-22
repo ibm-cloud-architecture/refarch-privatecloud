@@ -339,6 +339,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   ```
 
 ## Configure your new cluster
+
 Setting up your cluser for use
 
 * Create a DNS entry for our main OpenShift UI.
@@ -355,7 +356,7 @@ Setting up your cluser for use
 
   If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
 
-1. Add a new htpasswd user
+  1. Add a new htpasswd user
   ```
   [root@ansible openshift-ansible]# ssh master1
 
@@ -364,18 +365,18 @@ Setting up your cluser for use
   [root@master1 master]# htpasswd -c ./users.htpasswd sysadmin
   ```
 
-2. Copy the htpasswd file to the other master nodes
+  2. Copy the htpasswd file to the other master nodes
   ```
   [root@master1 master]# scp users.htpasswd master2:/etc/origin/master/
 
   [root@master1 master]# scp users.htpasswd master3:/etc/origin/master/
   ```
 
-3. With a browser access your new cluster
+  3. With a browser access your new cluster
 
   https://openshift.mydomain.local
 
-4. Login with the credentials you just created
+  4. Login with the credentials you just created
 
 * Configure a wildcard domain in bind (DNS)
 
@@ -383,7 +384,7 @@ Setting up your cluser for use
 
   You will also need to configure your second load balancer (infra-lb) to load balance traffic to your infra nodes.
 
-1.  Configure the second load balancer to load balance traffic to your infra nodes.
+ 1.  Configure the second load balancer to load balance traffic to your infra nodes.
 
   When you configured two nodes in the [lb] stanza, it created two load balancer nodes for you and installed haproxy on those nodes.  Both nodes were configured as load balancers with an ingress IP address of the node's IP and load balancing across each of the three master nodes defined in the [master] stanza.
 
