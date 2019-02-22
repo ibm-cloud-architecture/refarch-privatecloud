@@ -355,6 +355,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
 
   1. Add a new htpasswd user
+  
     ```
     [root@ansible openshift-ansible]# ssh master1
 
@@ -364,6 +365,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
     ```
 
   1. Copy the htpasswd file to the other master nodes
+
     ```
     [root@master1 master]# scp users.htpasswd master2:/etc/origin/master/
 
