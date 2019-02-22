@@ -3,19 +3,15 @@
   * HA architecture
   * GlusterFS for workload storage
   * haproxy load balancer
-  * htpasswd authentication
+  * htpasswd or LDAP authentication
 
 **Caveat:** These notes are based on steps the author took to get an instance of Red Hat OpenShift installed and running such that workloads could be provisioned.  This document should not be considered a replacement for product documentation or any kind of best practice other than as is the experience of the author.
 
 ## Important Notes
 
-1) Nodes here are provisioned such as to enable a significant implementation.  The nature of the cloud is that physical machines are typically over-provisioned by a factor of anywhere from 4:1 to 10:1.  A VM which has been allocated 16 vCPUs where the underlying physical CPU is 3GHz will be allowed a maximum of 48GHz of CPU cycles, but will only occupy as many cycles as needed to satisfy the demand.It will not use all of that unless the VM is running at 100% utilization (which is rare).
+1) Nodes here are provisioned such as to enable a significant implementation.  The nature of the cloud is that physical machines are typically over-provisioned by a factor of anywhere from 4:1 to 10:1.  A VM which has been allocated 16 vCPUs where the underlying physical CPU is 3GHz will be allowed a maximum of 48GHz of CPU cycles, but will only occupy as many cycles as needed to satisfy the demand.It will not use all of that unless the VM is running at 100% utilization (which is rare).<br><br>The same is the case for memory.  The author would rather provision too much resource and have it under-utilized (allowing other VMs to use cycles this one is not using), than to provision too few resources and have stability issues with the cluster.
 
-The same is the case for memory.  The author would rather provision too much resource and have it under-utilized (allowing other VMs to use cycles this one is not using), than to provision too few resources and have stability issues with the cluster.
-
-2) Storage (other than etcd nodes) should be thin provisioned for the same reasons.  Thin provisioned disks only occupy as much space as has been allocated in the operating system allowing the system adminitrator to over-provision physical storage by as much as 4:1.  It is not recommended to over-provision storage by more than 4:1.
-
-Nodes which will host etcd (either the master nodes or etcd nodes, depending on the architectural decisions) should be thick provisioned and be run only on disks with high IOPS.  etcd is extremely bandwidth intensive and using slow disks to back these nodes is certain to result in performance issues.
+2) Storage (other than etcd nodes) should be thin provisioned for the same reasons.  Thin provisioned disks only occupy as much space as has been allocated in the operating system allowing the system adminitrator to over-provision physical storage by as much as 4:1.  It is not recommended to over-provision storage by more than 4:1.<br><br.Nodes which will host etcd (either the master nodes or etcd nodes, depending on the architectural decisions) should be thick provisioned and be run only on disks with high IOPS.  etcd is extremely bandwidth intensive and using slow disks to back these nodes is certain to result in performance issues.
 
 3)  In this scenario, the haproxy node (lb) is installed for convenience and is a single point of failure for the platform. If using an external load balancer (e.g. F5, IBM Datapower) is being used, this node is not necessary. For production deployments, using a highly available external load balancer is highly recommended.
 
@@ -23,9 +19,7 @@ Nodes which will host etcd (either the master nodes or etcd nodes, depending on 
 
 5) Application nodes (node[1-3] below) should be run with a utilization low enough such that the cluster can absorb the loss of a physical node.  In this case, we are running three nodes.  Once the aggregate utilization on these nodes crossed the 65% threshold we would consider adding an additional application node or increasing the size of the existing node so that in the event of a failure of one node, the workload running on that node can be re-disbursed to the remaining nodes.
 
-6) All nodes noted below should be treated as "appliances". Meaning, users should be locked down to only `root` and a login user (e.g. `sysadmin`) and should not run any other applications such as virus scanners, backup agents, performance agents, etc.
-
-  Any such additional applications could occupy significant CPU, Memory, and Storage resources and can have a significant negative impact on the platform.  Sizing for OpenShift clusters typically does *not* account for the overhead of running such applications on the node.
+6) All nodes noted below should be treated as "appliances". Meaning, users should be locked down to only `root` and a login user (e.g. `sysadmin`) and should not run any other applications such as virus scanners, backup agents, performance agents, etc.<br><br>Any such additional applications could occupy significant CPU, Memory, and Storage resources and can have a significant negative impact on the platform.  Sizing for OpenShift clusters typically does *not* account for the overhead of running such applications on the node.
 
 7) Installing OpenShift Enterprise (OSE) requires a valid subscription from Red Hat.  There is a free opensource version called `origin`, however, it is not recommended for production use and so this document will discuss installation of OSE.
 
