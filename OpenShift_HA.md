@@ -350,7 +350,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   openshift	IN	CNAME	master-lb
   ```
 
-1. Adding users via htpasswd
+2. Adding users via htpasswd
 
   If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
 
@@ -363,20 +363,20 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   [root@master1 master]# htpasswd -c ./users.htpasswd sysadmin
   ```
 
-  1. Copy the htpasswd file to the other master nodes
+  2. Copy the htpasswd file to the other master nodes
   ```
   [root@master1 master]# scp users.htpasswd master2:/etc/origin/master/
 
   [root@master1 master]# scp users.htpasswd master3:/etc/origin/master/
   ```
 
-  1. With a browser access your new cluster
+  3. With a browser access your new cluster
 
-    https://openshift.mydomain.local
+  https://openshift.mydomain.local
 
-  1. Login with the credentials you just created
+  4. Login with the credentials you just created
 
-1. Configure a wildcard domain in bind (DNS)
+3. Configure a wildcard domain in bind (DNS)
 
   Before you can access your cluster console or apps deployed to your subdomain, you must configure your DNS to forward all requests to for in the configured subdomain (apps.mydomain.local in this case) to your infra nodes.
 
@@ -420,7 +420,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   systemctl restart haproxy
   ```
 
-  1. Configure a wildcard domain record in your DNS to point to your infra load balancer
+  2. Configure a wildcard domain record in your DNS to point to your infra load balancer
 
   When configured correctly all queries for any hostname in the apps.mydomain.local domain should return the IP address of your infra-lb node.
 
