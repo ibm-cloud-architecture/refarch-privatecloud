@@ -25,7 +25,7 @@ Nodes which will host etcd (either the master nodes or etcd nodes, depending on 
 
 6) All nodes noted below should be treated as "appliances". Meaning, users should be locked down to only `root` and a login user (e.g. `sysadmin`) and should not run any other applications such as virus scanners, backup agents, performance agents, etc.
 
-Any such additional applications could occupy significant CPU, Memory, and Storage resources and can have a significant negative impact on the platform.  Sizing for OpenShift clusters typically does *not* account for the overhead of running such applications on the node.
+  Any such additional applications could occupy significant CPU, Memory, and Storage resources and can have a significant negative impact on the platform.  Sizing for OpenShift clusters typically does *not* account for the overhead of running such applications on the node.
 
 7) Installing OpenShift Enterprise (OSE) requires a valid subscription from Red Hat.  There is a free opensource version called `origin`, however, it is not recommended for production use and so this document will discuss installation of OSE.
 
