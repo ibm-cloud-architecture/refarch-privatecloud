@@ -340,8 +340,6 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
 ## Configure your new cluster
 
-Setting up your cluser for use
-
 ### Create a DNS entry for our main OpenShift UI.
 
 In our inventory file, we created an openshift_master_cluster_public_hostname entry and set its value to openshift.mydomain.local. Before we can login to the UI using this hostname we need a alias configured in the DNS which aliases openshift.mydomain.local to your first load balancer (master-lb.mydomain.local).
@@ -371,12 +369,6 @@ If you configured LDAP authentication in your inventory file, you should be able
 
   [root@master1 master]# scp users.htpasswd master3:/etc/origin/master/
   ```
-
-3. With a browser access your new cluster
-
-  https://openshift.mydomain.local
-
-4. Login with the credentials you just created
 
 ### Configure a wildcard domain in bind (DNS)
 
@@ -447,3 +439,49 @@ You will also need to configure your second load balancer (infra-lb) to load bal
   Login to your OpenShift UI and at the top of the page you should see "OpenShift Container Platform" and right next to it "Service Catalog" with a down arrow.  Click the arrow and change your perspective to "Cluster Console".
 
   If all of your configuration efforts have been successful, you should see the cluster console.  If anything went wrong, your page will fail to load with a not found error; check your load balancer configuration and DNS configuration for any mistakes.
+
+### Setting up your cluster for use
+
+  * Login for the first time
+
+  Before you can do anything else, you must login the first time with the `oc` command and assign a user the cluster-admin role.  ssh to one of your master nodes and execute the following command:
+  ```
+  oc login -u system:admin
+  ```
+
+  If it worked correctly you should be able to execute commands
+  ```
+  [root@master1 ~]# oc get pods
+  NAME                       READY     STATUS    RESTARTS   AGE
+  docker-registry-1-4h574    1/1       Running   0          2h
+  registry-console-1-p7q4f   1/1       Running   0          2h
+  router-1-8p9xg             1/1       Running   0          2h
+  router-1-fzkl4             1/1       Running   0          2h
+  router-1-r8pb5             1/1       Running   0          2h
+
+  ```
+
+  * Create a cluster administrator user
+
+  If you configured an LDAP identity provider in your inventory file you will already have users available to configure and those user should be able to successfully login.
+
+  If you used the htpasswd identity provider and have not already done so, see above for instructions on creating a new htpasswd user.
+
+  To login to the web UI, point your browser to the hostname from the value you specified in your inventory for **openshift_master_cluster_public_hostname**, in this case: https://openshift.mydomain.local.
+
+  If you chose a port other than 443, you will have to add the port number as well (e.g. https://openshift.mydomain.com:8443).
+
+  Login with the credentials you just created and look around.  This is the user interface for a normal user.
+
+  When you are done, log back out of the web UI.
+
+  * Assign a user to be the cluster-admin
+
+  From the command line on a master node, execute the following command:
+  ```
+  [root@master1 ~]# oc adm policy add-cluster-role-to-user cluster-admin vhavard
+  cluster role "cluster-admin" added: "vhavard"
+  ```
+  Where `vhavard` is the userid of a valid user from LDAP or htpasswd.
+
+  Now login to the web UI with your cluster admin user and see the difference from a normal user.
