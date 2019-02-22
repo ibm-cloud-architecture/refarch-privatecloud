@@ -36,7 +36,8 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 |    Node   |  Host   | Storage      | vCPU  | Memory |
 |:--------- |:-------:|:------------ |:----: |:------:|
 | ansible   | host1   | 100,100      |   4   |    8   |
-| lb        | host1   | 100,100      |   4   |    8   |
+| lb-master | host1   | 100          |   4   |    8   |
+| lb-infra  | host2   | 100          |   4   |    8   |
 | master1   | host1   | 100,100      |  16   |   64   |
 | master2   | host2   | 100,100      |  16   |   64   |
 | master3   | host3   | 100,100      |  16   |   64   |
@@ -53,7 +54,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
   * _Node_ - Name of the host
     * **ansible** - This is the installer node. Analogous to the ICP boot node.
-    * **lb** - This is the haproxy node, used as a load balancer in HA environments.
+    * **lb** - This is the haproxy node, used as a load balancer in HA environments.  One to be used for the master nodes and one for infra nodes.
     * **master[1-3]** - Manages the cluster.  In this instance, we will configure etcd to run on the master node.  The user may elect to have separate etcd nodes.  If using separate etcd nodes, add three additional nodes provisioned like the master nodes and name them etcd[1-3].
     * **node[1-3]** - Where workloads run.  This is analogous to the ICP worker node.
     * **storage[1-3]** - Nodes to host GluserFS which is installed along with the cluster.
@@ -98,7 +99,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub lb.mydomain.local
 
 1. Install Red Hat Subscriptions
   ```
-  subscription-manager repos --disable-"\*"  # Remove existing Subscriptions
+  subscription-manager repos --disable="*"  # Remove existing Subscriptions
   subscription-manager register --username=<RedHat-UserID> --password=<RedHat-Password> # Register the node with Red Hat
   subscription-manager refresh
   subscription-manager attach --pool=<poolID>  # Pool with entitlement to RHOS
@@ -124,6 +125,7 @@ yum install -y openshift-ansible
 systemctl reboot
 ```
 
+  _**Note:** Load balancer nodes do not need docker so the rest of this section need not be done on lb nodes._
 1. Install docker
 ```
 yum install -y docker-1.13.1
@@ -235,6 +237,12 @@ tmpfs                          799M     0  799M   0% /run/user/1000
   # To add users, use the command htpasswd -c <filename> <username> and provide a password
   openshift_master_htpasswd_file=/etc/origin/master/users.htpasswd
 
+  # This section defines authentication via LDAP
+  # You can only have one identity provider provisioned at a time
+  # If you decide to use LDAP authorization you must comment out the htpasswd bit above
+  # LDAP auth
+  # openshift_master_identity_providers=[{'name': 'OpenLDAP', 'challenge': 'true', 'login': 'true', 'kind': 'LDAPPasswordIdentityProvider', 'attributes': {'id': ['cn'], 'email': ['Email'], 'name': ['displayName'], 'preferredUsername': ['cn']}, 'bindDN': 'cn=readonly,ou=readonly,dc=stt,dc=local', 'bindPassword': 'Passw0rd!', 'ca': '', 'insecure': 'true', 'url': 'ldap://10.10.0.1:389/ou=users,dc=mydomain,dc=local?cn'}]
+
   openshift_master_cluster_method=native
   openshift_master_cluster_hostname=lb.mydomain.local
   openshift_master_cluster_public_hostname=openshift.mydomain.local
@@ -273,7 +281,8 @@ tmpfs                          799M     0  799M   0% /run/user/1000
   master3.mydomain.local
 
   [lb]
-  lb.mydomain.local
+  lb-master.mydomain.local
+  lb-infra.mydomain.com
 
   # The value in the square brackets should indicate the raw disk to use for GlusterFS bricks.
   # These shoudld be raw disks and have no partitions defined.  If you have multiple
@@ -317,25 +326,123 @@ If the failure message indicates an issue that can be easily remediated (a misco
 
 If the error message indicates a 503 error, success might be achieved by running just the failed playbook as a stand-alone deployment, and after success, re-launch the deploy_cluster playbook and continue doing so as long as you get further along the process and until ultimate success.
 
+```
+INSTALLER STATUS *******************************************************************************************************************************************
+Initialization              : Complete (0:01:10)
+Health Check                : Complete (0:00:14)
+Node Bootstrap Preparation  : Complete (0:06:40)
+etcd Install                : Complete (0:02:04)
+Load Balancer Install       : Complete (0:00:53)
+Master Install              : Complete (0:06:37)
+Master Additional Install   : Complete (0:04:43)
+Node Join                   : Complete (0:01:44)
+GlusterFS Install           : In Progress (0:02:02)
+	This phase can be restarted by running: playbooks/openshift-glusterfs/new_install.yml
+Thursday 21 February 2019  11:18:14 -0600 (0:00:05.127)       0:26:07.595 *****
+===============================================================================
+```
+
 ## Configure your new cluster
 
-1. Add a new user
+1. Create a DNS entry for our main OpenShift UI.
+
+  In our inventory file, we created an openshift_master_cluster_public_hostname entry and set its value to openshift.mydomain.local. Before we can login to the UI using this hostname we need a alias configured in the DNS which aliases openshift.mydomain.local to your first load balancer (master-lb.mydomain.local).
+
+  In bind9, that entry would look something like this:
   ```
-  [root@ansible openshift-ansible]# ssh master1
-
-  [root@master1 ~]# cd /etc/origin/master
-
-  [root@master1 master]# htpasswd -c ./users.htpasswd sysadmin  # set a password
-  ```
-
-1. Copy the htpasswd file to the other master nodes
-  ```
-  [root@master1 master]# scp users.htpasswd master2:/etc/origin/master/
-
-  [root@master1 master]# scp users.htpasswd master3:/etc/origin/master/
+  openshift	IN	CNAME	master-lb
   ```
 
-1. With a browser access your new cluster
-  https://openshift.mydomain.local
+1. Adding users via htpasswd
 
-1. Login with the credentials you just created
+  If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
+
+  1. Add a new htpasswd user
+    ```
+    [root@ansible openshift-ansible]# ssh master1
+
+    [root@master1 ~]# cd /etc/origin/master
+
+    [root@master1 master]# htpasswd -c ./users.htpasswd sysadmin  # set a password
+    ```
+
+  1. Copy the htpasswd file to the other master nodes
+    ```
+    [root@master1 master]# scp users.htpasswd master2:/etc/origin/master/
+
+    [root@master1 master]# scp users.htpasswd master3:/etc/origin/master/
+    ```
+
+  1. With a browser access your new cluster
+
+    https://openshift.mydomain.local
+
+  1. Login with the credentials you just created
+
+1. Configure a wildcard domain in bind (DNS)
+
+  Before you can access your cluster console or apps deployed to your subdomain, you must configure your DNS to forward all requests to for in the configured subdomain (apps.mydomain.local in this case) to your infra nodes.
+
+  You will also need to configure your second load balancer (infra-lb) to load balance traffic to your infra nodes.
+
+  1.  Configure the second load balancer to load balance traffic to your infra nodes.
+
+    When you configured two nodes in the [lb] stanza, it created two load balancer nodes for you and installed haproxy on those nodes.  Both nodes were configured as load balancers with an ingress IP address of the node's IP and load balancing across each of the three master nodes defined in the [master] stanza.
+
+    We want the first load balancer (master-lb) to remain as it is because that is how we will access the OpenShift UI.
+
+    The second load balancer (infra-lb), however, will need to be reconfigured to load balance traffic aross your infra nodes.
+
+    ssh to your infra-lb node and edit the file /etc/haproxy/haproxy.cfg.
+
+    You should find a section at the bottom that looks something like this:
+    ```
+    backend atomic-openshift-api
+      balance source
+      mode tcp
+      server      master0 10.10.0.1:443 check
+      server      master1 10.10.0.2:443 check
+      server      master2 10.10.0.3:443 check
+    ```
+
+    Change the server lines to point to your infra nodes instead.  The result should look something like this:
+
+    ```
+    backend atomic-openshift-api
+      balance source
+      mode tcp
+      server      infra0 10.10.0.4:443 check
+      server      infra1 10.10.0.5:443 check
+      server      infra2 10.10.0.6:443 check
+    ```
+
+    Save your file and restart your haproxy service
+
+    ```
+    systemctl restart haproxy
+    ```
+
+  1. Configure a wildcard domain record in your DNS to point to your infra load balancer
+
+  When configured correctly all queries for any hostname in the apps.mydomain.local domain should return the IP address of your infra-lb node.
+
+  In bind9, the entry should look something like this:
+  ```
+  *.apps.mydomain.local.		IN	A	10.10.0.7
+  ```
+
+  Where 10.10.0.7 is the IP address of the infra-lb node.
+
+  Update the serial number of your db file and restart bind9 for your changes to take affect.
+
+  Test your updates by executing something like:
+
+  ```
+  nslookup whatever.apps.mydomain.local
+  ```
+
+  Querying any host in the apps.mydomain.local domain should return the value of your A record above: 10.10.0.7 in this case.
+
+  Login to your OpenShift UI and at the top of the page you should see "OpenShift Container Platform" and right next to it "Service Catalog" with a down arrow.  Click the arrow and change your perspective to "Cluster Console".
+
+  If all of your configuration efforts have been successful, you should see the cluster console.  If anything went wrong, your page will fail to load with a not found error; check your load balancer configuration and DNS configuration for any mistakes.
