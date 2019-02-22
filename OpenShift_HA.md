@@ -68,28 +68,28 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 1. Install all nodes with Red Hat Enterprise Linux version 7.5 or later with only the Minimal installation packages. Only install the operating system on the first allocated disk (e.g. /dev/sda, /dev/vda, etc.), the other disk[s] will be allocated later.  Do not put a partition on any disk other than the disk where the operating system will be installed (the boot disk).
 
 1. Configure passwordless SSH between the ansible (installer) node and all other nodes.
-```
-cd ~
-ssh-keygen -t rsa -P ''  # That is two single quotes
-```
-Accept all of the default values
+  ```
+  cd ~
+  ssh-keygen -t rsa -P ''  # That is two single quotes
+  ```
+  Accept all of the default values
 
 1. Copy the root id_rsa.pub key to all other nodes
-```
-ssh-copy-id -i ~/.ssh/id_rsa.pub master1.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub master2.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub master3.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub node1.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub node2.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub node3.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub infra1.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub infra2.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub infra3.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub storage1.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub storage2.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub storage3.mydomain.local
-ssh-copy-id -i ~/.ssh/id_rsa.pub lb.mydomain.local
-```
+  ```
+  ssh-copy-id -i ~/.ssh/id_rsa.pub master1.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub master2.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub master3.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub node1.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub node2.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub node3.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub infra1.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub infra2.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub infra3.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub storage1.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub storage2.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub storage3.mydomain.local
+  ssh-copy-id -i ~/.ssh/id_rsa.pub lb.mydomain.local
+  ```
 
 1. Install Red Hat Subscriptions
   ```
@@ -98,6 +98,7 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub lb.mydomain.local
   subscription-manager refresh
   subscription-manager attach --pool=<poolID>  # Pool with entitlement to RHOS
   ```
+
 1. Enable the needed yum repositories
   ```
   subscription-manager repos --enable="rhel-7-server-rpms" --enable="rhel-7-server-extras-rpms" --enable="rhel-7-server-ose-3.11-rpms" --enable="rhel-7-server-ansible-2.6-rpms" --enable="rh-gluster-3-client-for-rhel-7-server-rpms"
@@ -110,51 +111,52 @@ ssh-copy-id -i ~/.ssh/id_rsa.pub lb.mydomain.local
   ```
 
 1. Install openshift-ansible package
-```
-yum install -y openshift-ansible
-```
+  ```
+  yum install -y openshift-ansible
+  ```
 
 1. Once prerequisites are installed, reboot the node
-```
-systemctl reboot
-```
+  ```
+  systemctl reboot
+  ```
 
   _**Note:** Load balancer nodes do not need docker so the rest of this section need not be done on lb nodes._
 1. Install docker
-```
-yum install -y docker-1.13.1
-```
+  ```
+  yum install -y docker-1.13.1
+  ```
 
 1. Configure Docker Storage
-```
-cat > /etc/sysconfig/docker-storage-config <<EOF
-STORAGE_DRIVER=overlay2
-DEVS=/dev/vdb
-CONTAINER_ROOT_LV_NAME=dockerlv
-CONTAINER_ROOT_LV_SIZE=100%FREE
-CONTAINER_ROOT_LV_MOUNT_PATH=/var/lib/docker
-VG=dockervg
-EOF
-```
-This will create a new file named `docker-storage-config` in /etc/sysconfig.  DEVS should contain the raw device which should be used for the docker partition.  The raw disk will be configured for Logical Volume Mapping (LVM) and mounted at the location specified by `CONTAINER_ROOT_LV_MOUNT_PATH`, this specified location is the default location for the docker local registry.<br><br>The value in `DEVS` should be the second raw disk in the system (e.g. /dev/sdb or /dev/vdb).  This value should be the raw disk device and should not have a partition.
+  ```
+  cat > /etc/sysconfig/docker-storage-config <<EOF
+  STORAGE_DRIVER=overlay2
+  DEVS=/dev/vdb
+  CONTAINER_ROOT_LV_NAME=dockerlv
+  CONTAINER_ROOT_LV_SIZE=100%FREE
+  CONTAINER_ROOT_LV_MOUNT_PATH=/var/lib/docker
+  VG=dockervg
+  EOF
+  ```
+  This will create a new file named `docker-storage-config` in /etc/sysconfig.  DEVS should contain the raw device which should be used for the docker partition.  The raw disk will be configured for Logical Volume Mapping (LVM) and mounted at the location specified by `CONTAINER_ROOT_LV_MOUNT_PATH`, this specified location is the default location for the docker local registry.<br><br>The value in `DEVS` should be the second raw disk in the system (e.g. /dev/sdb or /dev/vdb).  This value should be the raw disk device and should not have a partition.
 
 1. Enable docker to be auto-started with the system
-```
-systemctl enable docker
-```
+  ```
+  systemctl enable docker
+  ```
 
 1. Start docker
-```
-systemctl start docker
-```
+  ```
+  systemctl start docker
+  ```
 
 1. Check to make sure docker is running properly
-`````````
-rpm -V docker-1.13.1
-docker version
-```
+  ```
+  rpm -V docker-1.13.1
+  docker version
+  ```
 
   The results of the above command should look something like this:
+
   ```
   [root@ansible ~]# rpm -V docker-1.13.1
   S.5....T.  c /etc/sysconfig/docker-storage
@@ -183,19 +185,19 @@ docker version
   If you don't get similar results, make sure docker is running using the `systemctl restart docker` command.
 
 1. Ensure the newly created docker volume is properly mounted
-```
-[root@ansible ~]# df -h
-Filesystem                     Size  Used Avail Use% Mounted on
-/dev/mapper/rhel-root          100G  2.1G   98G   2% /
-devtmpfs                       3.9G     0  3.9G   0% /dev
-tmpfs                          3.9G     0  3.9G   0% /dev/shm
-tmpfs                          3.9G  8.7M  3.9G   1% /run
-tmpfs                          3.9G     0  3.9G   0% /sys/fs/cgroup
-/dev/vda1                     1014M  132M  883M  14% /boot
-tmpfs                          799M     0  799M   0% /run/user/0
-tmpfs                          799M     0  799M   0% /run/user/1000
-/dev/mapper/dockervg-dockerlv  100G   33M  100G   1% /var/lib/docker
-```
+  ```
+  [root@ansible ~]# df -h
+  Filesystem                     Size  Used Avail Use% Mounted on
+  /dev/mapper/rhel-root          100G  2.1G   98G   2% /
+  devtmpfs                       3.9G     0  3.9G   0% /dev
+  tmpfs                          3.9G     0  3.9G   0% /dev/shm
+  tmpfs                          3.9G  8.7M  3.9G   1% /run
+  tmpfs                          3.9G     0  3.9G   0% /sys/fs/cgroup
+  /dev/vda1                     1014M  132M  883M  14% /boot
+  tmpfs                          799M     0  799M   0% /run/user/0
+  tmpfs                          799M     0  799M   0% /run/user/1000
+  /dev/mapper/dockervg-dockerlv  100G   33M  100G   1% /var/lib/docker
+  ```
 
   If you do not see a volume mounted to /var/lib/docker repeat the above process.
 
@@ -314,27 +316,27 @@ tmpfs                          799M     0  799M   0% /run/user/1000
   [root@ansible openshift-ansible]# ansible-playbook playbooks/deploy_cluster.yml
   ```
 
-**Note:** This author found that the installer failed for random reasons during deploy.  After each failure, however, is a log message providing an ansible playbook to launch to retry this specific recipe (rather than the full install).
+  **Note:** This author found that the installer failed for random reasons during deploy.  After each failure, however, is a log message providing an ansible playbook to launch to retry this specific recipe (rather than the full install).
 
-If the failure message indicates an issue that can be easily remediated (a misconfiguration), remediate your installation and retry the deploy_cluster playbook.
+  If the failure message indicates an issue that can be easily remediated (a misconfiguration), remediate your installation and retry the deploy_cluster playbook.
 
-If the error message indicates a 503 error, success might be achieved by running just the failed playbook as a stand-alone deployment, and after success, re-launch the deploy_cluster playbook and continue doing so as long as you get further along the process and until ultimate success.
+  If the error message indicates a 503 error, success might be achieved by running just the failed playbook as a stand-alone deployment, and after success, re-launch the deploy_cluster playbook and continue doing so as long as you get further along the process and until ultimate success.
 
-```
-INSTALLER STATUS *******************************************************************************************************************************************
-Initialization              : Complete (0:01:10)
-Health Check                : Complete (0:00:14)
-Node Bootstrap Preparation  : Complete (0:06:40)
-etcd Install                : Complete (0:02:04)
-Load Balancer Install       : Complete (0:00:53)
-Master Install              : Complete (0:06:37)
-Master Additional Install   : Complete (0:04:43)
-Node Join                   : Complete (0:01:44)
-GlusterFS Install           : In Progress (0:02:02)
-	This phase can be restarted by running: playbooks/openshift-glusterfs/new_install.yml
-Thursday 21 February 2019  11:18:14 -0600 (0:00:05.127)       0:26:07.595 *****
-===============================================================================
-```
+  ```
+  INSTALLER STATUS *******************************************************************************************************************************************
+  Initialization              : Complete (0:01:10)
+  Health Check                : Complete (0:00:14)
+  Node Bootstrap Preparation  : Complete (0:06:40)
+  etcd Install                : Complete (0:02:04)
+  Load Balancer Install       : Complete (0:00:53)
+  Master Install              : Complete (0:06:37)
+  Master Additional Install   : Complete (0:04:43)
+  Node Join                   : Complete (0:01:44)
+  GlusterFS Install           : In Progress (0:02:02)
+  	This phase can be restarted by running: playbooks/openshift-glusterfs/new_install.yml
+  Thursday 21 February 2019  11:18:14 -0600 (0:00:05.127)       0:26:07.595 *****
+  ===============================================================================
+  ```
 
 ## Configure your new cluster
 
@@ -343,6 +345,7 @@ Thursday 21 February 2019  11:18:14 -0600 (0:00:05.127)       0:26:07.595 *****
   In our inventory file, we created an openshift_master_cluster_public_hostname entry and set its value to openshift.mydomain.local. Before we can login to the UI using this hostname we need a alias configured in the DNS which aliases openshift.mydomain.local to your first load balancer (master-lb.mydomain.local).
 
   In bind9, that entry would look something like this:
+
   ```
   openshift	IN	CNAME	master-lb
   ```
@@ -421,6 +424,7 @@ Thursday 21 February 2019  11:18:14 -0600 (0:00:05.127)       0:26:07.595 *****
   When configured correctly all queries for any hostname in the apps.mydomain.local domain should return the IP address of your infra-lb node.
 
   In bind9, the entry should look something like this:
+  
   ```
   *.apps.mydomain.local.		IN	A	10.10.0.7
   ```
