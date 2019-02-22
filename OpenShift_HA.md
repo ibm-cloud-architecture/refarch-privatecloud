@@ -342,21 +342,21 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
 Setting up your cluser for use
 
-* Create a DNS entry for our main OpenShift UI.
+### Create a DNS entry for our main OpenShift UI.
 
-  In our inventory file, we created an openshift_master_cluster_public_hostname entry and set its value to openshift.mydomain.local. Before we can login to the UI using this hostname we need a alias configured in the DNS which aliases openshift.mydomain.local to your first load balancer (master-lb.mydomain.local).
+In our inventory file, we created an openshift_master_cluster_public_hostname entry and set its value to openshift.mydomain.local. Before we can login to the UI using this hostname we need a alias configured in the DNS which aliases openshift.mydomain.local to your first load balancer (master-lb.mydomain.local).
 
-  In bind9, that entry would look something like this:
+In bind9, that entry would look something like this:
 
-  ```
-  openshift	IN	CNAME	master-lb
-  ```
+```
+openshift	IN	CNAME	master-lb
+```
 
-* Adding users via htpasswd
+### Adding users via htpasswd
 
-  If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
+If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
 
-  1. Add a new htpasswd user
+1. Add a new htpasswd user
   ```
   [root@ansible openshift-ansible]# ssh master1
 
@@ -365,26 +365,26 @@ Setting up your cluser for use
   [root@master1 master]# htpasswd -c ./users.htpasswd sysadmin
   ```
 
-  2. Copy the htpasswd file to the other master nodes
+2. Copy the htpasswd file to the other master nodes
   ```
   [root@master1 master]# scp users.htpasswd master2:/etc/origin/master/
 
   [root@master1 master]# scp users.htpasswd master3:/etc/origin/master/
   ```
 
-  3. With a browser access your new cluster
+3. With a browser access your new cluster
 
   https://openshift.mydomain.local
 
-  4. Login with the credentials you just created
+4. Login with the credentials you just created
 
-* Configure a wildcard domain in bind (DNS)
+### Configure a wildcard domain in bind (DNS)
 
-  Before you can access your cluster console or apps deployed to your subdomain, you must configure your DNS to forward all requests to for in the configured subdomain (apps.mydomain.local in this case) to your infra nodes.
+Before you can access your cluster console or apps deployed to your subdomain, you must configure your DNS to forward all requests to for in the configured subdomain (apps.mydomain.local in this case) to your infra nodes.
 
-  You will also need to configure your second load balancer (infra-lb) to load balance traffic to your infra nodes.
+You will also need to configure your second load balancer (infra-lb) to load balance traffic to your infra nodes.
 
- 1.  Configure the second load balancer to load balance traffic to your infra nodes.
+1.  Configure the second load balancer to load balance traffic to your infra nodes.
 
   When you configured two nodes in the [lb] stanza, it created two load balancer nodes for you and installed haproxy on those nodes.  Both nodes were configured as load balancers with an ingress IP address of the node's IP and load balancing across each of the three master nodes defined in the [master] stanza.
 
