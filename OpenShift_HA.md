@@ -424,7 +424,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   When configured correctly all queries for any hostname in the apps.mydomain.local domain should return the IP address of your infra-lb node.
 
   In bind9, the entry should look something like this:
-  
+
   ```
   *.apps.mydomain.local.		IN	A	10.10.0.7
   ```
