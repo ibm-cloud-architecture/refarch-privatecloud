@@ -339,8 +339,9 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   ```
 
 ## Configure your new cluster
+Setting up your cluser for use
 
-1. Create a DNS entry for our main OpenShift UI.
+* Create a DNS entry for our main OpenShift UI.
 
   In our inventory file, we created an openshift_master_cluster_public_hostname entry and set its value to openshift.mydomain.local. Before we can login to the UI using this hostname we need a alias configured in the DNS which aliases openshift.mydomain.local to your first load balancer (master-lb.mydomain.local).
 
@@ -350,7 +351,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   openshift	IN	CNAME	master-lb
   ```
 
-2. Adding users via htpasswd
+* Adding users via htpasswd
 
   If you configured LDAP authentication in your inventory file, you should be able to login with a valid LDAP user and you can skip this step.  If you used htpasswd authentication, however, you will need to create a user so you can login.
 
@@ -376,7 +377,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
   4. Login with the credentials you just created
 
-3. Configure a wildcard domain in bind (DNS)
+* Configure a wildcard domain in bind (DNS)
 
   Before you can access your cluster console or apps deployed to your subdomain, you must configure your DNS to forward all requests to for in the configured subdomain (apps.mydomain.local in this case) to your infra nodes.
 
