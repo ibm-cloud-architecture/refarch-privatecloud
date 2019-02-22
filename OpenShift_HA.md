@@ -384,41 +384,41 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
   1.  Configure the second load balancer to load balance traffic to your infra nodes.
 
-    When you configured two nodes in the [lb] stanza, it created two load balancer nodes for you and installed haproxy on those nodes.  Both nodes were configured as load balancers with an ingress IP address of the node's IP and load balancing across each of the three master nodes defined in the [master] stanza.
+  When you configured two nodes in the [lb] stanza, it created two load balancer nodes for you and installed haproxy on those nodes.  Both nodes were configured as load balancers with an ingress IP address of the node's IP and load balancing across each of the three master nodes defined in the [master] stanza.
 
-    We want the first load balancer (master-lb) to remain as it is because that is how we will access the OpenShift UI.
+  We want the first load balancer (master-lb) to remain as it is because that is how we will access the OpenShift UI.
 
-    The second load balancer (infra-lb), however, will need to be reconfigured to load balance traffic aross your infra nodes.
+  The second load balancer (infra-lb), however, will need to be reconfigured to load balance traffic aross your infra nodes.
 
-    ssh to your infra-lb node and edit the file /etc/haproxy/haproxy.cfg.
+  ssh to your infra-lb node and edit the file /etc/haproxy/haproxy.cfg.
 
-    You should find a section at the bottom that looks something like this:
+  You should find a section at the bottom that looks something like this:
 
-    ```
-    backend atomic-openshift-api
-      balance source
-      mode tcp
-      server      master0 10.10.0.1:443 check
-      server      master1 10.10.0.2:443 check
-      server      master2 10.10.0.3:443 check
-    ```
+  ```
+  backend atomic-openshift-api
+    balance source
+    mode tcp
+    server      master0 10.10.0.1:443 check
+    server      master1 10.10.0.2:443 check
+    server      master2 10.10.0.3:443 check
+  ```
 
-    Change the server lines to point to your infra nodes instead.  The result should look something like this:
+  Change the server lines to point to your infra nodes instead.  The result should look something like this:
 
-    ```
-    backend atomic-openshift-api
-      balance source
-      mode tcp
-      server      infra0 10.10.0.4:443 check
-      server      infra1 10.10.0.5:443 check
-      server      infra2 10.10.0.6:443 check
-    ```
+  ```
+  backend atomic-openshift-api
+    balance source
+    mode tcp
+    server      infra0 10.10.0.4:443 check
+    server      infra1 10.10.0.5:443 check
+    server      infra2 10.10.0.6:443 check
+  ```
 
-    Save your file and restart your haproxy service
+  Save your file and restart your haproxy service
 
-    ```
-    systemctl restart haproxy
-    ```
+  ```
+  systemctl restart haproxy
+  ```
 
   1. Configure a wildcard domain record in your DNS to point to your infra load balancer
 
