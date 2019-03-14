@@ -69,7 +69,7 @@ It is advisable to further segment your storage usage in production environments
 
 | Disk Size | Volume | File System | File System Size | ICP Node |
 | :---: | :---: | :---: | :---: | :---: |
-| 100G  | sda | / | 100G | All |
+| 100G  | OS Volume | / | 100G | All |
 | 500G  | icp_vg |  | 500GB | all |
 | | icp_vg-etcd_lv | /var/lib/etcd | 5GB | master |
 | | icp_vg-kube_lv | /var/lib/kubelet | 20GB | all |
@@ -79,7 +79,7 @@ It is advisable to further segment your storage usage in production environments
 | | icp_vg-audit_lv | /var/lib/icp/audit | 30GB | master (if enabled) |
 | | icp_vg-elkdata_lv | /var/lib/icp/logging/elk-data | 300GB | management |
 
-> For the **elk-data** volume, this depends largely on the number of management nodes and the amount of data you are managing.  You will have to measure your data requirements and then split across the management nodes.
+> For the **elk-data** volume, this depends largely on the number of management nodes and the amount of data you are managing.  You will have to measure your data requirements and then split across the management nodes.  The above denotes two volumes, one for the OS and the second for the application / ICP platform.  You can adjust these sizes based upon the nodes.  **All of the values in this blog entry are approximate** you will notice that the guidelines will not tally exactly to the above chart.  You will be able to tune your values and as learn more about your specific workload, logging, operating, etc. environments.
 
 ## Proxy Nodes
 Considerations for proxy node sizing.  Proxy nodes can be added at any time.
