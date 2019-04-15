@@ -217,6 +217,5 @@ There are several steps required to create the load balancer and you will need t
   10.19.34.49:/storage/ha/icp-audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
   10.19.34.49:/storage/ha/log-audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
   ```
-  ```
-  
+
 * You can now install your ICP cluster as per normal.
