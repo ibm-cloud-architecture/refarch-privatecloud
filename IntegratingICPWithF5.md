@@ -182,11 +182,11 @@ There are several steps required to create the load balancer and you will need t
   ```
   ## External loadbalancer IP or domain
   ## Or floating IP in OpenStack environment
-  cluster_lb_address: 9.19.34.86
+  cluster_lb_address: 10.19.34.86
 
   ## External loadbalancer IP or domain
   ## Or floating IP in OpenStack environment
-  proxy_lb_address: 9.19.34.87
+  proxy_lb_address: 10.19.34.87
   ```
 
   Uncomment the lines containing "cluster_lb_address" and "proxy_lb_address" and enter the IP address of the external interface of your master and proxy virtual servers.
@@ -203,4 +203,20 @@ There are several steps required to create the load balancer and you will need t
   # proxy_vip: 127.0.1.1
   ```
 
+* If you are using NFS as your common filesystem for ICP HA, you will need to make sure your NFS server and clients are properly configured to avoid a docker "unknown blob" error while Installing
+
+  1. On the NFS server, make sure you use the "sync" property
+  ```
+  admin@nfs-server:~$ cat /etc/exports
+  /storage	*(rw,no_subtree_check,sync,insecure,no_root_squash)
+  ```
+
+  2. On each NFS client, ensure actimeo=0
+  ```
+  10.19.34.49:/storage/ha/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
+  10.19.34.49:/storage/ha/icp-audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
+  10.19.34.49:/storage/ha/log-audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
+  ```
+  ```
+  
 * You can now install your ICP cluster as per normal.
