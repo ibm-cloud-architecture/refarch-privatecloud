@@ -12,7 +12,7 @@ The guidelines below have been updated for IBM Cloud Private 3.1.0.  Each ICP cl
 |	Master	| 3	| 16	| 32	| 500 |
 |	Management	| 2	| 8	| 16	| 500 |
 |	Proxy	| 2	| 4	| 16	| 400 |
-|	Worker - Java Workloads | 3+ (Max:20)	| 8	| 32	| 400 |
+|	Worker | 3+ (Max:20)	| 8	| 32	| 400 |
 
 This cluster is listed as Medium Resilience with 3 Master nodes.  To make a Sandbox out of this you could deploy a single master and less proxy (Resilience Low).  Consider not combining node types (ie. sharing masters / proxies / management) in order to provide your environment the most flexibility.  The Workers included are shaped for Java workloads.  See the below section on **Consider Your Workload**.
 
@@ -24,7 +24,6 @@ This cluster is listed as Medium Resilience with 3 Master nodes.  To make a Sand
 |	Master	| 3	| 16	| 32	| 500 |
 |	Management	| 3	| 8	| 32	| 500 |
 |	Proxy	| 3	| 4	| 16	| 400 |
-|	Worker - Java Workloads | 3+ (Max:20)	| 8	| 32	| 400 |
 |	Worker | 5+ (Max:70)| 8 | 32	| 400 |
 |	VA	| 3	| 6	| 24	| 500 |
 
