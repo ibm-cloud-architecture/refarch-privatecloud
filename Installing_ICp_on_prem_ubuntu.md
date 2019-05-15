@@ -403,6 +403,51 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 
     `ssh root@icp-worker3`
 
+  5.  Now update the /etc/hosts file on your boot node and add entries for each of your nodes and propogate that file to all of your other nodes:
+
+    For example:
+
+    ```
+    # /etc/hosts
+    127.0.0.1     localhost
+    172.16.40.30  icp-boot.csplab.local icp-boot boot
+    172.16.40.31  icp-master1.csplab.local icp-master1 master1
+    172.16.40.32  icp-master1.csplab.local icp-master2 master2
+    172.16.40.33  icp-master1.csplab.local icp-master3 master3
+    172.16.40.34  icp-proxy1.csplab.local icp-proxy1 master1
+    172.16.40.35  icp-proxy2.csplab.local icp-proxy2 master2
+    172.16.40.36  icp-proxy3.csplab.local icp-proxy3 master3
+    172.16.40.37  icp-mgmt1.csplab.local icp-mgmt1 mgmt1
+    172.16.40.38  icp-mgmt2.csplab.local icp-mgmt2 mgmt2
+    172.16.40.39  icp-mgmt3.csplab.local icp-mgmt3 mgmt3
+    172.16.40.40  icp-va1.csplab.local icp-va1 va1
+    172.16.40.41  icp-va2.csplab.local icp-va2 va2
+    172.16.40.42  icp-va3.csplab.local icp-va3 va3
+    172.16.40.43  icp-worker1.csplab.local icp-worker1 worker1
+    172.16.40.44  icp-worker2.csplab.local icp-worker2 worker2
+    172.16.40.45  icp-worker3.csplab.local icp-worker3 worker3
+    ```
+
+    With your /etc/hosts file configured correctly on the boot node, propogate it to all the other nodes in your cluster:
+
+    ```
+    scp /etc/hosts master1:/etc/hosts
+    scp /etc/hosts master2:/etc/hosts
+    scp /etc/hosts master3:/etc/hosts
+    scp /etc/hosts proxy1:/etc/hosts
+    scp /etc/hosts proxy2:/etc/hosts
+    scp /etc/hosts proxy3:/etc/hosts
+    scp /etc/hosts mgmt1:/etc/hosts
+    scp /etc/hosts mgmt2:/etc/hosts
+    scp /etc/hosts mgmt3:/etc/hosts
+    scp /etc/hosts va1:/etc/hosts
+    scp /etc/hosts va2:/etc/hosts
+    scp /etc/hosts va3:/etc/hosts
+    scp /etc/hosts worker1:/etc/hosts
+    scp /etc/hosts worker2:/etc/hosts
+    scp /etc/hosts worker3:/etc/hosts
+    ```
+
     Your virtual machines are now ready to install ICP and now is a good time to take a snapshot of each VM in the cluster. In the event something goes horribly wrong with the installation you can revert to this snapshot and try it again.  Snapshots slow down Virtual Machines by a factor of the number of shapshots that have been taken.  For this reason, it is not a good idea to leave a bunch of snapshots (or any, really) hanging around.  Once your installation is complete, you should consolidiate your disks to remove the snapshot.
 
 ## Install ICP
@@ -410,7 +455,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 * Load your icp tarball into your boot node's docker registry
 
   Only on the boot node, load the inception image from the ICP tarball into boot node's local docker registry.
-	
+
   ```
   tar -xvf /opt/ibm-cloud-private-x86_64-2.1.0.tar.gz ibm-inception-amd64-3.1.1.tar -O |docker load
   ```   
