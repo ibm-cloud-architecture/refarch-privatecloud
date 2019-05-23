@@ -569,9 +569,9 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     172.16.40.49:/storage/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
     172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
     172.16.40.49:/storage/log/audit	/var/log/audit		nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
-    ```
+		```
 
-		Mount the directories in the current environment
+    Mount the directories in the current environment
 
     ```
     mount /var/lib/registry
