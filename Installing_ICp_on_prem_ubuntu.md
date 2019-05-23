@@ -548,14 +548,16 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     On your NFS server, create mount points for each of these paths e.g. ``/storage/registry`, ``/storage/icp/audit`, and ``/storage/log/audit`.
 
     Your NFS server should export fileystems with the `sync` parameter set.  For example:
+
     ```
-		# /etc/exports
+    # /etc/exports
     /storage/mycluster.icp/var/lib/registry	master1(rw,no_subtree_check,sync,insecure,no_root_squash) master2(rw,no_subtree_check,sync,insecure,no_root_squash) master3(rw,no_subtree_check,sync,insecure,no_root_squash)
     /storage/mycluster.icp/var/lib/icp/audit	master1(rw,no_subtree_check,sync,insecure,no_root_squash) master2(rw,no_subtree_check,sync,insecure,no_root_squash) master3(rw,no_subtree_check,sync,insecure,no_root_squash)
     /storage/mycluster.icp/var/log/audit	master1(rw,no_subtree_check,sync,insecure,no_root_squash) master2(rw,no_subtree_check,sync,insecure,no_root_squash) master3(rw,no_subtree_check,sync,insecure,no_root_squash)
     ```
 
     On each of the master nodes, mount the NFS mount points to the appropriate locations:
+
     ```
     mkdir -p /var/lib/registry
     mkdir -p /var/lib/icp/audit
@@ -563,6 +565,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
     ```
 
     Update the /etc/fstab file so that the mountes will be reestablished after a reboot.  The /etc/fstab entries should look something like this:
+
     ```
     172.16.40.49:/storage/registry	/var/lib/registry	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
     172.16.40.49:/storage/icp/audit	/var/lib/icp/audit	nfs	auto,nofail,noatime,nolock,intr,tcp,actimeo=0	0 0
@@ -570,6 +573,7 @@ This walkthrough will focus on installing the IBM Cloud private Enterprise Editi
 		```
 
     Mount the directories in the current environment
+
     ```
     mount /var/lib/registry
     mount /var/lib/icp/audit
