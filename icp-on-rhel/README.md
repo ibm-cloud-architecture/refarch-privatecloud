@@ -19,7 +19,7 @@ This is the top level document that serves as a guide to other documents that ca
 
 [Special RHEL Configuration](special-rhel-configuration.md) - Things that need to be configured for IBM Cloud Private that are not usually part of a stock RHEL configuration.
 
-[Install Docker](rhel-install-docker-using-overlay2-.md) Instructions for installing Docker using the installation executable provided with ICP at Passport Advantage (external) or eXtreme Leverage (IBM internal)
+[Install Docker](rhel-install-docker-using-overlay2.md) Instructions for installing Docker using the installation executable provided with ICP at Passport Advantage (external) or eXtreme Leverage (IBM internal)
 
 [Outline for Sample HA Installation](sample-icp-ha-installation-step-by-step.md) - An outline of the steps involved in standing up an ICP environment.  Details for each step are not provided in this document.  See other documents for details.
 

@@ -65,7 +65,7 @@ If you inspect the yum repository, you will notice that the `<uuid1>-updateinfo.
 
 A `yum clean all` will likely clean up such errors.
 
-# Use you and subscription manager commands
+# Yum and subscription manager commands
 
 To see all yum repos (enabled and disabled):
 ```
@@ -74,5 +74,5 @@ yum repolist all
 
 To enable a disabled repo:
 ```
-subscription-manager repo 
+subscription-manager repo
 ```
