@@ -38,6 +38,9 @@ See the following page for recommended sizing of ICP environments: [Sizing](Sizi
 ### Installing the Cloud Foundry Environment
   [Installing ICP Cloud Foundry on-prem](InstallCloudFoundryOnPrem.md)
 
+### Hyper-V Recommendations
+  [Recommendations for Dynamic Memory Allocation Settings in Hyper-V](HyperV-Recommendations.md)
+
 ## High Availability and Resiliency
   [General High Availability Considerations](HighAvailabilityConsiderations.md)
 
