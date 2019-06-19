@@ -122,11 +122,9 @@ For example:
 ```
 NOTE: The use of the `-s localhost:8888` option has been disabled.  It can be enabled by manually configuring the service to listen on that port.
 
-The preferred approach for using `kubectl` when a console login is not available is the following command (run on a master node)
+One approach for using `kubectl` when a console login is not available is the following command (run on a master node)
 ```
 kubectl --kubeconfig=/var/lib/kubelet/kubectl-config get pods -n kube-system -o wide
 ```
-On a non-master node the config file is named `kubelet-config`:
-```
-kubectl --kubeconfig=/var/lib/kubelet/kubelet-config get pods -n kube-system -o wide
-```
+
+At least as of ICP 3.1.1, the root user on the master nodes has the `~/.kube/config` file set up with a permanent login context for `kubectl`.  (To become root on the master once you log in be sure to include the dash in `sudo su -`.)

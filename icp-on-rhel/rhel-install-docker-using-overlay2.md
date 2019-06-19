@@ -12,7 +12,7 @@ For ICP 3.1.0 this is the recommended installation process.  RHEL 7.4 or later i
 
 - Install docker
 ```
-./icp-docker-17.12.1_x86_64.bin --install
+./icp-docker-18.03.1_x86_64.bin --install
 ```
 
 - Edit `/usr/lib/systemd/system/docker.service`.  The `ExecStart` line should look like:
@@ -29,30 +29,47 @@ restart docker - systemctl restart docker
 - After Docker is running use `docker info` to confirm that the `overlay2` storage driver is in use with an `xfs` file system and `d_type` is supported.  See output below for a sample:
 ```
 # docker info
-Containers: 0
- Running: 0
- Paused: 0
- Stopped: 0
-Images: 0
-Server Version: 17.12.1-ce
+Containers: 90
+ Running: 68
+ Paused: 0
+ Stopped: 22
+Images: 106
+Server Version: 18.03.1-ce
 Storage Driver: overlay2
- Backing Filesystem: xfs
- Supports d_type: true
- Native Overlay Diff: true
+ Backing Filesystem: extfs
+ Supports d_type: true
+ Native Overlay Diff: true
 Logging Driver: json-file
 Cgroup Driver: cgroupfs
 Plugins:
- Volume: local
- Network: bridge host macvlan null overlay
- Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
+ Volume: local
+ Network: bridge host macvlan null overlay
+ Log: awslogs fluentd gcplogs gelf journald json-file logentries splunk syslog
 Swarm: inactive
 Runtimes: runc
 Default Runtime: runc
 Init Binary: docker-init
-containerd version: 9b55aab90508bd389d7654c4baf173a981477d55
-runc version: 9f9c96235cc97674e935002fc3d78361b696a69e
+containerd version: 773c489c9c1b21a6d78b5c538cd395416ec50f88
+runc version: 4fc53a81fb7c994640722ac585fa9ca548971871
 init version: 949e6fa
 Security Options:
- seccomp
-  Profile: default
+ seccomp
+  Profile: default
+Kernel Version: 3.10.0-957.el7.x86_64
+Operating System: Red Hat Enterprise Linux Server 7.6 (Maipo)
+OSType: linux
+Architecture: x86_64
+CPUs: 8
+Total Memory: 31.26GiB
+Name: u1-master01
+ID: SDU4:HGYA:5XT6:A7E6:TIIE:6NQF:3GBU:BZDN:DC2S:34UV:C4PY:V4D4
+Docker Root Dir: /var/lib/docker
+Debug Mode (client): false
+Debug Mode (server): false
+Registry: https://index.docker.io/v1/
+Labels:
+Experimental: false
+Insecure Registries:
+ 127.0.0.0/8
+Live Restore Enabled: false
 ```
