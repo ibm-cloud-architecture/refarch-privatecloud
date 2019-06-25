@@ -1,19 +1,24 @@
 [all]
-master-1 ansible_ssh_host=172.16.254.220 ansible_user=sysadmin ansible_host=jpacock-icp-master-1.csplab.local
-mgmt-1 ansible_ssh_host=172.16.253.107 ansible_user=sysadmin ansible_host=jpacock-icp-mgmt-1.csplab.local
+boot1 ansible_ssh_host=172.16.252.246 ansible_user=sysadmin ansible_host=jpacock-icp-boot1.csplab.local
+master1 ansible_ssh_host=172.16.252.245 ansible_user=sysadmin ansible_host=jpacock-icp-master1.csplab.local
+management1 ansible_ssh_host=172.16.252.244 ansible_user=sysadmin ansible_host=jpacock-icp-management1.csplab.local
+proxy1 ansible_ssh_host=172.16.253.104 ansible_user=sysadmin ansible_host=jpacock-icp-proxy1.csplab.local
+worker1 ansible_ssh_host=172.16.252.247 ansible_user=sysadmin ansible_host=jpacock-icp-worker1.csplab.local
+
+[boot]
+boot1
 
 [master]
-master-1
-
-#[proxy]
-# 172.16.253.125
+master1
 
 [management]
-mgmt-1
+management1
+
+[proxy]
+proxy1
 
 #[va]
 
-# [worker]
-# 172.16.253.122
-# 172.16.253.123
-# 172.16.253.124
+[worker]
+worker1
+

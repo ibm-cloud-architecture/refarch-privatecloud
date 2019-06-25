@@ -7,11 +7,12 @@
 #
 # Sample invocation (all on one line):
 #   ansible-playbook -i hosts site.yml --extra-vars "ansible_become_pass=passw0rd"
-- name: Apply master config
-  hosts: master
+
+- name: Apply boot config
+  hosts: boot
   become: yes
   roles:
-    - master-boot-ssh
+    - boot
 
 - name: Apply base icp config to all nodes
   hosts: all

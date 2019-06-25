@@ -12,6 +12,11 @@
 # - name: Create the hosts file for all machines
 #   apt: update_cache=yes cach_valid_time=3600
 
+- include_vars: "{{ item }}"
+  with_first_found:
+    - "../vars/{{ ansible_distribution }}.yml"
+    - "../vars/default.yml"
+
 - name: "Change hostname"
   hostname:
     name: "{{ inventory_hostname }}"
@@ -25,6 +30,12 @@
   when: hostvars[item].ansible_host is defined
   with_items: "{{ groups.all }}"
 
+- name: "Set root password"
+  user:
+    name: root
+    update_password: always
+    password: $6$kmx3VG6IVg2HNaQD$.qMvyYLbNsjRXTgAYnVJIKvRWaDJx6nrmN.1p1uO6kvMLSEW3FNeHa6DH7zeRPxWtgp1seK40kiDCPF5lbK18.
+
 - name: "Enable root login"
   lineinfile:
     dest: /etc/ssh/sshd_config
@@ -34,14 +45,14 @@
   
 - name: "Reload ssh"
   systemd: 
-    name: ssh 
+    name: "{{ ssh_svc_name }}"
     state: reloaded
 
 - name: "Add master public key to other"
   authorized_key:
     user: root
     key: "{{ hostvars[item].master_public_key.stdout }}"
-  with_items:  "{{ groups.master }}" 
+  with_items:  "{{ groups.boot }}" 
 
 - name: "Update NTP (Network Time Protocol) settings"
   package:
@@ -56,44 +67,7 @@
     sysctl_set: yes
     value: '262144'
   
-- name: "Install NFS common packages"
+- name: "Install NFS client packages"
   package:
-    name: nfs-common
-    state: present
-
-- name: "Install Python"
-  package:
-    name: python-setuptools
-    state: present
-
-- name: "Install Linux image extra packages"
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    # - linux-image-extra-ubuntu
-    - linux-image-extra-virtual
-
-- name: Install additional needed packages
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - apt-transport-https
-    - ca-certificates
-    - curl
-    - software-properties-common
-
-- name: "Install Docker's official GPG Key"
-  apt_key: 
-    url: https://download.docker.com/linux/ubuntu/gpg
-    state: present
-
-- name: "Add Docker apt-repository"
-  apt_repository: 
-    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
-
-- name: "Install Docker"
-  package: 
-    name: docker-ce
+    name: "{{nfs_client_package_name}}"
     state: present
