@@ -4632,3 +4632,1183 @@ Should be written as:
 2019-06-25 09:59:13,409 p=12001 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 2019-06-25 09:59:13,410 p=12001 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 2019-06-25 09:59:13,410 p=12001 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-25 14:46:18,876 p=49758 u=jpacock@us.ibm.com |  boot1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-25 14:46:18,972 p=49758 u=jpacock@us.ibm.com |  management1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-25 14:46:18,973 p=49758 u=jpacock@us.ibm.com |  worker1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-25 14:46:19,003 p=49758 u=jpacock@us.ibm.com |  master1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-25 14:46:19,045 p=49758 u=jpacock@us.ibm.com |  proxy1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-25 14:46:36,492 p=49847 u=jpacock@us.ibm.com |  PLAY [Apply boot config] *******************************************************************************************************************************
+2019-06-25 14:46:36,504 p=49847 u=jpacock@us.ibm.com |  TASK [Gathering Facts] *********************************************************************************************************************************
+2019-06-25 14:46:41,589 p=49847 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-25 14:46:41,625 p=49847 u=jpacock@us.ibm.com |  TASK [boot : include_vars] *****************************************************************************************************************************
+2019-06-25 14:46:41,674 p=49847 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/Ubuntu.yml)
+2019-06-25 14:46:41,697 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] ****************************************************************************************************************
+2019-06-25 14:46:44,607 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:46:44,629 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] *************************************************************************************************************************
+2019-06-25 14:46:48,145 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:46:48,171 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] *****************************************************************************************************************
+2019-06-25 14:46:54,966 p=49847 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-25 14:46:54,999 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Install Python] ***************************************************************************************************************************
+2019-06-25 14:47:13,962 p=49847 u=jpacock@us.ibm.com |   [WARNING]: Could not find aptitude. Using apt-get instead
+
+2019-06-25 14:47:13,962 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:47:13,985 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] *******************************************************************************************************
+2019-06-25 14:47:56,764 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=linux-image-extra-virtual)
+2019-06-25 14:47:56,787 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] *******************************************************************************************************
+2019-06-25 14:48:00,554 p=49847 u=jpacock@us.ibm.com |  ok: [boot1] => (item=apt-transport-https)
+2019-06-25 14:48:04,242 p=49847 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-25 14:48:10,404 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=curl)
+2019-06-25 14:48:19,142 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=software-properties-common)
+2019-06-25 14:48:19,165 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] ********************************************************************************************************
+2019-06-25 14:48:23,217 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:48:23,237 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] ****************************************************************************************************************
+2019-06-25 14:48:30,127 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:48:30,146 p=49847 u=jpacock@us.ibm.com |  TASK [boot : Install Docker] ***************************************************************************************************************************
+2019-06-25 14:48:52,094 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:48:52,099 p=49847 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] **************************************************************************************************************
+2019-06-25 14:48:52,120 p=49847 u=jpacock@us.ibm.com |  TASK [Gathering Facts] *********************************************************************************************************************************
+2019-06-25 14:48:54,632 p=49847 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-25 14:48:56,982 p=49847 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-25 14:48:57,545 p=49847 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-25 14:48:57,569 p=49847 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-25 14:48:58,609 p=49847 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-25 14:48:58,627 p=49847 u=jpacock@us.ibm.com |  TASK [base : include_vars] *****************************************************************************************************************************
+2019-06-25 14:48:58,673 p=49847 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-25 14:48:58,696 p=49847 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-25 14:48:58,718 p=49847 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-25 14:48:58,728 p=49847 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-25 14:48:58,750 p=49847 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-25 14:48:58,768 p=49847 u=jpacock@us.ibm.com |  TASK [base : Change hostname] **************************************************************************************************************************
+2019-06-25 14:49:02,767 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:49:02,800 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:49:02,868 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:49:02,939 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:49:03,078 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:49:03,103 p=49847 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] ************************************************************************************************************************
+2019-06-25 14:49:05,679 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-25 14:49:05,686 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-25 14:49:05,687 p=49847 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-25 14:49:05,709 p=49847 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-25 14:49:05,773 p=49847 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-25 14:49:08,066 p=49847 u=jpacock@us.ibm.com |  changed: [worker1] => (item=master1)
+2019-06-25 14:49:08,099 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=master1)
+2019-06-25 14:49:08,236 p=49847 u=jpacock@us.ibm.com |  changed: [management1] => (item=master1)
+2019-06-25 14:49:08,413 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=master1)
+2019-06-25 14:49:08,527 p=49847 u=jpacock@us.ibm.com |  changed: [master1] => (item=master1)
+2019-06-25 14:49:10,380 p=49847 u=jpacock@us.ibm.com |  changed: [worker1] => (item=management1)
+2019-06-25 14:49:10,570 p=49847 u=jpacock@us.ibm.com |  changed: [management1] => (item=management1)
+2019-06-25 14:49:10,785 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=management1)
+2019-06-25 14:49:10,923 p=49847 u=jpacock@us.ibm.com |  changed: [master1] => (item=management1)
+2019-06-25 14:49:11,066 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=management1)
+2019-06-25 14:49:12,687 p=49847 u=jpacock@us.ibm.com |  changed: [worker1] => (item=proxy1)
+2019-06-25 14:49:13,016 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=proxy1)
+2019-06-25 14:49:13,017 p=49847 u=jpacock@us.ibm.com |  changed: [management1] => (item=proxy1)
+2019-06-25 14:49:13,086 p=49847 u=jpacock@us.ibm.com |  changed: [master1] => (item=proxy1)
+2019-06-25 14:49:13,303 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=proxy1)
+2019-06-25 14:49:14,957 p=49847 u=jpacock@us.ibm.com |  changed: [worker1] => (item=worker1)
+2019-06-25 14:49:15,227 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=worker1)
+2019-06-25 14:49:15,336 p=49847 u=jpacock@us.ibm.com |  changed: [master1] => (item=worker1)
+2019-06-25 14:49:15,338 p=49847 u=jpacock@us.ibm.com |  changed: [management1] => (item=worker1)
+2019-06-25 14:49:15,700 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=worker1)
+2019-06-25 14:49:15,722 p=49847 u=jpacock@us.ibm.com |  TASK [base : Set root password] ************************************************************************************************************************
+2019-06-25 14:49:18,957 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:49:19,029 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:49:19,162 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:49:19,198 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:49:19,226 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:49:19,254 p=49847 u=jpacock@us.ibm.com |  TASK [base : Enable root login] ************************************************************************************************************************
+2019-06-25 14:49:22,301 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:49:22,464 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:49:22,498 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:49:22,666 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:49:22,837 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:49:22,862 p=49847 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] *******************************************************************************************************************************
+2019-06-25 14:49:26,117 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:49:26,389 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:49:26,449 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:49:26,682 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:49:26,856 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:49:26,882 p=49847 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] ***********************************************************************************************************
+2019-06-25 14:49:29,936 p=49847 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-25 14:49:30,381 p=49847 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-25 14:49:30,415 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-25 14:49:30,457 p=49847 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-25 14:49:30,458 p=49847 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-25 14:49:30,491 p=49847 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] **********************************************************************************************
+2019-06-25 14:49:37,239 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:49:49,268 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:49:51,081 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:49:51,252 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:49:53,528 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:49:53,557 p=49847 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] *************************************************************************************************************************
+2019-06-25 14:49:56,108 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:49:56,141 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:49:56,173 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:49:56,268 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:49:56,392 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:49:56,420 p=49847 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] **************************************************************************************************************
+2019-06-25 14:50:05,314 p=49847 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-25 14:50:08,644 p=49847 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-25 14:50:08,705 p=49847 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-25 14:50:09,044 p=49847 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-25 14:50:09,142 p=49847 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-25 14:50:09,146 p=49847 u=jpacock@us.ibm.com |  PLAY RECAP *********************************************************************************************************************************************
+2019-06-25 14:50:09,146 p=49847 u=jpacock@us.ibm.com |  boot1                      : ok=22   changed=17   unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-25 14:50:09,146 p=49847 u=jpacock@us.ibm.com |  management1                : ok=11   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-25 14:50:09,146 p=49847 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-25 14:50:09,146 p=49847 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-25 14:50:09,146 p=49847 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=9    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:06:15,929 p=59726 u=jpacock@us.ibm.com |   [WARNING]:  * Failed to parse /Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/hosts with yaml plugin: Syntax Error while loading YAML.   expected '<document
+start>', but found '<scalar>'  The error appears to be in '/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/hosts': line 2, column 1, but may be elsewhere in the
+file depending on the exact syntax problem.  The offending line appears to be:  [all] boot1 ansible_ssh_host=172.16.252.224 ansible_user=sysadmin ansible_host=jpacock-icp-boot1.csplab.local
+^ here
+
+2019-06-27 12:06:15,930 p=59726 u=jpacock@us.ibm.com |   [WARNING]:  * Failed to parse /Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/hosts with ini plugin: host range must be begin:end or begin:end:step
+
+2019-06-27 12:06:15,930 p=59726 u=jpacock@us.ibm.com |   [WARNING]: Unable to parse /Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/hosts as an inventory source
+
+2019-06-27 12:06:15,930 p=59726 u=jpacock@us.ibm.com |   [WARNING]: No inventory was parsed, only implicit localhost is available
+
+2019-06-27 12:06:20,626 p=59726 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host management1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:06:20,627 p=59726 u=jpacock@us.ibm.com |  management1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:06:20,690 p=59726 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host boot1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:06:20,691 p=59726 u=jpacock@us.ibm.com |  boot1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:06:20,752 p=59726 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host proxy1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:06:20,752 p=59726 u=jpacock@us.ibm.com |  proxy1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:06:20,753 p=59726 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host master1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:06:20,753 p=59726 u=jpacock@us.ibm.com |  master1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:06:20,927 p=59726 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host worker1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:06:20,927 p=59726 u=jpacock@us.ibm.com |  worker1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:07:12,261 p=59848 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host boot1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:07:12,261 p=59848 u=jpacock@us.ibm.com |  boot1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:07:12,393 p=59848 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host management1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:07:12,394 p=59848 u=jpacock@us.ibm.com |  management1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:07:12,648 p=59848 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host worker1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:07:12,648 p=59848 u=jpacock@us.ibm.com |  worker1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:07:12,685 p=59848 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host proxy1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:07:12,685 p=59848 u=jpacock@us.ibm.com |  proxy1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:07:12,686 p=59848 u=jpacock@us.ibm.com |   [WARNING]: Platform linux on host master1 is using the discovered Python interpreter at /usr/bin/python, but future installation of another Python interpreter could change this. See
+https://docs.ansible.com/ansible/2.8/reference_appendices/interpreter_discovery.html for more information.
+
+2019-06-27 12:07:12,686 p=59848 u=jpacock@us.ibm.com |  master1 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python"
+    }, 
+    "changed": false, 
+    "ping": "pong"
+}
+2019-06-27 12:07:41,939 p=59920 u=jpacock@us.ibm.com |  PLAY [Apply boot config] *********************************************************************************************************************************************************************
+2019-06-27 12:07:41,958 p=59920 u=jpacock@us.ibm.com |  TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+2019-06-27 12:07:45,749 p=59920 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:07:45,778 p=59920 u=jpacock@us.ibm.com |  TASK [boot : include_vars] *******************************************************************************************************************************************************************
+2019-06-27 12:07:45,818 p=59920 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/SLES.yml)
+2019-06-27 12:07:45,844 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] ******************************************************************************************************************************************************
+2019-06-27 12:07:48,271 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:07:48,299 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ***************************************************************************************************************************************************************
+2019-06-27 12:07:51,924 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:07:51,957 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] *******************************************************************************************************************************************************
+2019-06-27 12:07:54,176 p=59920 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:07:54,209 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Install Python] *****************************************************************************************************************************************************************
+2019-06-27 12:07:54,232 p=59920 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:07:54,256 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] *********************************************************************************************************************************************
+2019-06-27 12:07:54,296 p=59920 u=jpacock@us.ibm.com |  skipping: [boot1] => (item=linux-image-extra-virtual) 
+2019-06-27 12:07:54,321 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] *********************************************************************************************************************************************
+2019-06-27 12:07:57,155 p=59920 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-27 12:07:59,457 p=59920 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-27 12:07:59,489 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] **********************************************************************************************************************************************
+2019-06-27 12:07:59,516 p=59920 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:07:59,543 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] ******************************************************************************************************************************************************
+2019-06-27 12:07:59,579 p=59920 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:07:59,616 p=59920 u=jpacock@us.ibm.com |  TASK [boot : Install Docker] *****************************************************************************************************************************************************************
+2019-06-27 12:08:06,608 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:08:06,613 p=59920 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] ****************************************************************************************************************************************************
+2019-06-27 12:08:06,642 p=59920 u=jpacock@us.ibm.com |  TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+2019-06-27 12:08:08,646 p=59920 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:08:09,494 p=59920 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:08:10,259 p=59920 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:08:10,370 p=59920 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:08:11,177 p=59920 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:08:11,202 p=59920 u=jpacock@us.ibm.com |  TASK [base : include_vars] *******************************************************************************************************************************************************************
+2019-06-27 12:08:11,278 p=59920 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:08:11,314 p=59920 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:08:11,353 p=59920 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:08:11,356 p=59920 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:08:11,405 p=59920 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:08:11,434 p=59920 u=jpacock@us.ibm.com |  TASK [base : Change hostname] ****************************************************************************************************************************************************************
+2019-06-27 12:08:13,724 p=59920 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:08:13,742 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:08:14,344 p=59920 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:08:14,363 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:08:14,480 p=59920 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:08:14,509 p=59920 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] **************************************************************************************************************************************************************
+2019-06-27 12:08:16,404 p=59920 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-27 12:08:16,510 p=59920 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-27 12:08:16,600 p=59920 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-27 12:08:16,619 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-27 12:08:16,731 p=59920 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-27 12:08:18,057 p=59920 u=jpacock@us.ibm.com |  changed: [boot1] => (item=master1)
+2019-06-27 12:08:18,074 p=59920 u=jpacock@us.ibm.com |  changed: [management1] => (item=master1)
+2019-06-27 12:08:18,498 p=59920 u=jpacock@us.ibm.com |  changed: [master1] => (item=master1)
+2019-06-27 12:08:18,520 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=master1)
+2019-06-27 12:08:18,611 p=59920 u=jpacock@us.ibm.com |  changed: [worker1] => (item=master1)
+2019-06-27 12:08:19,727 p=59920 u=jpacock@us.ibm.com |  changed: [management1] => (item=management1)
+2019-06-27 12:08:19,745 p=59920 u=jpacock@us.ibm.com |  changed: [boot1] => (item=management1)
+2019-06-27 12:08:20,445 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=management1)
+2019-06-27 12:08:20,488 p=59920 u=jpacock@us.ibm.com |  changed: [master1] => (item=management1)
+2019-06-27 12:08:20,507 p=59920 u=jpacock@us.ibm.com |  changed: [worker1] => (item=management1)
+2019-06-27 12:08:21,326 p=59920 u=jpacock@us.ibm.com |  changed: [management1] => (item=proxy1)
+2019-06-27 12:08:21,430 p=59920 u=jpacock@us.ibm.com |  changed: [boot1] => (item=proxy1)
+2019-06-27 12:08:22,338 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=proxy1)
+2019-06-27 12:08:22,473 p=59920 u=jpacock@us.ibm.com |  changed: [master1] => (item=proxy1)
+2019-06-27 12:08:22,553 p=59920 u=jpacock@us.ibm.com |  changed: [worker1] => (item=proxy1)
+2019-06-27 12:08:23,002 p=59920 u=jpacock@us.ibm.com |  changed: [management1] => (item=worker1)
+2019-06-27 12:08:23,184 p=59920 u=jpacock@us.ibm.com |  changed: [boot1] => (item=worker1)
+2019-06-27 12:08:24,455 p=59920 u=jpacock@us.ibm.com |  changed: [worker1] => (item=worker1)
+2019-06-27 12:08:24,473 p=59920 u=jpacock@us.ibm.com |  changed: [master1] => (item=worker1)
+2019-06-27 12:08:24,476 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=worker1)
+2019-06-27 12:08:24,511 p=59920 u=jpacock@us.ibm.com |  TASK [base : Set root password] **************************************************************************************************************************************************************
+2019-06-27 12:08:26,496 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:08:26,864 p=59920 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:08:26,929 p=59920 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:08:27,013 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:08:27,053 p=59920 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:08:27,093 p=59920 u=jpacock@us.ibm.com |  TASK [base : Enable root login] **************************************************************************************************************************************************************
+2019-06-27 12:08:34,502 p=59920 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:08:34,585 p=59920 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:08:34,627 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:08:34,885 p=59920 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:08:35,026 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:08:35,055 p=59920 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] *********************************************************************************************************************************************************************
+2019-06-27 12:08:37,551 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:08:37,626 p=59920 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:08:37,651 p=59920 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:08:37,855 p=59920 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:08:37,882 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:08:37,913 p=59920 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] *************************************************************************************************************************************************
+2019-06-27 12:08:39,873 p=59920 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-27 12:08:39,929 p=59920 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-27 12:08:39,952 p=59920 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-27 12:08:39,970 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-27 12:08:40,007 p=59920 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-27 12:08:40,040 p=59920 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] ************************************************************************************************************************************
+2019-06-27 12:08:41,790 p=59920 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:08:42,426 p=59920 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:08:42,426 p=59920 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:08:42,443 p=59920 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:08:42,462 p=59920 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:08:42,496 p=59920 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] ***************************************************************************************************************************************************************
+2019-06-27 12:08:44,286 p=59920 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:08:44,302 p=59920 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:08:44,341 p=59920 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:08:44,403 p=59920 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:08:45,420 p=59920 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:08:45,452 p=59920 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] ****************************************************************************************************************************************************
+2019-06-27 12:08:47,181 p=59920 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:08:47,195 p=59920 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:08:47,233 p=59920 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:08:47,251 p=59920 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:08:47,276 p=59920 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:08:47,282 p=59920 u=jpacock@us.ibm.com |  PLAY RECAP ***********************************************************************************************************************************************************************************
+2019-06-27 12:08:47,282 p=59920 u=jpacock@us.ibm.com |  boot1                      : ok=18   changed=10   unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+2019-06-27 12:08:47,282 p=59920 u=jpacock@us.ibm.com |  management1                : ok=11   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:08:47,283 p=59920 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:08:47,283 p=59920 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:08:47,283 p=59920 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=7    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:11:33,425 p=60617 u=jpacock@us.ibm.com |  PLAY [Apply boot config] *********************************************************************************************************************************************************************
+2019-06-27 12:11:33,434 p=60617 u=jpacock@us.ibm.com |  TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+2019-06-27 12:11:37,222 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:37,244 p=60617 u=jpacock@us.ibm.com |  TASK [boot : include_vars] *******************************************************************************************************************************************************************
+2019-06-27 12:11:37,293 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/SLES.yml)
+2019-06-27 12:11:37,317 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] ******************************************************************************************************************************************************
+2019-06-27 12:11:39,526 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:39,558 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ***************************************************************************************************************************************************************
+2019-06-27 12:11:41,759 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:41,801 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] *******************************************************************************************************************************************************
+2019-06-27 12:11:44,276 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:44,304 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Install Python] *****************************************************************************************************************************************************************
+2019-06-27 12:11:44,331 p=60617 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:11:44,364 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] *********************************************************************************************************************************************
+2019-06-27 12:11:44,408 p=60617 u=jpacock@us.ibm.com |  skipping: [boot1] => (item=linux-image-extra-virtual) 
+2019-06-27 12:11:44,438 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] *********************************************************************************************************************************************
+2019-06-27 12:11:47,035 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-27 12:11:49,337 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-27 12:11:49,365 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] **********************************************************************************************************************************************
+2019-06-27 12:11:49,391 p=60617 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:11:49,417 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] ******************************************************************************************************************************************************
+2019-06-27 12:11:49,446 p=60617 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:11:49,479 p=60617 u=jpacock@us.ibm.com |  TASK [boot : Install Docker] *****************************************************************************************************************************************************************
+2019-06-27 12:11:51,933 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:51,939 p=60617 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] ****************************************************************************************************************************************************
+2019-06-27 12:11:51,968 p=60617 u=jpacock@us.ibm.com |  TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+2019-06-27 12:11:53,695 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:54,781 p=60617 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:11:54,807 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:11:54,891 p=60617 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:11:54,905 p=60617 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:11:54,929 p=60617 u=jpacock@us.ibm.com |  TASK [base : include_vars] *******************************************************************************************************************************************************************
+2019-06-27 12:11:55,002 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:11:55,039 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:11:55,076 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:11:55,083 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:11:55,122 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:11:55,150 p=60617 u=jpacock@us.ibm.com |  TASK [base : Change hostname] ****************************************************************************************************************************************************************
+2019-06-27 12:11:57,893 p=60617 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:11:57,895 p=60617 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:11:57,994 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:11:58,015 p=60617 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:11:58,213 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:11:58,235 p=60617 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] **************************************************************************************************************************************************************
+2019-06-27 12:12:00,179 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-27 12:12:00,192 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-27 12:12:00,214 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-27 12:12:00,236 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-27 12:12:00,257 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-27 12:12:01,799 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=master1)
+2019-06-27 12:12:01,922 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=master1)
+2019-06-27 12:12:01,922 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=master1)
+2019-06-27 12:12:02,277 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=master1)
+2019-06-27 12:12:02,354 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=master1)
+2019-06-27 12:12:03,696 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=management1)
+2019-06-27 12:12:03,758 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=management1)
+2019-06-27 12:12:03,821 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=management1)
+2019-06-27 12:12:03,860 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=management1)
+2019-06-27 12:12:04,300 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=management1)
+2019-06-27 12:12:05,274 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=proxy1)
+2019-06-27 12:12:05,351 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=proxy1)
+2019-06-27 12:12:05,352 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=proxy1)
+2019-06-27 12:12:05,403 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=proxy1)
+2019-06-27 12:12:06,106 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=proxy1)
+2019-06-27 12:12:06,749 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=worker1)
+2019-06-27 12:12:06,882 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=worker1)
+2019-06-27 12:12:06,965 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=worker1)
+2019-06-27 12:12:06,982 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=worker1)
+2019-06-27 12:12:07,963 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=worker1)
+2019-06-27 12:12:07,993 p=60617 u=jpacock@us.ibm.com |  TASK [base : Set root password] **************************************************************************************************************************************************************
+2019-06-27 12:12:10,168 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:12:10,207 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:12:10,260 p=60617 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:12:10,282 p=60617 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:12:10,283 p=60617 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:12:10,330 p=60617 u=jpacock@us.ibm.com |  TASK [base : Enable root login] **************************************************************************************************************************************************************
+2019-06-27 12:12:19,644 p=60617 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:12:19,664 p=60617 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:12:19,666 p=60617 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:12:19,701 p=60617 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:12:19,702 p=60617 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:12:19,735 p=60617 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] *********************************************************************************************************************************************************************
+2019-06-27 12:12:22,284 p=60617 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:12:22,361 p=60617 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:12:22,381 p=60617 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:12:22,402 p=60617 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:12:22,509 p=60617 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:12:22,537 p=60617 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] *************************************************************************************************************************************************
+2019-06-27 12:12:24,616 p=60617 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-27 12:12:24,618 p=60617 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-27 12:12:24,652 p=60617 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-27 12:12:24,666 p=60617 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-27 12:12:24,813 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-27 12:12:24,836 p=60617 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] ************************************************************************************************************************************
+2019-06-27 12:12:26,761 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:12:26,814 p=60617 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:12:26,833 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:12:26,836 p=60617 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:12:26,947 p=60617 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:12:26,979 p=60617 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] ***************************************************************************************************************************************************************
+2019-06-27 12:12:29,654 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:12:29,655 p=60617 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:12:29,656 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:12:29,869 p=60617 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:12:29,895 p=60617 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:12:29,935 p=60617 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] ****************************************************************************************************************************************************
+2019-06-27 12:12:32,011 p=60617 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:12:32,106 p=60617 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:12:32,164 p=60617 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:12:32,210 p=60617 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:12:32,247 p=60617 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:12:32,252 p=60617 u=jpacock@us.ibm.com |  PLAY RECAP ***********************************************************************************************************************************************************************************
+2019-06-27 12:12:32,253 p=60617 u=jpacock@us.ibm.com |  boot1                      : ok=18   changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+2019-06-27 12:12:32,253 p=60617 u=jpacock@us.ibm.com |  management1                : ok=11   changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:12:32,253 p=60617 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:12:32,253 p=60617 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:12:32,253 p=60617 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:53:47,899 p=61936 u=jpacock@us.ibm.com |  PLAY [Apply boot config] *********************************************************************************************************************************************************************
+2019-06-27 12:53:47,910 p=61936 u=jpacock@us.ibm.com |  TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+2019-06-27 12:53:55,662 p=61936 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:53:55,688 p=61936 u=jpacock@us.ibm.com |  TASK [boot : include_vars] *******************************************************************************************************************************************************************
+2019-06-27 12:53:55,725 p=61936 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/SLES.yml)
+2019-06-27 12:53:55,747 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] ******************************************************************************************************************************************************
+2019-06-27 12:53:58,650 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:53:58,680 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ***************************************************************************************************************************************************************
+2019-06-27 12:54:02,545 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:54:02,579 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] *******************************************************************************************************************************************************
+2019-06-27 12:54:05,722 p=61936 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:54:05,761 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Install Python] *****************************************************************************************************************************************************************
+2019-06-27 12:54:05,790 p=61936 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:54:05,824 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] *********************************************************************************************************************************************
+2019-06-27 12:54:05,879 p=61936 u=jpacock@us.ibm.com |  skipping: [boot1] => (item=linux-image-extra-virtual) 
+2019-06-27 12:54:05,916 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] *********************************************************************************************************************************************
+2019-06-27 12:54:10,484 p=61936 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-27 12:54:13,781 p=61936 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-27 12:54:13,807 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] **********************************************************************************************************************************************
+2019-06-27 12:54:13,832 p=61936 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:54:13,857 p=61936 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] ******************************************************************************************************************************************************
+2019-06-27 12:54:13,881 p=61936 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 12:54:13,890 p=61936 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] ****************************************************************************************************************************************************
+2019-06-27 12:54:13,916 p=61936 u=jpacock@us.ibm.com |  TASK [Gathering Facts] ***********************************************************************************************************************************************************************
+2019-06-27 12:54:16,315 p=61936 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:54:18,993 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:54:19,137 p=61936 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:54:19,157 p=61936 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:54:21,308 p=61936 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:54:21,336 p=61936 u=jpacock@us.ibm.com |  TASK [base : include_vars] *******************************************************************************************************************************************************************
+2019-06-27 12:54:21,405 p=61936 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:54:21,440 p=61936 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:54:21,475 p=61936 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:54:21,478 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:54:21,515 p=61936 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 12:54:21,543 p=61936 u=jpacock@us.ibm.com |  TASK [base : Change hostname] ****************************************************************************************************************************************************************
+2019-06-27 12:54:33,088 p=61936 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:54:33,129 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:54:33,486 p=61936 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:54:33,634 p=61936 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:54:33,636 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:54:33,662 p=61936 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] **************************************************************************************************************************************************************
+2019-06-27 12:54:36,253 p=61936 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-27 12:54:36,329 p=61936 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-27 12:54:36,331 p=61936 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-27 12:54:36,332 p=61936 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-27 12:54:36,347 p=61936 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-27 12:54:38,023 p=61936 u=jpacock@us.ibm.com |  ok: [management1] => (item=master1)
+2019-06-27 12:54:38,049 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=master1)
+2019-06-27 12:54:38,050 p=61936 u=jpacock@us.ibm.com |  ok: [master1] => (item=master1)
+2019-06-27 12:54:38,126 p=61936 u=jpacock@us.ibm.com |  ok: [worker1] => (item=master1)
+2019-06-27 12:54:38,155 p=61936 u=jpacock@us.ibm.com |  changed: [boot1] => (item=master1)
+2019-06-27 12:54:39,701 p=61936 u=jpacock@us.ibm.com |  ok: [management1] => (item=management1)
+2019-06-27 12:54:39,738 p=61936 u=jpacock@us.ibm.com |  ok: [master1] => (item=management1)
+2019-06-27 12:54:39,773 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=management1)
+2019-06-27 12:54:39,905 p=61936 u=jpacock@us.ibm.com |  changed: [boot1] => (item=management1)
+2019-06-27 12:54:39,905 p=61936 u=jpacock@us.ibm.com |  ok: [worker1] => (item=management1)
+2019-06-27 12:54:41,435 p=61936 u=jpacock@us.ibm.com |  ok: [master1] => (item=proxy1)
+2019-06-27 12:54:41,513 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=proxy1)
+2019-06-27 12:54:41,513 p=61936 u=jpacock@us.ibm.com |  ok: [management1] => (item=proxy1)
+2019-06-27 12:54:41,652 p=61936 u=jpacock@us.ibm.com |  ok: [worker1] => (item=proxy1)
+2019-06-27 12:54:41,673 p=61936 u=jpacock@us.ibm.com |  changed: [boot1] => (item=proxy1)
+2019-06-27 12:54:43,116 p=61936 u=jpacock@us.ibm.com |  ok: [management1] => (item=worker1)
+2019-06-27 12:54:43,134 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=worker1)
+2019-06-27 12:54:43,194 p=61936 u=jpacock@us.ibm.com |  ok: [worker1] => (item=worker1)
+2019-06-27 12:54:43,195 p=61936 u=jpacock@us.ibm.com |  changed: [boot1] => (item=worker1)
+2019-06-27 12:54:43,345 p=61936 u=jpacock@us.ibm.com |  ok: [master1] => (item=worker1)
+2019-06-27 12:54:43,378 p=61936 u=jpacock@us.ibm.com |  TASK [base : Set root password] **************************************************************************************************************************************************************
+2019-06-27 12:54:45,867 p=61936 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:54:45,868 p=61936 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:54:45,926 p=61936 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:54:45,992 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:54:46,128 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:54:46,164 p=61936 u=jpacock@us.ibm.com |  TASK [base : Enable root login] **************************************************************************************************************************************************************
+2019-06-27 12:54:47,812 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:54:47,887 p=61936 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:54:47,976 p=61936 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:54:47,998 p=61936 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:54:48,043 p=61936 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:54:48,074 p=61936 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] *********************************************************************************************************************************************************************
+2019-06-27 12:54:50,403 p=61936 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 12:54:50,441 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:54:50,543 p=61936 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 12:54:50,607 p=61936 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 12:54:50,643 p=61936 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 12:54:50,679 p=61936 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] *************************************************************************************************************************************************
+2019-06-27 12:54:52,647 p=61936 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-27 12:54:52,648 p=61936 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-27 12:54:52,668 p=61936 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-27 12:54:52,669 p=61936 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-27 12:54:53,210 p=61936 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-27 12:54:53,243 p=61936 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] ************************************************************************************************************************************
+2019-06-27 12:54:55,147 p=61936 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:54:55,149 p=61936 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:54:55,149 p=61936 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:54:55,198 p=61936 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:54:55,330 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:54:55,364 p=61936 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] ***************************************************************************************************************************************************************
+2019-06-27 12:54:57,235 p=61936 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 12:54:57,255 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:54:57,258 p=61936 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:54:57,274 p=61936 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:54:57,276 p=61936 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:54:57,322 p=61936 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] ****************************************************************************************************************************************************
+2019-06-27 12:54:59,241 p=61936 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 12:54:59,278 p=61936 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 12:54:59,295 p=61936 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 12:54:59,317 p=61936 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 12:54:59,425 p=61936 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 12:54:59,433 p=61936 u=jpacock@us.ibm.com |  PLAY RECAP ***********************************************************************************************************************************************************************************
+2019-06-27 12:54:59,433 p=61936 u=jpacock@us.ibm.com |  boot1                      : ok=17   changed=9    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+2019-06-27 12:54:59,433 p=61936 u=jpacock@us.ibm.com |  management1                : ok=11   changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:54:59,433 p=61936 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:54:59,433 p=61936 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 12:54:59,433 p=61936 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=4    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:01:41,390 p=64481 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-27 14:01:41,401 p=64481 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-27 14:01:46,614 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:01:46,643 p=64481 u=jpacock@us.ibm.com |  TASK [boot : include_vars] **********************************************************************************************************************************************
+2019-06-27 14:01:46,678 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/SLES.yml)
+2019-06-27 14:01:46,700 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] *********************************************************************************************************************************
+2019-06-27 14:01:48,941 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:01:48,970 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ******************************************************************************************************************************************
+2019-06-27 14:01:51,266 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:01:51,295 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] **********************************************************************************************************************************
+2019-06-27 14:01:53,458 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:01:53,493 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Install Python] ********************************************************************************************************************************************
+2019-06-27 14:01:53,513 p=64481 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 14:01:53,537 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] ************************************************************************************************************************
+2019-06-27 14:01:53,566 p=64481 u=jpacock@us.ibm.com |  skipping: [boot1] => (item=linux-image-extra-virtual) 
+2019-06-27 14:01:53,588 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] ************************************************************************************************************************
+2019-06-27 14:01:56,313 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-27 14:01:59,180 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-27 14:01:59,205 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] *************************************************************************************************************************
+2019-06-27 14:01:59,230 p=64481 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 14:01:59,252 p=64481 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] *********************************************************************************************************************************
+2019-06-27 14:01:59,270 p=64481 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 14:01:59,274 p=64481 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] *******************************************************************************************************************************
+2019-06-27 14:01:59,300 p=64481 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-27 14:02:01,225 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:02:02,133 p=64481 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:02:02,299 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:02:02,318 p=64481 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:02:03,296 p=64481 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:02:03,320 p=64481 u=jpacock@us.ibm.com |  TASK [base : include_vars] **********************************************************************************************************************************************
+2019-06-27 14:02:03,375 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:02:03,405 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:02:03,434 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:02:03,437 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:02:03,466 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:02:03,491 p=64481 u=jpacock@us.ibm.com |  TASK [base : Change hostname] *******************************************************************************************************************************************
+2019-06-27 14:02:05,652 p=64481 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 14:02:05,718 p=64481 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 14:02:05,735 p=64481 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 14:02:05,739 p=64481 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 14:02:05,755 p=64481 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 14:02:05,785 p=64481 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] *****************************************************************************************************************************************
+2019-06-27 14:02:07,786 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-27 14:02:07,787 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-27 14:02:07,804 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-27 14:02:07,821 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-27 14:02:07,858 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-27 14:02:09,564 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=master1)
+2019-06-27 14:02:09,565 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=master1)
+2019-06-27 14:02:09,566 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=master1)
+2019-06-27 14:02:09,571 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=master1)
+2019-06-27 14:02:09,582 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=master1)
+2019-06-27 14:02:11,157 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=management1)
+2019-06-27 14:02:11,174 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=management1)
+2019-06-27 14:02:11,195 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=management1)
+2019-06-27 14:02:11,277 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=management1)
+2019-06-27 14:02:11,351 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=management1)
+2019-06-27 14:02:12,726 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=proxy1)
+2019-06-27 14:02:12,761 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=proxy1)
+2019-06-27 14:02:12,788 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=proxy1)
+2019-06-27 14:02:12,789 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=proxy1)
+2019-06-27 14:02:12,844 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=proxy1)
+2019-06-27 14:02:14,367 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=worker1)
+2019-06-27 14:02:14,408 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=worker1)
+2019-06-27 14:02:14,437 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=worker1)
+2019-06-27 14:02:14,505 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=worker1)
+2019-06-27 14:02:14,525 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=worker1)
+2019-06-27 14:02:14,558 p=64481 u=jpacock@us.ibm.com |  TASK [base : Set root password] *****************************************************************************************************************************************
+2019-06-27 14:02:16,435 p=64481 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:02:16,478 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:02:16,497 p=64481 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:02:16,548 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:02:16,588 p=64481 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:02:16,617 p=64481 u=jpacock@us.ibm.com |  TASK [base : Enable root login] *****************************************************************************************************************************************
+2019-06-27 14:02:18,221 p=64481 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 14:02:18,222 p=64481 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 14:02:18,243 p=64481 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 14:02:18,294 p=64481 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 14:02:18,319 p=64481 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 14:02:18,343 p=64481 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] ************************************************************************************************************************************************
+2019-06-27 14:02:20,515 p=64481 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 14:02:20,732 p=64481 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 14:02:20,788 p=64481 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 14:02:20,790 p=64481 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 14:02:20,879 p=64481 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 14:02:20,904 p=64481 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] ****************************************************************************************************************************
+2019-06-27 14:02:22,966 p=64481 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-27 14:02:23,005 p=64481 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-27 14:02:23,042 p=64481 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-27 14:02:23,064 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-27 14:02:23,331 p=64481 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-27 14:02:23,357 p=64481 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] ***************************************************************************************************************
+2019-06-27 14:02:25,084 p=64481 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:02:25,104 p=64481 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:02:25,163 p=64481 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:02:25,226 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:02:25,586 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:02:25,613 p=64481 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] ******************************************************************************************************************************************
+2019-06-27 14:02:27,423 p=64481 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:02:27,425 p=64481 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:02:27,425 p=64481 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:02:27,426 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:02:27,602 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:02:27,632 p=64481 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] *******************************************************************************************************************************
+2019-06-27 14:02:33,896 p=64481 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:02:33,939 p=64481 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:02:33,984 p=64481 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:02:33,986 p=64481 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:02:33,987 p=64481 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:02:33,992 p=64481 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-27 14:02:33,993 p=64481 u=jpacock@us.ibm.com |  boot1                      : ok=17   changed=3    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+2019-06-27 14:02:33,993 p=64481 u=jpacock@us.ibm.com |  management1                : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:02:33,993 p=64481 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:02:33,993 p=64481 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:02:33,993 p=64481 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:15:13,867 p=65334 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-27 14:15:13,878 p=65334 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-27 14:15:18,914 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:18,940 p=65334 u=jpacock@us.ibm.com |  TASK [boot : include_vars] **********************************************************************************************************************************************
+2019-06-27 14:15:18,976 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/SLES.yml)
+2019-06-27 14:15:19,001 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] *********************************************************************************************************************************
+2019-06-27 14:15:21,328 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:21,355 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ******************************************************************************************************************************************
+2019-06-27 14:15:23,687 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:23,715 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] **********************************************************************************************************************************
+2019-06-27 14:15:25,862 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:25,888 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Install Python] ********************************************************************************************************************************************
+2019-06-27 14:15:25,909 p=65334 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 14:15:25,935 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] ************************************************************************************************************************
+2019-06-27 14:15:25,965 p=65334 u=jpacock@us.ibm.com |  skipping: [boot1] => (item=linux-image-extra-virtual) 
+2019-06-27 14:15:25,991 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] ************************************************************************************************************************
+2019-06-27 14:15:28,479 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-27 14:15:35,362 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-27 14:15:35,399 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] *************************************************************************************************************************
+2019-06-27 14:15:35,429 p=65334 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 14:15:35,451 p=65334 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] *********************************************************************************************************************************
+2019-06-27 14:15:35,470 p=65334 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-27 14:15:35,475 p=65334 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] *******************************************************************************************************************************
+2019-06-27 14:15:35,501 p=65334 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-27 14:15:37,875 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:38,529 p=65334 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:15:38,590 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:15:38,595 p=65334 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:15:39,365 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:15:39,390 p=65334 u=jpacock@us.ibm.com |  TASK [base : include_vars] **********************************************************************************************************************************************
+2019-06-27 14:15:39,471 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:15:39,521 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:15:39,569 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:15:39,575 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:15:39,614 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-27 14:15:39,641 p=65334 u=jpacock@us.ibm.com |  TASK [base : Change hostname] *******************************************************************************************************************************************
+2019-06-27 14:15:42,131 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:42,286 p=65334 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:15:42,345 p=65334 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:15:42,366 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:15:42,634 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:15:42,664 p=65334 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] *****************************************************************************************************************************************
+2019-06-27 14:15:44,566 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-27 14:15:44,600 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-27 14:15:44,693 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-27 14:15:44,693 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-27 14:15:44,802 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-27 14:15:46,435 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=master1)
+2019-06-27 14:15:46,436 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=master1)
+2019-06-27 14:15:46,473 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=master1)
+2019-06-27 14:15:46,490 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=master1)
+2019-06-27 14:15:46,639 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=master1)
+2019-06-27 14:15:48,216 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=management1)
+2019-06-27 14:15:48,348 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=management1)
+2019-06-27 14:15:48,349 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=management1)
+2019-06-27 14:15:48,607 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=management1)
+2019-06-27 14:15:48,631 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=management1)
+2019-06-27 14:15:50,369 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=proxy1)
+2019-06-27 14:15:50,394 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=proxy1)
+2019-06-27 14:15:50,447 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=proxy1)
+2019-06-27 14:15:50,631 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=proxy1)
+2019-06-27 14:15:50,638 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=proxy1)
+2019-06-27 14:15:52,483 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=worker1)
+2019-06-27 14:15:52,484 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=worker1)
+2019-06-27 14:15:52,524 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=worker1)
+2019-06-27 14:15:52,857 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=worker1)
+2019-06-27 14:15:52,858 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=worker1)
+2019-06-27 14:15:52,888 p=65334 u=jpacock@us.ibm.com |  TASK [base : Set root password] *****************************************************************************************************************************************
+2019-06-27 14:15:55,260 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:15:55,264 p=65334 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:15:55,265 p=65334 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:15:55,283 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:15:55,405 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:15:55,435 p=65334 u=jpacock@us.ibm.com |  TASK [base : Enable root login] *****************************************************************************************************************************************
+2019-06-27 14:15:57,799 p=65334 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 14:15:57,801 p=65334 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 14:15:57,948 p=65334 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 14:15:57,949 p=65334 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 14:15:58,165 p=65334 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 14:15:58,193 p=65334 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] ************************************************************************************************************************************************
+2019-06-27 14:16:00,925 p=65334 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-27 14:16:01,006 p=65334 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 14:16:01,149 p=65334 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 14:16:01,625 p=65334 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-27 14:16:01,627 p=65334 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 14:16:01,653 p=65334 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] ****************************************************************************************************************************
+2019-06-27 14:16:04,008 p=65334 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-27 14:16:04,012 p=65334 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-27 14:16:04,121 p=65334 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-27 14:16:04,174 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-27 14:16:04,234 p=65334 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-27 14:16:04,259 p=65334 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] ***************************************************************************************************************
+2019-06-27 14:16:06,781 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:16:06,783 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:16:06,784 p=65334 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:16:06,870 p=65334 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:16:06,973 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:16:07,002 p=65334 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] ******************************************************************************************************************************************
+2019-06-27 14:16:09,182 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:16:09,235 p=65334 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:16:09,237 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:16:09,409 p=65334 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:16:09,458 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:16:09,492 p=65334 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] *******************************************************************************************************************************
+2019-06-27 14:16:12,238 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:16:12,239 p=65334 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-27 14:16:12,240 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:16:12,240 p=65334 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-27 14:16:12,280 p=65334 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-27 14:16:12,307 p=65334 u=jpacock@us.ibm.com |  TASK [base : Install git-core] ******************************************************************************************************************************************
+2019-06-27 14:16:14,665 p=65334 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-27 14:16:14,811 p=65334 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-27 14:16:16,194 p=65334 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-27 14:16:16,195 p=65334 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-27 14:16:16,494 p=65334 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-27 14:16:16,499 p=65334 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-27 14:16:16,499 p=65334 u=jpacock@us.ibm.com |  boot1                      : ok=18   changed=2    unreachable=0    failed=0    skipped=4    rescued=0    ignored=0   
+2019-06-27 14:16:16,499 p=65334 u=jpacock@us.ibm.com |  management1                : ok=12   changed=2    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:16:16,500 p=65334 u=jpacock@us.ibm.com |  master1                    : ok=12   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:16:16,500 p=65334 u=jpacock@us.ibm.com |  proxy1                     : ok=12   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-27 14:16:16,500 p=65334 u=jpacock@us.ibm.com |  worker1                    : ok=12   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:28:40,532 p=70598 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:28:40,545 p=70598 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:28:50,590 p=70598 u=jpacock@us.ibm.com |  fatal: [boot1]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 172.16.252.219 port 22: Operation timed out", "unreachable": true}
+2019-06-28 15:28:50,592 p=70598 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:28:50,592 p=70598 u=jpacock@us.ibm.com |  boot1                      : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:29:35,131 p=71196 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:29:35,157 p=71196 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:29:42,578 p=71196 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:29:42,610 p=71196 u=jpacock@us.ibm.com |  TASK [boot : include_vars] **********************************************************************************************************************************************
+2019-06-28 15:29:42,660 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/SLES.yml)
+2019-06-28 15:29:42,687 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] *********************************************************************************************************************************
+2019-06-28 15:29:45,917 p=71196 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:29:45,950 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ******************************************************************************************************************************************
+2019-06-28 15:29:49,127 p=71196 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:29:49,164 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] **********************************************************************************************************************************
+2019-06-28 15:29:53,997 p=71196 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:29:54,034 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Install Python] ********************************************************************************************************************************************
+2019-06-28 15:29:54,057 p=71196 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-28 15:29:54,084 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] ************************************************************************************************************************
+2019-06-28 15:29:54,121 p=71196 u=jpacock@us.ibm.com |  skipping: [boot1] => (item=linux-image-extra-virtual) 
+2019-06-28 15:29:54,150 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] ************************************************************************************************************************
+2019-06-28 15:29:58,537 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-28 15:30:02,976 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-28 15:30:03,011 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] *************************************************************************************************************************
+2019-06-28 15:30:03,042 p=71196 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-28 15:30:03,070 p=71196 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] *********************************************************************************************************************************
+2019-06-28 15:30:03,094 p=71196 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-28 15:30:03,100 p=71196 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] *******************************************************************************************************************************
+2019-06-28 15:30:03,136 p=71196 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:30:06,397 p=71196 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:30:07,914 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-28 15:30:08,019 p=71196 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-28 15:30:08,235 p=71196 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-28 15:30:08,270 p=71196 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-28 15:30:08,297 p=71196 u=jpacock@us.ibm.com |  TASK [base : include_vars] **********************************************************************************************************************************************
+2019-06-28 15:30:08,365 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-28 15:30:08,404 p=71196 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-28 15:30:08,441 p=71196 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-28 15:30:08,443 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-28 15:30:08,477 p=71196 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/SLES.yml)
+2019-06-28 15:30:08,510 p=71196 u=jpacock@us.ibm.com |  TASK [base : Change hostname] *******************************************************************************************************************************************
+2019-06-28 15:30:12,393 p=71196 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 15:30:12,900 p=71196 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 15:30:12,935 p=71196 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 15:30:13,262 p=71196 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:30:13,342 p=71196 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 15:30:13,375 p=71196 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] *****************************************************************************************************************************************
+2019-06-28 15:30:16,259 p=71196 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-28 15:30:16,435 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-28 15:30:16,436 p=71196 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-28 15:30:16,677 p=71196 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-28 15:30:16,745 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-28 15:30:23,100 p=71196 u=jpacock@us.ibm.com |  ok: [master1] => (item=master1)
+2019-06-28 15:30:23,279 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=master1)
+2019-06-28 15:30:23,455 p=71196 u=jpacock@us.ibm.com |  ok: [management1] => (item=master1)
+2019-06-28 15:30:23,493 p=71196 u=jpacock@us.ibm.com |  ok: [worker1] => (item=master1)
+2019-06-28 15:30:23,638 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=master1)
+2019-06-28 15:30:27,026 p=71196 u=jpacock@us.ibm.com |  ok: [master1] => (item=management1)
+2019-06-28 15:30:27,096 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=management1)
+2019-06-28 15:30:27,274 p=71196 u=jpacock@us.ibm.com |  ok: [worker1] => (item=management1)
+2019-06-28 15:30:27,344 p=71196 u=jpacock@us.ibm.com |  ok: [management1] => (item=management1)
+2019-06-28 15:30:27,416 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=management1)
+2019-06-28 15:30:30,216 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=proxy1)
+2019-06-28 15:30:30,251 p=71196 u=jpacock@us.ibm.com |  ok: [master1] => (item=proxy1)
+2019-06-28 15:30:30,441 p=71196 u=jpacock@us.ibm.com |  ok: [worker1] => (item=proxy1)
+2019-06-28 15:30:30,664 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=proxy1)
+2019-06-28 15:30:30,665 p=71196 u=jpacock@us.ibm.com |  ok: [management1] => (item=proxy1)
+2019-06-28 15:30:32,828 p=71196 u=jpacock@us.ibm.com |  ok: [master1] => (item=worker1)
+2019-06-28 15:30:32,967 p=71196 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=worker1)
+2019-06-28 15:30:33,178 p=71196 u=jpacock@us.ibm.com |  ok: [worker1] => (item=worker1)
+2019-06-28 15:30:33,249 p=71196 u=jpacock@us.ibm.com |  ok: [boot1] => (item=worker1)
+2019-06-28 15:30:33,320 p=71196 u=jpacock@us.ibm.com |  ok: [management1] => (item=worker1)
+2019-06-28 15:30:33,356 p=71196 u=jpacock@us.ibm.com |  TASK [base : Set root password] *****************************************************************************************************************************************
+2019-06-28 15:30:36,350 p=71196 u=jpacock@us.ibm.com |   [WARNING]: The input password appears not to have been hashed. The 'password' argument must be encrypted for this module to work properly.
+
+2019-06-28 15:30:36,351 p=71196 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 15:30:36,352 p=71196 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 15:30:36,414 p=71196 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 15:30:36,417 p=71196 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 15:30:36,594 p=71196 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:30:36,629 p=71196 u=jpacock@us.ibm.com |  TASK [base : Enable root login] *****************************************************************************************************************************************
+2019-06-28 15:30:41,215 p=71196 u=jpacock@us.ibm.com |  fatal: [boot1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:30:41,245 p=71196 u=jpacock@us.ibm.com |  fatal: [worker1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:30:41,426 p=71196 u=jpacock@us.ibm.com |  fatal: [management1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:30:41,714 p=71196 u=jpacock@us.ibm.com |  fatal: [master1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:30:41,954 p=71196 u=jpacock@us.ibm.com |  fatal: [proxy1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:30:41,957 p=71196 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:30:41,958 p=71196 u=jpacock@us.ibm.com |  boot1                      : ok=11   changed=2    unreachable=0    failed=1    skipped=4    rescued=0    ignored=0   
+2019-06-28 15:30:41,958 p=71196 u=jpacock@us.ibm.com |  management1                : ok=5    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:30:41,958 p=71196 u=jpacock@us.ibm.com |  master1                    : ok=5    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:30:41,958 p=71196 u=jpacock@us.ibm.com |  proxy1                     : ok=5    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:30:41,958 p=71196 u=jpacock@us.ibm.com |  worker1                    : ok=5    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:33:12,356 p=71881 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:33:12,366 p=71881 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:33:21,583 p=71881 u=jpacock@us.ibm.com |  fatal: [boot1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:33:21,585 p=71881 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:33:21,585 p=71881 u=jpacock@us.ibm.com |  boot1                      : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:34:07,893 p=71911 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:34:07,901 p=71911 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:34:14,416 p=71911 u=jpacock@us.ibm.com |  fatal: [boot1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:34:14,417 p=71911 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:34:14,417 p=71911 u=jpacock@us.ibm.com |  boot1                      : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:34:37,999 p=71945 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:34:38,007 p=71945 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:34:44,734 p=71945 u=jpacock@us.ibm.com |  fatal: [boot1]: FAILED! => {"msg": "Incorrect sudo password"}
+2019-06-28 15:34:44,735 p=71945 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:34:44,735 p=71945 u=jpacock@us.ibm.com |  boot1                      : ok=0    changed=0    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:51:07,139 p=72137 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:51:07,151 p=72137 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:51:07,970 p=72137 u=jpacock@us.ibm.com |  fatal: [boot1]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: sysadmin@172.16.252.212: Permission denied (publickey,password).", "unreachable": true}
+2019-06-28 15:51:07,972 p=72137 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:51:07,972 p=72137 u=jpacock@us.ibm.com |  boot1                      : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:53:09,567 p=72423 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:53:09,579 p=72423 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:53:16,052 p=72423 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:53:16,071 p=72423 u=jpacock@us.ibm.com |  TASK [boot : include_vars] **********************************************************************************************************************************************
+2019-06-28 15:53:16,112 p=72423 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/Ubuntu.yml)
+2019-06-28 15:53:16,130 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] *********************************************************************************************************************************
+2019-06-28 15:53:19,314 p=72423 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:53:19,331 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ******************************************************************************************************************************************
+2019-06-28 15:53:27,546 p=72423 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:53:27,566 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] **********************************************************************************************************************************
+2019-06-28 15:53:31,113 p=72423 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:53:31,139 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Install Python] ********************************************************************************************************************************************
+2019-06-28 15:53:49,697 p=72423 u=jpacock@us.ibm.com |   [WARNING]: Could not find aptitude. Using apt-get instead
+
+2019-06-28 15:53:49,703 p=72423 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:53:49,726 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] ************************************************************************************************************************
+2019-06-28 15:54:33,632 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=linux-image-extra-virtual)
+2019-06-28 15:54:33,653 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] ************************************************************************************************************************
+2019-06-28 15:54:39,197 p=72423 u=jpacock@us.ibm.com |  ok: [boot1] => (item=apt-transport-https)
+2019-06-28 15:54:43,541 p=72423 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-28 15:54:49,272 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=curl)
+2019-06-28 15:54:58,681 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=software-properties-common)
+2019-06-28 15:54:58,701 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] *************************************************************************************************************************
+2019-06-28 15:55:03,293 p=72423 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:55:03,309 p=72423 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] *********************************************************************************************************************************
+2019-06-28 15:55:10,549 p=72423 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:55:10,557 p=72423 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] *******************************************************************************************************************************
+2019-06-28 15:55:10,581 p=72423 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:55:13,548 p=72423 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:55:16,074 p=72423 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-28 15:55:16,111 p=72423 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-28 15:55:17,763 p=72423 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-28 15:55:17,834 p=72423 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-28 15:55:17,852 p=72423 u=jpacock@us.ibm.com |  TASK [base : include_vars] **********************************************************************************************************************************************
+2019-06-28 15:55:17,903 p=72423 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 15:55:17,931 p=72423 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 15:55:17,960 p=72423 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 15:55:17,968 p=72423 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 15:55:18,001 p=72423 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 15:55:18,024 p=72423 u=jpacock@us.ibm.com |  TASK [base : Change hostname] *******************************************************************************************************************************************
+2019-06-28 15:55:21,972 p=72423 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 15:55:21,973 p=72423 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 15:55:22,004 p=72423 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 15:55:22,303 p=72423 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 15:55:23,849 p=72423 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 15:55:23,873 p=72423 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] *****************************************************************************************************************************************
+2019-06-28 15:55:26,757 p=72423 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-28 15:55:26,764 p=72423 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-28 15:55:26,856 p=72423 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-28 15:55:26,858 p=72423 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-28 15:55:27,274 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-28 15:55:31,318 p=72423 u=jpacock@us.ibm.com |  changed: [worker1] => (item=master1)
+2019-06-28 15:55:31,387 p=72423 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=master1)
+2019-06-28 15:55:31,424 p=72423 u=jpacock@us.ibm.com |  changed: [management1] => (item=master1)
+2019-06-28 15:55:31,683 p=72423 u=jpacock@us.ibm.com |  changed: [master1] => (item=master1)
+2019-06-28 15:55:32,061 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=master1)
+2019-06-28 15:55:33,856 p=72423 u=jpacock@us.ibm.com |  changed: [worker1] => (item=management1)
+2019-06-28 15:55:34,036 p=72423 u=jpacock@us.ibm.com |  changed: [management1] => (item=management1)
+2019-06-28 15:55:34,175 p=72423 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=management1)
+2019-06-28 15:55:34,336 p=72423 u=jpacock@us.ibm.com |  changed: [master1] => (item=management1)
+2019-06-28 15:55:34,561 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=management1)
+2019-06-28 15:55:36,666 p=72423 u=jpacock@us.ibm.com |  changed: [worker1] => (item=proxy1)
+2019-06-28 15:55:36,741 p=72423 u=jpacock@us.ibm.com |  changed: [management1] => (item=proxy1)
+2019-06-28 15:55:37,362 p=72423 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=proxy1)
+2019-06-28 15:55:37,506 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=proxy1)
+2019-06-28 15:55:37,586 p=72423 u=jpacock@us.ibm.com |  changed: [master1] => (item=proxy1)
+2019-06-28 15:55:39,150 p=72423 u=jpacock@us.ibm.com |  changed: [worker1] => (item=worker1)
+2019-06-28 15:55:39,642 p=72423 u=jpacock@us.ibm.com |  changed: [management1] => (item=worker1)
+2019-06-28 15:55:39,853 p=72423 u=jpacock@us.ibm.com |  changed: [boot1] => (item=worker1)
+2019-06-28 15:55:40,328 p=72423 u=jpacock@us.ibm.com |  changed: [master1] => (item=worker1)
+2019-06-28 15:55:40,473 p=72423 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=worker1)
+2019-06-28 15:55:40,499 p=72423 u=jpacock@us.ibm.com |  TASK [base : Set root password] *****************************************************************************************************************************************
+2019-06-28 15:55:40,537 p=72423 u=jpacock@us.ibm.com |  fatal: [boot1]: FAILED! => {"msg": "crypt.crypt not supported on Mac OS X/Darwin, install passlib python module"}
+2019-06-28 15:55:40,570 p=72423 u=jpacock@us.ibm.com |  fatal: [master1]: FAILED! => {"msg": "crypt.crypt not supported on Mac OS X/Darwin, install passlib python module"}
+2019-06-28 15:55:40,601 p=72423 u=jpacock@us.ibm.com |  fatal: [management1]: FAILED! => {"msg": "crypt.crypt not supported on Mac OS X/Darwin, install passlib python module"}
+2019-06-28 15:55:40,630 p=72423 u=jpacock@us.ibm.com |  fatal: [proxy1]: FAILED! => {"msg": "crypt.crypt not supported on Mac OS X/Darwin, install passlib python module"}
+2019-06-28 15:55:40,647 p=72423 u=jpacock@us.ibm.com |  fatal: [worker1]: FAILED! => {"msg": "crypt.crypt not supported on Mac OS X/Darwin, install passlib python module"}
+2019-06-28 15:55:40,651 p=72423 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 15:55:40,652 p=72423 u=jpacock@us.ibm.com |  boot1                      : ok=14   changed=9    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:55:40,652 p=72423 u=jpacock@us.ibm.com |  management1                : ok=4    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:55:40,652 p=72423 u=jpacock@us.ibm.com |  master1                    : ok=4    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:55:40,652 p=72423 u=jpacock@us.ibm.com |  proxy1                     : ok=4    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:55:40,652 p=72423 u=jpacock@us.ibm.com |  worker1                    : ok=4    changed=2    unreachable=0    failed=1    skipped=0    rescued=0    ignored=0   
+2019-06-28 15:58:59,308 passlib.registry registered 'md5_crypt' handler: <class 'passlib.handlers.md5_crypt.md5_crypt'>
+2019-06-28 15:58:59,314 p=72867 u=jpacock@us.ibm.com |  PLAY [Apply boot config] ************************************************************************************************************************************************
+2019-06-28 15:58:59,325 p=72867 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:59:06,130 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:06,156 p=72867 u=jpacock@us.ibm.com |  TASK [boot : include_vars] **********************************************************************************************************************************************
+2019-06-28 15:59:06,200 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/boot/vars/../vars/Ubuntu.yml)
+2019-06-28 15:59:06,217 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Create root ssh directory] *********************************************************************************************************************************
+2019-06-28 15:59:09,152 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:09,173 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Generate ssh key] ******************************************************************************************************************************************
+2019-06-28 15:59:12,958 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:12,985 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Copy ssh key to hostvars] **********************************************************************************************************************************
+2019-06-28 15:59:16,889 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:16,916 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Install Python] ********************************************************************************************************************************************
+2019-06-28 15:59:25,536 p=72867 u=jpacock@us.ibm.com |   [WARNING]: Updating cache and auto-installing missing dependency: python-apt
+
+2019-06-28 15:59:25,537 p=72867 u=jpacock@us.ibm.com |   [WARNING]: Could not find aptitude. Using apt-get instead
+
+2019-06-28 15:59:25,537 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:25,557 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Install Linux image extra packages] ************************************************************************************************************************
+2019-06-28 15:59:30,629 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=linux-image-extra-virtual)
+2019-06-28 15:59:30,651 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Install additional needed packages] ************************************************************************************************************************
+2019-06-28 15:59:34,521 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=apt-transport-https)
+2019-06-28 15:59:38,755 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=ca-certificates)
+2019-06-28 15:59:42,714 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=curl)
+2019-06-28 15:59:46,450 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=software-properties-common)
+2019-06-28 15:59:46,474 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Install Docker's official GPG Key] *************************************************************************************************************************
+2019-06-28 15:59:50,385 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:50,403 p=72867 u=jpacock@us.ibm.com |  TASK [boot : Add Docker apt-repository] *********************************************************************************************************************************
+2019-06-28 15:59:54,422 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:54,427 p=72867 u=jpacock@us.ibm.com |  PLAY [Apply base icp config to all nodes] *******************************************************************************************************************************
+2019-06-28 15:59:54,450 p=72867 u=jpacock@us.ibm.com |  TASK [Gathering Facts] **************************************************************************************************************************************************
+2019-06-28 15:59:58,314 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 15:59:59,198 p=72867 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-28 15:59:59,336 p=72867 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-28 16:00:00,497 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-28 16:00:00,533 p=72867 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-28 16:00:00,551 p=72867 u=jpacock@us.ibm.com |  TASK [base : include_vars] **********************************************************************************************************************************************
+2019-06-28 16:00:00,627 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 16:00:00,656 p=72867 u=jpacock@us.ibm.com |  ok: [master1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 16:00:00,658 p=72867 u=jpacock@us.ibm.com |  ok: [management1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 16:00:00,665 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 16:00:00,696 p=72867 u=jpacock@us.ibm.com |  ok: [worker1] => (item=/Users/jpacock@us.ibm.com/Projects/refarch-privatecloud/ansible_node_prep/roles/base/vars/../vars/Ubuntu.yml)
+2019-06-28 16:00:00,715 p=72867 u=jpacock@us.ibm.com |  TASK [base : Change hostname] *******************************************************************************************************************************************
+2019-06-28 16:00:03,904 p=72867 u=jpacock@us.ibm.com |  ok: [boot1]
+2019-06-28 16:00:04,123 p=72867 u=jpacock@us.ibm.com |  ok: [worker1]
+2019-06-28 16:00:04,265 p=72867 u=jpacock@us.ibm.com |  ok: [master1]
+2019-06-28 16:00:05,501 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1]
+2019-06-28 16:00:05,649 p=72867 u=jpacock@us.ibm.com |  ok: [management1]
+2019-06-28 16:00:05,669 p=72867 u=jpacock@us.ibm.com |  TASK [base : Update /etc/hosts] *****************************************************************************************************************************************
+2019-06-28 16:00:08,298 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=boot1)
+2019-06-28 16:00:08,368 p=72867 u=jpacock@us.ibm.com |  ok: [master1] => (item=boot1)
+2019-06-28 16:00:08,410 p=72867 u=jpacock@us.ibm.com |  ok: [worker1] => (item=boot1)
+2019-06-28 16:00:08,631 p=72867 u=jpacock@us.ibm.com |  ok: [management1] => (item=boot1)
+2019-06-28 16:00:08,668 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=boot1)
+2019-06-28 16:00:10,584 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=master1)
+2019-06-28 16:00:10,767 p=72867 u=jpacock@us.ibm.com |  ok: [worker1] => (item=master1)
+2019-06-28 16:00:10,911 p=72867 u=jpacock@us.ibm.com |  ok: [master1] => (item=master1)
+2019-06-28 16:00:11,328 p=72867 u=jpacock@us.ibm.com |  ok: [management1] => (item=master1)
+2019-06-28 16:00:11,364 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=master1)
+2019-06-28 16:00:13,464 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=management1)
+2019-06-28 16:00:13,720 p=72867 u=jpacock@us.ibm.com |  ok: [master1] => (item=management1)
+2019-06-28 16:00:13,759 p=72867 u=jpacock@us.ibm.com |  ok: [worker1] => (item=management1)
+2019-06-28 16:00:13,975 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=management1)
+2019-06-28 16:00:14,014 p=72867 u=jpacock@us.ibm.com |  ok: [management1] => (item=management1)
+2019-06-28 16:00:15,859 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=proxy1)
+2019-06-28 16:00:16,039 p=72867 u=jpacock@us.ibm.com |  ok: [worker1] => (item=proxy1)
+2019-06-28 16:00:16,075 p=72867 u=jpacock@us.ibm.com |  ok: [master1] => (item=proxy1)
+2019-06-28 16:00:16,262 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=proxy1)
+2019-06-28 16:00:16,405 p=72867 u=jpacock@us.ibm.com |  ok: [management1] => (item=proxy1)
+2019-06-28 16:00:22,728 p=72867 u=jpacock@us.ibm.com |  ok: [boot1] => (item=worker1)
+2019-06-28 16:00:22,796 p=72867 u=jpacock@us.ibm.com |  ok: [master1] => (item=worker1)
+2019-06-28 16:00:22,903 p=72867 u=jpacock@us.ibm.com |  ok: [worker1] => (item=worker1)
+2019-06-28 16:00:23,469 p=72867 u=jpacock@us.ibm.com |  ok: [proxy1] => (item=worker1)
+2019-06-28 16:00:23,635 p=72867 u=jpacock@us.ibm.com |  ok: [management1] => (item=worker1)
+2019-06-28 16:00:23,666 p=72867 u=jpacock@us.ibm.com |  TASK [base : Set root password] *****************************************************************************************************************************************
+2019-06-28 16:00:23,696 passlib.registry registered 'sha512_crypt' handler: <class 'passlib.handlers.sha2_crypt.sha512_crypt'>
+2019-06-28 16:00:23,719 passlib.registry registered 'sha512_crypt' handler: <class 'passlib.handlers.sha2_crypt.sha512_crypt'>
+2019-06-28 16:00:23,745 passlib.registry registered 'sha512_crypt' handler: <class 'passlib.handlers.sha2_crypt.sha512_crypt'>
+2019-06-28 16:00:23,770 passlib.registry registered 'sha512_crypt' handler: <class 'passlib.handlers.sha2_crypt.sha512_crypt'>
+2019-06-28 16:00:23,793 passlib.registry registered 'sha512_crypt' handler: <class 'passlib.handlers.sha2_crypt.sha512_crypt'>
+2019-06-28 16:00:26,590 p=72867 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 16:00:26,730 p=72867 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 16:00:26,765 p=72867 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 16:00:26,838 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 16:00:26,839 p=72867 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 16:00:26,864 p=72867 u=jpacock@us.ibm.com |  TASK [base : Enable root login] *****************************************************************************************************************************************
+2019-06-28 16:00:29,372 p=72867 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 16:00:29,547 p=72867 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 16:00:29,548 p=72867 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 16:00:29,618 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 16:00:29,653 p=72867 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 16:00:29,677 p=72867 u=jpacock@us.ibm.com |  TASK [base : Reload ssh] ************************************************************************************************************************************************
+2019-06-28 16:00:34,032 p=72867 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 16:00:34,235 p=72867 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 16:00:34,329 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 16:00:34,505 p=72867 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 16:00:34,578 p=72867 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 16:00:34,601 p=72867 u=jpacock@us.ibm.com |  TASK [base : Add master public key to other] ****************************************************************************************************************************
+2019-06-28 16:00:37,181 p=72867 u=jpacock@us.ibm.com |  changed: [boot1] => (item=boot1)
+2019-06-28 16:00:38,401 p=72867 u=jpacock@us.ibm.com |  changed: [worker1] => (item=boot1)
+2019-06-28 16:00:38,402 p=72867 u=jpacock@us.ibm.com |  changed: [master1] => (item=boot1)
+2019-06-28 16:00:38,436 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1] => (item=boot1)
+2019-06-28 16:00:38,470 p=72867 u=jpacock@us.ibm.com |  changed: [management1] => (item=boot1)
+2019-06-28 16:00:38,493 p=72867 u=jpacock@us.ibm.com |  TASK [base : Update NTP (Network Time Protocol) settings] ***************************************************************************************************************
+2019-06-28 16:00:46,996 p=72867 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 16:00:59,376 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 16:01:01,806 p=72867 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 16:01:01,988 p=72867 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 16:01:02,851 p=72867 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 16:01:02,875 p=72867 u=jpacock@us.ibm.com |  TASK [base : Configure sysctl] ******************************************************************************************************************************************
+2019-06-28 16:01:05,781 p=72867 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 16:01:05,814 p=72867 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 16:01:05,852 p=72867 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 16:01:05,886 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 16:01:05,921 p=72867 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 16:01:05,944 p=72867 u=jpacock@us.ibm.com |  TASK [base : Install NFS client packages] *******************************************************************************************************************************
+2019-06-28 16:01:13,771 p=72867 u=jpacock@us.ibm.com |  changed: [boot1]
+2019-06-28 16:01:16,823 p=72867 u=jpacock@us.ibm.com |  changed: [proxy1]
+2019-06-28 16:01:17,403 p=72867 u=jpacock@us.ibm.com |  changed: [worker1]
+2019-06-28 16:01:17,876 p=72867 u=jpacock@us.ibm.com |  changed: [master1]
+2019-06-28 16:01:18,946 p=72867 u=jpacock@us.ibm.com |  changed: [management1]
+2019-06-28 16:01:18,971 p=72867 u=jpacock@us.ibm.com |  TASK [base : Install git-core] ******************************************************************************************************************************************
+2019-06-28 16:01:19,031 p=72867 u=jpacock@us.ibm.com |  skipping: [boot1]
+2019-06-28 16:01:19,062 p=72867 u=jpacock@us.ibm.com |  skipping: [master1]
+2019-06-28 16:01:19,097 p=72867 u=jpacock@us.ibm.com |  skipping: [management1]
+2019-06-28 16:01:19,098 p=72867 u=jpacock@us.ibm.com |  skipping: [proxy1]
+2019-06-28 16:01:19,114 p=72867 u=jpacock@us.ibm.com |  skipping: [worker1]
+2019-06-28 16:01:19,120 p=72867 u=jpacock@us.ibm.com |  PLAY RECAP **************************************************************************************************************************************************************
+2019-06-28 16:01:19,120 p=72867 u=jpacock@us.ibm.com |  boot1                      : ok=21   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+2019-06-28 16:01:19,120 p=72867 u=jpacock@us.ibm.com |  management1                : ok=11   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+2019-06-28 16:01:19,121 p=72867 u=jpacock@us.ibm.com |  master1                    : ok=11   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+2019-06-28 16:01:19,121 p=72867 u=jpacock@us.ibm.com |  proxy1                     : ok=11   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   
+2019-06-28 16:01:19,121 p=72867 u=jpacock@us.ibm.com |  worker1                    : ok=11   changed=7    unreachable=0    failed=0    skipped=1    rescued=0    ignored=0   

@@ -34,7 +34,7 @@
   user:
     name: root
     update_password: always
-    password: $6$kmx3VG6IVg2HNaQD$.qMvyYLbNsjRXTgAYnVJIKvRWaDJx6nrmN.1p1uO6kvMLSEW3FNeHa6DH7zeRPxWtgp1seK40kiDCPF5lbK18.
+    password: "{{ root_password | password_hash('sha512') }}"
 
 - name: "Enable root login"
   lineinfile:
@@ -71,3 +71,9 @@
   package:
     name: "{{nfs_client_package_name}}"
     state: present
+
+- name: "Install git-core"
+  package:
+    name: git-core
+    state: present
+  when: ansible_distribution == 'SLES'
