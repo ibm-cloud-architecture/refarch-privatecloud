@@ -101,3 +101,7 @@ Additional items:
 - Consider breaking out etcd outside of the master nodes if you plan on having a cluster with several hundred worker nodes.
 - Multiple master nodes does not automatically imply load balancing, you are responsible for load balancing your master node requests.
 - The number of services in your cluster greatly affects the load on each node.  In large clusters with greater than 5000 services, you will require nodes to run in IPVS mode rather than the default of IPTables.  (IPVS takes additional considerations for deployment).
+
+## Additional Information
+
+This [blog](https://github.ibm.com/Georgios-Raptis/ICP_assets/blob/master/BankOfCyprus/Readme.md) includes some additional help for qualifying your infrastructure.
