@@ -128,7 +128,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
 1. Configure Docker Storage
   ```
-  cat > /etc/sysconfig/docker-storage-config <<EOF
+  cat > /etc/sysconfig/docker-storage-setup <<EOF
   STORAGE_DRIVER=overlay2
   DEVS=/dev/vdb
   CONTAINER_ROOT_LV_NAME=dockerlv
@@ -137,7 +137,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   VG=dockervg
   EOF
   ```
-  This will create a new file named `docker-storage-config` in /etc/sysconfig.  DEVS should contain the raw device which should be used for the docker partition.  The raw disk will be configured for Logical Volume Mapping (LVM) and mounted at the location specified by `CONTAINER_ROOT_LV_MOUNT_PATH`, this specified location is the default location for the docker local registry.<br><br>The value in `DEVS` should be the second raw disk in the system (e.g. /dev/sdb or /dev/vdb).  This value should be the raw disk device and should not have a partition.
+  This will create a new file named `docker-storage-setup` in /etc/sysconfig.  DEVS should contain the raw device which should be used for the docker partition.  The raw disk will be configured for Logical Volume Mapping (LVM) and mounted at the location specified by `CONTAINER_ROOT_LV_MOUNT_PATH`, this specified location is the default location for the docker local registry.<br><br>The value in `DEVS` should be the second raw disk in the system (e.g. /dev/sdb or /dev/vdb).  This value should be the raw disk device and should not have a partition.
 
 1. Enable docker to be auto-started with the system
   ```
