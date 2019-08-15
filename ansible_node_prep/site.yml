@@ -6,12 +6,13 @@
 # The tasks where root is needed use the "become" option.
 #
 # Sample invocation (all on one line):
-#   ansible-playbook -i hosts site.yml --extra-vars "ansible_become_pass=passw0rd"
-- name: Apply master config
-  hosts: master
+#   ansible-playbook -i hosts site.yml --extra-vars "ansible_become_pass=<password> root_password=<root_password>"
+
+- name: Apply boot config
+  hosts: boot
   become: yes
   roles:
-    - master-boot-ssh
+    - boot
 
 - name: Apply base icp config to all nodes
   hosts: all

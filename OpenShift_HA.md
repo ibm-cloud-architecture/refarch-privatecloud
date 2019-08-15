@@ -1,4 +1,4 @@
-# Install Redhat Openshift
+# Install Red Hat OpenShift
   Features:
   * HA architecture
   * GlusterFS for workload storage

@@ -1,0 +1,10 @@
+---
+ssh_svc_name: sshd
+nfs_client_package_name: nfs-client
+
+additional_packages_list: 
+  # - apt-transport-https
+  - ca-certificates
+  - curl
+  # - software-properties-common
+docker_package_name: docker

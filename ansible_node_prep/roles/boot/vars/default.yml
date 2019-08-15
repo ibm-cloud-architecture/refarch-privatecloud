@@ -1,0 +1,6 @@
+---
+ssh_svc_name: ssh
+nfs_client_package_name: nfs-common
+python_setup_tools_package_name: python-setuptools
+additional_packages_list: [ apt-transport-https, ca-certificates, curl, software-properties-common ]
+docker_package_name: docker-ce
