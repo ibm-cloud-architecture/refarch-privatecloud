@@ -10,6 +10,7 @@ Installation in a vmware environment includes the following basic steps:
 1. Decide how many instances of each node type to install and determine the IP addresses for each node.
 
   In this guide we will use the following topology:
+  
     1. Installation server (with webserver installed)
     1. 1 load balancer for the control control plane (master nodes)
     1. 1 load balancer for the compute nodes (worker nodes)
