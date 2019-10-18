@@ -180,7 +180,7 @@ We will discuss each of these in turn in the rest of this document.
 
   ```
   cd /opt
-  ./openshift-install create ignition-configes --dir=./vhavard
+  ./openshift-install create ignition-configs --dir=./vhavard
   ```
 
   Where vhavard is the name of your cluster just as in the previous step.
