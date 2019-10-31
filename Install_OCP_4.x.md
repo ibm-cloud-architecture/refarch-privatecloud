@@ -10,7 +10,7 @@ Installation in a vmware environment includes the following basic steps:
 1. Decide how many instances of each node type to install and determine the IP addresses for each node.
 
   In this guide we will use the following topology:
-  
+
     1. Installation server (with webserver installed)
     1. 1 load balancer for the control control plane (master nodes)
     1. 1 load balancer for the compute nodes (worker nodes)
@@ -760,7 +760,95 @@ INFO Access the OpenShift web-console here: https://console-openshift-console.ap
 INFO Login to the console with user: kubeadmin, password: wSbzT-DCZCU-BRYF7-C7bXz
 ```
 
-Login to your new cluster and enjoy!
+Login to your new cluster as kubeadmin with the credentials output to the screen.  If you lose that screen output, the same information can be found on your installation server in the `<projectdir>/auth/kubeadmin-password` file.
+
+# Integrating your cluster with Microsoft Active Directory for authentication
+
+Login to your cluster as kubeadmin as noted above.
+
+Navigate to "Administration -> Cluster Settings -> Global Configuration", scroll down and click the "OAuth" link.
+
+At the bottom of the page you will find a section entitled "Identity Providers" and it will be blank.
+
+If you click the "Add" drop-down list you will find a number of different options for authentication integration.
+
+Scroll down the list and choose "LDAP".  This will bring up a form with a number of fields you must fill:
+
+* Name - This is the name of the provider and can be any value label.  You should name it something meaningful - I named mine 'csplab' since I will be authenticating against the csplab Active Directory service.
+
+  e.g `csplab`
+
+* URL - This is not just the URL of the LDAP server, but also the basedn and attribute to use as your login name.
+
+  e.g `ldap://<hostname of AD server>:389/CN=users,DC=csplab,DC=local?sAMAccountName`
+
+* Bind DN - Although the docs say this can be blank for anonymous bind, experience shows it must not be blank.  Provide the full binddn for the user to use to bind to the service and query for valid users.
+
+  e.g. `CN=ReadOnly,CN=Users,DC=csplab,DC=local`
+
+* Bind Password - The password for the user specified in the BindDN blank.
+
+  e.g. `mySup3rS3cr3tPassw0rd!`
+
+* ID - This is the LDAP attribute that should be used for authentication.  For AD, this should be `sAMAccountName`.
+
+  e.g. `sAMAccountName`
+
+* Preferred Username - Typically, the userid and username are the same.
+
+  e.g. `sAMAccountName`
+
+* Name - This is the user's display name.  The field that containes the user's full name.
+
+  e.g. `displayName`
+
+* Email - The field that contains the user's email address
+
+  e.g. `mail`
+
+If you are using TLS for authentication, use the `CA File` blank to put your CA Cert file.
+
+Click 'Add' to create your new identity provider.
+
+**IMPORTANT:** You can have multiple identity providers, but a single userid can only be used by one.  For example, if I have an htpasswd provider and a user `vhavard` is defined and claimed from that provider, I cannot also have a user named `vhavard` from the LDAP identity provider.
+
+When this is complete you should be able to login with any value user from your LDAP identity provider as the most basic user.
+
+_Once you have logged in for the first time_ you should be able to click on the `Role Bindings` menu item under `Administration` and find your new user.  You will then need to specify a role for your new user.
+
+Lets add an LDAP user as a cluster administrator.  Either use the oc command line or the console UI to login as a valid LDAP user.
+
+  ```
+  oc login -u <validLdapUser>
+  oc get users  # Note the user exists
+  oc get identities  # Note the user is from the correct identity provider
+  ```
+
+At the top of this page, click "Create Binding" which will bring up a form.
+
+* Binding Type - A role within the namespace or a role within the cluster?
+
+  `Cluster-wide Role Binding (ClusterRoleBinding)`
+
+* Role Binding - Any Valid Label
+
+  `vhavard-cluster-admin`
+
+* Role Name - Click the drop-down list and choose `cluster-admin`
+
+* Subject - Who should this role belong to?
+
+  * User
+
+  * Subject Name - The name of the user to bind to this role
+
+    `vhavard`
+
+Click the `Create` button to create the role binding.  Your user should now be a cluster administrator.
+
+**Note:** You an also create groups and apply the role to a group, then anyone within that group will have that role.
+
+You can also sync local groups from LDAP groups.  For more information see: https://docs.openshift.com/container-platform/4.2/authentication/ldap-syncing.html
 
 # Appendix A - Example DNS Configuration
 
