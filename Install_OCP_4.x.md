@@ -104,7 +104,7 @@ We will discuss each of these in turn in the rest of this document.
 1. Add your private key to the ssh-agent
 
   ```
-  ssh-add ~/.ssh/id_rsa.pub
+  ssh-add ~/.ssh/id_rsa
   ```
 
 1. You will need a pull secret so your cluster can download the needed containers.  Get your pull secret from https://cloud.redhat.com/openshift/install/vsphere/user-provisioned and put it into a file in your /opt directory (e.g. pull-secret.txt).  You will need this in the next step.
