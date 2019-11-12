@@ -78,13 +78,13 @@ We will discuss each of these in turn in the rest of this document.
   Explode the files into /opt
   ```
   gunzip -c openshift-client-linux-4.2.0.tar.gz |tar -xvf -
-  gunzip -c openshift-instll-linux-4.2.0.tar.gz |tar -xvf -
+  gunzip -c openshift-install-linux-4.2.0.tar.gz |tar -xvf -
   ```
 
   Now copy the `oc` and `kubectl` binaries into your path
   ```
   sudo cp oc /usr/local/bin/
-  sudo cp kubectl /usr/local/bin
+  sudo cp kubectl /usr/local/bin/
   ```
 
 1. Create an ssh key for your primary user
