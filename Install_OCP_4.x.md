@@ -279,10 +279,10 @@ You will need at the very least, 1 bootstrap node, and 3 control plane (master) 
 
     1. In the `Ignition config data encoding` blank put `base64`.
 
-    1. In the `Ignition config data` blank paste the base64 output from the bootstrap.b64 file.
+    1. In the `Ignition config data` blank paste the base64 output from the append-bootstrap.b64 file.
 
       ```
-      cat bootstrap.base64
+      cat append-bootstrap.base64
       ```
 
       Copy the output from this file into your clipboard/paste buffer and then paste it into this blank.  Click `Next` and then `Finish`.
