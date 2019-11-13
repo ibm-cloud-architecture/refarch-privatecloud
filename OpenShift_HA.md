@@ -107,17 +107,22 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
 
 1. Install needed prerequisite packages
   ```
-  yum install -y wget git net-tools bind-utils yum-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct glusterfs-fuse
+  yum install -y wget git net-tools bind-utils yum-utils iptables-services bridge-utils bash-completion kexec-tools sos psacct glusterfs-fuse ntp
   ```
 
-1. Install openshift-ansible package
+1. Enable ntpd
   ```
-  yum install -y openshift-ansible
+  systemctl enable ntpd
   ```
 
 1. Once prerequisites are installed, reboot the node
   ```
   systemctl reboot
+  ```
+
+1. Install openshift-ansible package (on ansible node only)
+  ```
+  yum install -y openshift-ansible
   ```
 
   _**Note:** Load balancer nodes do not need docker so the rest of this section need not be done on lb nodes._
@@ -250,6 +255,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   # https://{openshift_master_cluster_public_hostname}[:${openshift_master_console_port}]
 
   openshift_console_install=true
+  openshift_console_hostname=console.apps.cp4d.csplab.local
 
   # Use this if you are getting image availability errors
   # openshift_disable_check=docker_image_availability
