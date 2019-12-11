@@ -167,7 +167,7 @@ We will discuss each of these in turn in the rest of this document.
 
 1. In your project directory, create a file named `install-config.yaml` with the following contents (_expand the section for your target environment_):
 
-  **IMPORTANT:** _Replace values in square brackets in the text below (including the square brackets) with values from your environment._
+  <b>IMPORTANT:</b> _Replace values in square brackets in the text below (including the square brackets) with values from your environment._
 
   <details>
   <summary>VMware Environment</summary>
@@ -303,7 +303,7 @@ We will discuss each of these in turn in the rest of this document.
 
   In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
 
-  **IMPORTANT:** _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
+  <b>IMPORTANT:</b> _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
 
   ```
   {
@@ -484,7 +484,7 @@ We will discuss each of these in turn in the rest of this document.
 
   The file should have the following contents:
 
-  IMPORTANT: Replace the URL in square brackets (removing the square brackets) with the URL of the metal-bios file you downloaded to your installation/web server and the URL of the bootstrap.ign ignition file, respectively.
+  <b>IMPORTANT:</b> Replace the URL in square brackets (removing the square brackets) with the URL of the metal-bios file you downloaded to your installation/web server and the URL of the bootstrap.ign ignition file, respectively.
 
   ```
   DEFAULT pxeboot
@@ -504,7 +504,7 @@ We will discuss each of these in turn in the rest of this document.
   When all of the files have been created, double check to make sure there are no typos.  There is no need to restart the service, changes are picked up immediately.
   </details>
 
-### Provision two new VMs to use as External Load Balancers
+### Provision two new VMs to use as external load balancers
 
   1. In the csplab, use the template named rhel80-cli-template in the sandbox datastore to instantiate two new VMs.  Otherwise, install any linux VM you choose, in your example, we will use RHEL 8.0.
 
