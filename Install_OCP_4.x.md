@@ -253,7 +253,7 @@ We will discuss each of these in turn in the rest of this document.
   * **networking.clusterNetworks.networkPrefix** - This value specifies the size of the network to assign to each node for pod IP addresses.  For example, a /23 prefix represents 512 IP addresses, so a hostPrefix of /23 means that control-plane-1 (master1) will have 512 IP addresses available, as will control-plane-2, compute1, compute2, etc.<br><br>
   If you are using a class B network for the clusterNetwork (a /16 prefix) you have a total of 255^255 usable IP addresses. Since the lowest and highest IP addresses are assigned to the subnet name and broadcast address, respectively they are not assignable leaving 65534 addressable IP addresses in a Class B subnet.<br><br>
   If we are using a class B subnet we have 65535 total IP addresses to use over 6 nodes.  That's 19,922 IP addresses, but subnets must divided along powers of two, so you could set this value to *19* which would allow for 8190 usable IP addresses per node.  If we use 19, however, we would not be able to add any additional nodes because we would not have any addresses available for the new node.<br><br>
-  On the other hand, if we are planning to expand the cluster to as many as 100 nodes in the future, we can set this value to 23 which will allow 512 IP addresses per node for up to 100 total nodes (the highest power of 2 which is lower than 65535/100).<br><br>
+  On the other hand, if we are planning to expand the cluster to as many as 100 nodes in the future, we can set this value to 23 which will allow 512 IP addresses per node for up to 100 total nodes (the highest power of 2 which is lower than 65535/100).
 
   * **networking.serviceNetwork** - The network CIDR to assign for services.  This is not assigned per node as is the clusterNetwork, so there it no separate prefix number.
 
@@ -274,7 +274,7 @@ We will discuss each of these in turn in the rest of this document.
 
   Where dir is the name of your cluster - the directory you created in step 3 above.
 
-1. This will create a number of .yaml files in a couple of directories which you can use to change the default installation of your cluster.
+  This will create a number of .yaml files in a couple of directories which you can use to change the default installation of your cluster.
 
   Of particular note is the manifests/cluster-config.yaml file where you can change the default networking subnets.  See the `bare metal` section of the install-config.yaml section above (step 11) for information on how to set these values if you need/want to change them.  Note that the subnets in this section must be valid for your environment meaning these subnets must not already exist in your environment, but will not (unless explicitly reconfigured) be routed outside of the cluster.
 
@@ -295,7 +295,7 @@ We will discuss each of these in turn in the rest of this document.
 
 1. Environment-specific configurations
   <details>
-    <summary>Configure VMware Environment</summary>
+  <summary>Configure VMware Environment</summary>
 
   1. Create the 'append-bootstrap.ign' File
 
@@ -337,7 +337,7 @@ We will discuss each of these in turn in the rest of this document.
   base64 -w0 worker.ign > worker.base64
   ```
 
-### Create the RHCOS Template in vSphere
+  ### Create the RHCOS Template in vSphere
 
   1. From any computer, download the openshift 4.x vmware template and store it locally.
 
