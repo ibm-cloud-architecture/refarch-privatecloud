@@ -1055,185 +1055,178 @@ You can also sync local groups from LDAP groups.  For more information see: http
 
 ## named.conf.local
 
-  ```
-  //
-  // Do any local configuration here
-  //
+```
+//
+// Do any local configuration here
+//
 
-  // Consider adding the 1918 zones here, if they are not used in your
-  // organization
-  include "/etc/bind/zones.rfc1918";
+// Consider adding the 1918 zones here, if they are not used in your
+// organization
+include "/etc/bind/zones.rfc1918";
 
-  zone "ocp.csplab.local" { type master; file "/etc/bind/db.ocp.csplab.local"; };
-  zone "vhavard.ocp.csplab.local" { type master; file "/etc/bind/db.vhavard.ocp.csplab.local"; };
- zone "18.172.in-addr.arpa" { type master; file "/etc/bind/db.172.18"; };
+zone "ocp.csplab.local" { type master; file "/etc/bind/db.ocp.csplab.local"; };
+zone "vhavard.ocp.csplab.local" { type master; file "/etc/bind/db.vhavard.ocp.csplab.local"; };
+zone "18.172.in-addr.arpa" { type master; file "/etc/bind/db.172.18"; };
 ```
 
 ## db.172.18
 
-  ```
-  $TTL    86400 ; 24 hours, could have been written as 24h or 1d
-  ; $ORIGIN 172.IN-ADDR.ARPA.
-  @    IN  SOA ns1.ocp.csplab.local.      root.ocp.csplab.local. (
-                                11 ; serial
-                                3H ; refresh
-                                15 ; retry
-                                1w ; expire
-                                3h ; minimum
-                               )
-  ; Name servers for the zone - both out-of-zone - no A RRs required
-         IN  NS ns1.ocp.csplab.local.
-  ; Infrastructure
-  $ORIGIN 0.18.172.IN-ADDR.ARPA.
-  1        IN  PTR    gwy.ocp.csplab.local.
-  9        IN  PTR    dhcp.ocp.csplab.local.
-  10       IN  PTR    ns1.ocp.csplab.local.
-  12       IN  PTR    ipam.ocp.csplab.local.
-  $ORIGIN 1.18.172.IN-ADDR.ARPA.
-  1       IN  PTR    gwy.vhavard.ocp.csplab.local.
-  2       IN  PTR    master1.vhavard.ocp.csplab.local.
-  3       IN  PTR    master2.vhavard.ocp.csplab.local.
-  4       IN  PTR    master3.vhavard.ocp.csplab.local.
-  5       IN  PTR    worker1.vhavard.ocp.csplab.local.
-  6       IN  PTR    worker2.vhavard.ocp.csplab.local.
-  7       IN  PTR    worker3.vhavard.ocp.csplab.local.
-  8       IN  PTR    worker1.vhavard.ocp.csplab.local.
-  9       IN  PTR    worker2.vhavard.ocp.csplab.local.
-  10       IN  PTR    worker3.vhavard.ocp.csplab.local.
-  11       IN  PTR    api-int.vhavard.ocp.csplab.local.
-  11       IN  PTR    api.vhavard.ocp.csplab.local.
-  12       IN  PTR    infra-lb.vhavard.ocp.csplab.local.
-  29       IN  PTR    bootstrap.vhavard.ocp.csplab.local.
-  30       IN  PTR    installer.vhavard.ocp.csplab.local.
-  ```
+```
+$TTL    86400 ; 24 hours, could have been written as 24h or 1d
+; $ORIGIN 172.IN-ADDR.ARPA.
+@    IN  SOA ns1.ocp.csplab.local.      root.ocp.csplab.local. (
+                              11 ; serial
+                              3H ; refresh
+                              15 ; retry
+                              1w ; expire
+                              3h ; minimum
+                             )
+; Name servers for the zone - both out-of-zone - no A RRs required
+       IN  NS ns1.ocp.csplab.local.
+; Infrastructure
+$ORIGIN 0.18.172.IN-ADDR.ARPA.
+1        IN  PTR    gwy.ocp.csplab.local.
+9        IN  PTR    dhcp.ocp.csplab.local.
+10       IN  PTR    ns1.ocp.csplab.local.
+$ORIGIN 1.18.172.IN-ADDR.ARPA.
+1       IN  PTR    gwy.vhavard.ocp.csplab.local.
+2       IN  PTR    control-plane-1.vhavard.ocp.csplab.local.
+3       IN  PTR    control-plane-2.vhavard.ocp.csplab.local.
+4       IN  PTR    control-plane-3.vhavard.ocp.csplab.local.
+5       IN  PTR    compute1.vhavard.ocp.csplab.local.
+6       IN  PTR    compute2.vhavard.ocp.csplab.local.
+7       IN  PTR    compute3.vhavard.ocp.csplab.local.
+11       IN  PTR    api-int.vhavard.ocp.csplab.local.
+11       IN  PTR    api.vhavard.ocp.csplab.local.
+12       IN  PTR    compute-lb.vhavard.ocp.csplab.local.
+29       IN  PTR    bootstrap.vhavard.ocp.csplab.local.
+30       IN  PTR    installer.vhavard.ocp.csplab.local.
+```
 
 ## db.vhavard.ocp.csplab.local
 
-  ```
-  ;
-  ; BIND data file for example.com
-  ;
-  $TTL    604800
-  @       IN      SOA     vhavard.ocp.csplab.local. root.vhavard.ocp.csplab.local. (
-                               3         ; Serial
-                           604800         ; Refresh
-                            86400         ; Retry
-                          2419200         ; Expire
-                           604800 )       ; Negative Cache TTL
-          IN      A       172.18.0.10
-  ;
-  @       IN      NS      ns1.vhavard.ocp.csplab.local.
-  @       IN      A       17.18.0.10
-  @       IN      AAAA    ::1
-  ns1     IN      A       172.18.0.10
-  gwy     IN      A       172.18.1.1
-  master1 IN      A       172.18.1.2
-  master2 IN      A       172.18.1.3
-  master3 IN      A       172.18.1.4
-  worker1 IN      A       172.18.1.5
-  worker2 IN      A       172.18.1.6
-  worker3 IN      A       172.18.1.7
-  infra1  IN      A       172.18.1.8
-  infra2  IN      A       172.18.1.9
-  infra3  IN      A       172.18.1.10
-  control-lb      IN      CNAME   api
-  infra-lb        IN      A       172.18.1.12
-  bootstrap       IN      A       172.18.1.29
-  installer       IN      A       172.18.1.30
-  api     IN      A       172.18.1.11
-  api-int IN      A       172.18.1.11
-  *.apps  IN      A       172.18.1.12
-  etcd-0  IN      A       172.18.1.2
-  etcd-1  IN      A       172.18.1.3
-  etcd-2  IN      A       172.18.1.4
-  ; _service._proto.name.                         TTL   class SRV priority weight port target.
-  _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-0.vhavard.ocp.csplab.local.
-  _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-1.vhavard.ocp.csplab.local.
-  _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-2.vhavard.ocp.csplab.local.
-  ```
+```
+;
+; BIND data file for example.com
+;
+$TTL    604800
+@       IN      SOA     vhavard.ocp.csplab.local. root.vhavard.ocp.csplab.local. (
+                             3         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+        IN      A       172.18.0.10
+;
+@       IN      NS      ns1.vhavard.ocp.csplab.local.
+@       IN      A       17.18.0.10
+@       IN      AAAA    ::1
+ns1     IN      A       172.18.0.10
+gwy     IN      A       172.18.1.1
+control-plane-1 IN      A       172.18.1.2
+control-plane-2 IN      A       172.18.1.3
+control-plane-3 IN      A       172.18.1.4
+compute1 IN      A       172.18.1.5
+compute2 IN      A       172.18.1.6
+compute3 IN      A       172.18.1.7
+control-lb      IN      CNAME   api
+compute-lb        IN      A       172.18.1.12
+bootstrap       IN      A       172.18.1.29
+installer       IN      A       172.18.1.30
+api     IN      A       172.18.1.11
+api-int IN      A       172.18.1.11
+*.apps  IN      A       172.18.1.12
+etcd-0  IN      A       172.18.1.2
+etcd-1  IN      A       172.18.1.3
+etcd-2  IN      A       172.18.1.4
+; _service._proto.name.                         TTL   class SRV priority weight port target.
+_etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-0.vhavard.ocp.csplab.local.
+_etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-1.vhavard.ocp.csplab.local.
+_etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-2.vhavard.ocp.csplab.local.
+```
 
 # Appendix B - Example DHCP configuration
 
 ## dhcpd.conf
 
-  ```
-  shared-network ocp {
-  	option domain-name-servers 172.18.0.10;
-  	subnet 172.18.1.0 netmask 255.255.255.224 {
-  		option domain-name "vhavard.ocp.csplab.local";
-  		option subnet-mask 255.255.255.224;
-  		option routers 172.18.1.1;
-  		option broadcast-address 172.18.1.31;
-  		default-lease-time 86400;
-  	}
-  	subnet 172.18.0.0 netmask 255.255.255.224 {
-  		option domain-name "ocp.csplab.local";
-  		option subnet-mask 255.255.255.224;
-  		option routers 172.18.0.1;
-  		option broadcast-address 172.18.0.31;
-  		default-lease-time 86400;
-  		range 172.18.0.21 172.18.0.30;
-  	}
+```
+shared-network ocp {
+  option domain-name-servers 172.18.0.10;
+  subnet 172.18.1.0 netmask 255.255.255.224 {
+    option domain-name "vhavard.ocp.csplab.local";
+    option subnet-mask 255.255.255.224;
+    option routers 172.18.1.1;
+    option broadcast-address 172.18.1.31;
+    default-lease-time 86400;
   }
+  subnet 172.18.0.0 netmask 255.255.255.224 {
+    option domain-name "ocp.csplab.local";
+    option subnet-mask 255.255.255.224;
+    option routers 172.18.0.1;
+    option broadcast-address 172.18.0.31;
+    default-lease-time 86400;
+    range 172.18.0.21 172.18.0.30;
+  }
+}
 
-  host vhavard-control-lb {
-  	hardware ethernet 00:50:56:a5:84:3f;
-  	fixed-address 172.18.1.11;
-  }
+host vhavard-control-lb {
+  hardware ethernet 00:50:56:a5:84:3f;
+  fixed-address 172.18.1.11;
+}
 
-  host vhavard-infra-lb {
-  	hardware ethernet 00:50:56:a5:bb:a9;
-  	fixed-address 172.18.1.12;
-  }
+host vhavard-infra-lb {
+  hardware ethernet 00:50:56:a5:bb:a9;
+  fixed-address 172.18.1.12;
+}
 
-  host vhavard-installer {
-  	hardware ethernet 00:50:56:a5:a8:95;
-  	fixed-address 172.18.1.30;
-  	option host-name "vhavard-installer";
-  }
+host vhavard-installer {
+  hardware ethernet 00:50:56:a5:a8:95;
+  fixed-address 172.18.1.30;
+  option host-name "vhavard-installer";
+}
 
-  host vhavard-bootstrap {
-  	hardware ethernet 00:50:56:a5:74:91;
-  	fixed-address 172.18.1.29;
-  	option host-name "bootstrap";
-  }
+host vhavard-bootstrap {
+  hardware ethernet 00:50:56:a5:74:91;
+  fixed-address 172.18.1.29;
+  option host-name "bootstrap";
+}
 
-  host vhavard-master1 {
-  	hardware ethernet 00:50:56:a5:22:5b;
-  	fixed-address 172.18.1.2;
-  	option host-name "master1";
-  }
+host vhavard-master1 {
+  hardware ethernet 00:50:56:a5:22:5b;
+  fixed-address 172.18.1.2;
+  option host-name "master1";
+}
 
-  host vhavard-master2 {
-  	hardware ethernet 00:50:56:a5:1e:a7;
-  	fixed-address 172.18.1.3;
-  	option host-name "master2";
-  }
+host vhavard-master2 {
+  hardware ethernet 00:50:56:a5:1e:a7;
+  fixed-address 172.18.1.3;
+  option host-name "master2";
+}
 
-  host vhavard-master3 {
-  	hardware ethernet 00:50:56:a5:1d:8d;
-  	fixed-address 172.18.1.4;
-  	option host-name "master3";
-  }
+host vhavard-master3 {
+  hardware ethernet 00:50:56:a5:1d:8d;
+  fixed-address 172.18.1.4;
+  option host-name "master3";
+}
 
-  host vhavard-worker1 {
-  	hardware ethernet 00:50:56:a5:e9:14;
-  	fixed-address 172.18.1.5;
-  	option host-name "worker1";
-  }
+host vhavard-worker1 {
+  hardware ethernet 00:50:56:a5:e9:14;
+  fixed-address 172.18.1.5;
+  option host-name "worker1";
+}
 
-  host vhavard-worker2 {
-  	hardware ethernet 00:50:56:a5:ef:d0;
-  	fixed-address 172.18.1.6;
-  	option host-name "worker2";
-  }
+host vhavard-worker2 {
+  hardware ethernet 00:50:56:a5:ef:d0;
+  fixed-address 172.18.1.6;
+  option host-name "worker2";
+}
 
-  host vhavard-worker3 {
-  	hardware ethernet 00:50:56:a5:f4:53;
-  	fixed-address 172.18.1.7;
-  	option host-name "worker3";
-  }
-  ```
+host vhavard-worker3 {
+  hardware ethernet 00:50:56:a5:f4:53;
+  fixed-address 172.18.1.7;
+  option host-name "worker3";
+}
+```
 
 # Appendix C - Example haproxy comfiguration
 
