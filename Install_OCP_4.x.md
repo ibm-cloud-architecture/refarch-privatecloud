@@ -512,9 +512,9 @@ We will discuss each of these in turn in the rest of this document.
 
   1. Install the haproxy packages on the VMs
 
-    ```
-    yum install -y haproxy
-    ```
+  ```
+  yum install -y haproxy
+  ```
 
   1. You will configure your load balancers when you get your IP addresses assigned.
 
