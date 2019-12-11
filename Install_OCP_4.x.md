@@ -172,94 +172,94 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>VMware Environment</summary>
 
-    ```
-    apiVersion: v1
-    baseDomain: [ocp.csplab.local]
-    compute:
-    - hyperthreading: Enabled   
-      name: worker
-      replicas: 0
-    controlPlane:
-      hyperthreading: Enabled   
-      name: master
-      replicas: 3
-    metadata:
-      name: [vhavard]
-    platform:
-      vsphere:
-        vcenter: [demo-vcenter.csplab.local]
-        username: username
-        password: password
-        datacenter: [CSPLAB]
-        defaultDatastore: [SANDBOX_TIER4]
-    pullSecret: '[contents of pull-secret.txt]'
-    sshKey: '[contents of ~/.ssh/id_rsa.pub]'
-    ```
+  ```
+  apiVersion: v1
+  baseDomain: [ocp.csplab.local]
+  compute:
+  - hyperthreading: Enabled   
+    name: worker
+    replicas: 0
+  controlPlane:
+    hyperthreading: Enabled   
+    name: master
+    replicas: 3
+  metadata:
+    name: [vhavard]
+  platform:
+    vsphere:
+      vcenter: [demo-vcenter.csplab.local]
+      username: username
+      password: password
+      datacenter: [CSPLAB]
+      defaultDatastore: [SANDBOX_TIER4]
+  pullSecret: '[contents of pull-secret.txt]'
+  sshKey: '[contents of ~/.ssh/id_rsa.pub]'
+  ```
 
-    * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
+  * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
 
-    * **metadata.name** - This is the name of your cluster.
+  * **metadata.name** - This is the name of your cluster.
 
-    * **platform.vsphere.vcenter** - This is the hostname or IP address of your vsphere server.
+  * **platform.vsphere.vcenter** - This is the hostname or IP address of your vsphere server.
 
-    * **platform.vsphere.userna**me - This is a valid user in vsphere with permissions to deploy vApps and add items to the datastore.
+  * **platform.vsphere.userna**me - This is a valid user in vsphere with permissions to deploy vApps and add items to the datastore.
 
-    * **platform.vsphere.password** - The password for the username specified above (this file will be deleted when the installer creates the ignition files).
+  * **platform.vsphere.password** - The password for the username specified above (this file will be deleted when the installer creates the ignition files).
 
-    * **platform.vsphere.datacenter** - The datacenter under which files should be created.
+  * **platform.vsphere.datacenter** - The datacenter under which files should be created.
 
-    * **platform.vsphere.defaultDatastore** - The datastore on which files should be stored.  A storage class will be created on your openshift cluster for dynamic storage provisioning to this datastore.
+  * **platform.vsphere.defaultDatastore** - The datastore on which files should be stored.  A storage class will be created on your openshift cluster for dynamic storage provisioning to this datastore.
 
-    * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
+  * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
 
-    * **sshKey** - The contents of ~/.ssh/id_rsa.pub
+  * **sshKey** - The contents of ~/.ssh/id_rsa.pub
   </details>
 
   <details>
   <summary>Bare Metal Environment</summary>
 
-    ```
-    apiVersion: v1
-    baseDomain: [ocp.csplab.local]
-    compute:
-    - hyperthreading: Enabled
-      name: worker
-      replicas: 0
-    controlPlane:
-      hyperthreading: Enabled
-      name: master
-      replicas: 3
-    metadata:
-      name: [baremetal]
-    networking:
-      clusterNetworks:
-      - cidr: [10.254.0.0/16]
-        hostPrefix: [23]
-      networkType: OpenShiftSDN
-      serviceNetwork:
-      - [172.30.0.0/16]
-    platform:
-      none: {}
-    pullSecret: '[pull-secret]'
-    sshKey: '[ssh-key]'
-    ```
+  ```
+  apiVersion: v1
+  baseDomain: [ocp.csplab.local]
+  compute:
+  - hyperthreading: Enabled
+    name: worker
+    replicas: 0
+  controlPlane:
+    hyperthreading: Enabled
+    name: master
+    replicas: 3
+  metadata:
+    name: [baremetal]
+  networking:
+    clusterNetworks:
+    - cidr: [10.254.0.0/16]
+      hostPrefix: [23]
+    networkType: OpenShiftSDN
+    serviceNetwork:
+    - [172.30.0.0/16]
+  platform:
+    none: {}
+  pullSecret: '[pull-secret]'
+  sshKey: '[ssh-key]'
+  ```
 
-    * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
+  * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
 
-    * **metadata.name** - This is the name of your cluster.
+  * **metadata.name** - This is the name of your cluster.
 
-    * **networking.clusterNetworks.cidr** - Use a valid network for your environment.  This should not conflict with any existing subnet in your environment.
+  * **networking.clusterNetworks.cidr** - Use a valid network for your environment.  This should not conflict with any existing subnet in your environment.
 
-    * **networking.clusterNetworks.networkPrefix** - This value specifies the size of the network to assign to each node for pod IP addresses.  For example, a /23 prefix represents 512 IP addresses, so a hostPrefix of /23 means that control-plane-1 (master1) will have 512 IP addresses available, as will control-plane-2, compute1, compute2, etc.<br><br>
-    If you are using a class B network for the clusterNetwork (a /16 prefix) you have a total of 255^255 usable IP addresses. Since the lowest and highest IP addresses are assigned to the subnet name and broadcast address, respectively they are not assignable leaving 65534 addressable IP addresses in a Class B subnet.<br><br>
-    If we are using a class B subnet we have 65535 total IP addresses to use over 6 nodes.  That's 19,922 IP addresses, but subnets must divided along powers of two, so you could set this value to *19* which would allow for 8190 usable IP addresses per node.  If we use 19, however, we would not be able to add any additional nodes because we would not have any addresses available for the new node.<br><br>
-    On the other hand, if we are planning to expand the cluster to as many as 100 nodes in the future, we can set this value to 23 which will allow 512 IP addresses per node for up to 100 total nodes (the highest power of 2 which is lower than 65535/100).<br><br>
+  * **networking.clusterNetworks.networkPrefix** - This value specifies the size of the network to assign to each node for pod IP addresses.  For example, a /23 prefix represents 512 IP addresses, so a hostPrefix of /23 means that control-plane-1 (master1) will have 512 IP addresses available, as will control-plane-2, compute1, compute2, etc.<br><br>
+  If you are using a class B network for the clusterNetwork (a /16 prefix) you have a total of 255^255 usable IP addresses. Since the lowest and highest IP addresses are assigned to the subnet name and broadcast address, respectively they are not assignable leaving 65534 addressable IP addresses in a Class B subnet.<br><br>
+  If we are using a class B subnet we have 65535 total IP addresses to use over 6 nodes.  That's 19,922 IP addresses, but subnets must divided along powers of two, so you could set this value to *19* which would allow for 8190 usable IP addresses per node.  If we use 19, however, we would not be able to add any additional nodes because we would not have any addresses available for the new node.<br><br>
+  On the other hand, if we are planning to expand the cluster to as many as 100 nodes in the future, we can set this value to 23 which will allow 512 IP addresses per node for up to 100 total nodes (the highest power of 2 which is lower than 65535/100).<br><br>
 
-    * **networking.serviceNetwork** - The network CIDR to assign for services.  This is not assigned per node as is the clusterNetwork, so there it no separate prefix number.
+  * **networking.serviceNetwork** - The network CIDR to assign for services.  This is not assigned per node as is the clusterNetwork, so there it no separate prefix number.
 
-    * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
+  * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
 
-    * **sshKey** - The contents of ~/.ssh/id_rsa.pub
+  * **sshKey** - The contents of ~/.ssh/id_rsa.pub
   </details>
   <br>
 
