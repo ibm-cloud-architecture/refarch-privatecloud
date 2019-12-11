@@ -671,8 +671,8 @@ When this is done you should be able to login to your new cluster.
 From your installation machine where you installed the oc binary:
 
 ```
-[sysadmin@localhost opt]$ export KUBECONFIG=/opt/vhavard/auth/kubeconfig
-[sysadmin@localhost opt]$ oc whoami
+export KUBECONFIG=/opt/vhavard/auth/kubeconfig
+oc whoami
 system:admin
 ```
 
@@ -763,103 +763,103 @@ Your image-registry custer operator should complete its installation in a couple
 
   1. To create the storage class create a file on your installation server named `sc.yml` with the following contents:
 
-    ```
-    kind: StorageClass
-    apiVersion: storage.k8s.io/v1
-    metadata:
-      name: non-dynamic
-    provisioner: no-provisioning
-    parameters:
-    ```
+  ```
+  kind: StorageClass
+  apiVersion: storage.k8s.io/v1
+  metadata:
+    name: non-dynamic
+  provisioner: no-provisioning
+  parameters:
+  ```
 
-    Create the storage class by executing `oc create -f sc.yml`.  Your new storage class name is `non-dynamic`.
+  Create the storage class by executing `oc create -f sc.yml`.  Your new storage class name is `non-dynamic`.
 
   1. Make your new storage class the default.
 
-    By default, with a vSphere installation, vsphere storage is the default storage class.  If this isn't changed the image-registry operator will try to create a RWX volume on the vsphere datastore and it will fail.
+  By default, with a vSphere installation, vsphere storage is the default storage class.  If this isn't changed the image-registry operator will try to create a RWX volume on the vsphere datastore and it will fail.
 
-    To remove the default flag for the `thin` (vsphere) storage class, execute the following command:
+  To remove the default flag for the `thin` (vsphere) storage class, execute the following command:
 
-    ```
-    oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
-    ```
+  ```
+  oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+  ```
 
-    Next, you will need to set your newly created storage class as the default.  Do that by executing the following command:
+  Next, you will need to set your newly created storage class as the default.  Do that by executing the following command:
 
-    ```
-    oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-    ```
+  ```
+  oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+  ```
 
-    Your new `non-dynamic` storage class is now the default.
+  Your new `non-dynamic` storage class is now the default.
 
   1. Create a file on the installation server named `pv.yml` with the following contents:
 
-    ```
-    apiVersion: v1
-    kind: PersistentVolume
-    metadata:
-      name: [pv0001]
-    spec:
-      capacity:
-        storage: 100Gi
-      accessModes:
-      - ReadWriteMany
-      nfs:
-        path: [/server]
-        server: [10.x.x.138]
-      persistentVolumeReclaimPolicy: Retain
-      storageClassName: non-dynamic
-    ```
+  ```
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: [pv0001]
+  spec:
+    capacity:
+      storage: 100Gi
+    accessModes:
+    - ReadWriteMany
+    nfs:
+      path: [/server]
+      server: [10.x.x.138]
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: non-dynamic
+  ```
 
-    Replace `pv0001` with something more descriptive like `image-registry-pv`.
+  Replace `pv0001` with something more descriptive like `image-registry-pv`.
 
-    Replace `spec.nfs.path` with the path on the NFS server to the volume to mount (e.g. `/storage`).
+  Replace `spec.nfs.path` with the path on the NFS server to the volume to mount (e.g. `/storage`).
 
-    Replace `spec.nfs.server` with the ip address of your nfs server.
+  Replace `spec.nfs.server` with the ip address of your nfs server.
 
-    Deploy your PV to the clsuter with the following command:
+  Deploy your PV to the clsuter with the following command:
 
-    ```
-    oc create -f pv.yml
-    ```
+  ```
+  oc create -f pv.yml
+  ```
 
   1. Create a file on the installation server named `pvc.yml` with the following contents.
 
-    ```
-    apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      finalizers:
-      - kubernetes.io/pvc-protection
-      name: image-registry-storage
-      namespace: openshift-image-registry
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 100Gi
-    ```
+  ```
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: image-registry-storage
+    namespace: openshift-image-registry
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 100Gi
+  ```
 
-    Deploy the PVC to the cluster with the following command:
+  Deploy the PVC to the cluster with the following command:
 
-    ```
-    oc create -f pvc.yml
-    ```
+  ```
+  oc create -f pvc.yml
+  ```
 
   1. Check to make sure your PVC is bound to your PV
 
-    ```
-    oc get pv --all-namespaces
-    ```
+  ```
+  oc get pv --all-namespaces
+  ```
 
-    The result should show the PV bound to a PVC.
+  The result should show the PV bound to a PVC.
 
-    ```
-    [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
-    NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
-    image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
-    ```
+  ```
+  [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
+  NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
+  image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
+  ```
 
   1. Last, configure the image-registry operator to consume the provisioned PVC edit the operator and set the storage values as specified:
 
