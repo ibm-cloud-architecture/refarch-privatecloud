@@ -218,48 +218,48 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>Bare Metal Environment</summary>
 
-  ```
-  apiVersion: v1
-  baseDomain: [ocp.csplab.local]
-  compute:
-  - hyperthreading: Enabled
-    name: worker
-    replicas: 0
-  controlPlane:
-    hyperthreading: Enabled
-    name: master
-    replicas: 3
-  metadata:
-    name: [baremetal]
-  networking:
-    clusterNetworks:
-    - cidr: [10.254.0.0/16]
-      hostPrefix: [23]
-    networkType: OpenShiftSDN
-    serviceNetwork:
-    - [172.30.0.0/16]
-  platform:
-    none: {}
-  pullSecret: '[pull-secret]'
-  sshKey: '[ssh-key]'
-  ```
+    ```
+    apiVersion: v1
+    baseDomain: [ocp.csplab.local]
+    compute:
+    - hyperthreading: Enabled
+      name: worker
+      replicas: 0
+    controlPlane:
+      hyperthreading: Enabled
+      name: master
+      replicas: 3
+    metadata:
+      name: [baremetal]
+    networking:
+      clusterNetworks:
+      - cidr: [10.254.0.0/16]
+        hostPrefix: [23]
+      networkType: OpenShiftSDN
+      serviceNetwork:
+      - [172.30.0.0/16]
+    platform:
+      none: {}
+    pullSecret: '[pull-secret]'
+    sshKey: '[ssh-key]'
+    ```
 
-  * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
+    * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
 
-  * **metadata.name** - This is the name of your cluster.
+    * **metadata.name** - This is the name of your cluster.
 
-  * **networking.clusterNetworks.cidr** - Use a valid network for your environment.  This should not conflict with any existing subnet in your environment.
+    * **networking.clusterNetworks.cidr** - Use a valid network for your environment.  This should not conflict with any existing subnet in your environment.
 
-  * **networking.clusterNetworks.networkPrefix** - This value specifies the size of the network to assign to each node for pod IP addresses.  For example, a /23 prefix represents 512 IP addresses, so a hostPrefix of /23 means that control-plane-1 (master1) will have 512 IP addresses available, as will control-plane-2, compute1, compute2, etc.<br><br>
-  If you are using a class B network for the clusterNetwork (a /16 prefix) you have a total of 255^255 usable IP addresses. Since the lowest and highest IP addresses are assigned to the subnet name and broadcast address, respectively they are not assignable leaving 65534 addressable IP addresses in a Class B subnet.<br><br>
-  If we are using a class B subnet we have 65535 total IP addresses to use over 6 nodes.  That's 19,922 IP addresses, but subnets must divided along powers of two, so you could set this value to *19* which would allow for 8190 usable IP addresses per node.  If we use 19, however, we would not be able to add any additional nodes because we would not have any addresses available for the new node.<br><br>
-  On the other hand, if we are planning to expand the cluster to as many as 100 nodes in the future, we can set this value to 23 which will allow 512 IP addresses per node for up to 100 total nodes (the highest power of 2 which is lower than 65535/100).<br><br>
+    * **networking.clusterNetworks.networkPrefix** - This value specifies the size of the network to assign to each node for pod IP addresses.  For example, a /23 prefix represents 512 IP addresses, so a hostPrefix of /23 means that control-plane-1 (master1) will have 512 IP addresses available, as will control-plane-2, compute1, compute2, etc.<br><br>
+    If you are using a class B network for the clusterNetwork (a /16 prefix) you have a total of 255^255 usable IP addresses. Since the lowest and highest IP addresses are assigned to the subnet name and broadcast address, respectively they are not assignable leaving 65534 addressable IP addresses in a Class B subnet.<br><br>
+    If we are using a class B subnet we have 65535 total IP addresses to use over 6 nodes.  That's 19,922 IP addresses, but subnets must divided along powers of two, so you could set this value to *19* which would allow for 8190 usable IP addresses per node.  If we use 19, however, we would not be able to add any additional nodes because we would not have any addresses available for the new node.<br><br>
+    On the other hand, if we are planning to expand the cluster to as many as 100 nodes in the future, we can set this value to 23 which will allow 512 IP addresses per node for up to 100 total nodes (the highest power of 2 which is lower than 65535/100).<br><br>
 
-  * **networking.serviceNetwork** - The network CIDR to assign for services.  This is not assigned per node as is the clusterNetwork, so there it no separate prefix number.
+    * **networking.serviceNetwork** - The network CIDR to assign for services.  This is not assigned per node as is the clusterNetwork, so there it no separate prefix number.
 
-  * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
+    * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
 
-  * **sshKey** - The contents of ~/.ssh/id_rsa.pub
+    * **sshKey** - The contents of ~/.ssh/id_rsa.pub
   </details>
   <br>
 
@@ -297,211 +297,211 @@ We will discuss each of these in turn in the rest of this document.
   <details>
     <summary>Configure VMware Environment</summary>
 
-    1. Create the 'append-bootstrap.ign' File (VMware only)
+  1. Create the 'append-bootstrap.ign' File
 
-    The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
+  The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
 
-    In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
+  In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
 
-      **IMPORTANT:** _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
+  **IMPORTANT:** _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
 
-    ```
-    {
-    "ignition": {
-      "config": {
-        "append": [
-          {
-            "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
-            "verification": {}
-          }
-        ]
-      },
-      "timeouts": {},
-      "version": "2.1.0"
+  ```
+  {
+  "ignition": {
+    "config": {
+      "append": [
+        {
+          "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
+          "verification": {}
+        }
+      ]
     },
-    "networkd": {},
-    "passwd": {},
-    "storage": {},
-    "systemd": {}
-    }
-    ```
+    "timeouts": {},
+    "version": "2.1.0"
+  },
+  "networkd": {},
+  "passwd": {},
+  "storage": {},
+  "systemd": {}
+  }
+  ```
 
-    Where `source` is the URL where the vCenter server can download the bootstrap.ign file (from your locally running web server).
+  Where `source` is the URL where the vCenter server can download the bootstrap.ign file (from your locally running web server).
 
-    1. The ignition files will need to be encoded into base64 strings so they can be placed in a form blank.  In the /opt/<project> directory (e.g. /opt/vhavard), encode master.ign, worker.ign, and append-bootstrap.ign into base64 strings.
+  1. The ignition files will need to be encoded into base64 strings so they can be placed in a form blank.  In the /opt/<project> directory (e.g. /opt/vhavard), encode master.ign, worker.ign, and append-bootstrap.ign into base64 strings.
 
-    ```
-    cd /opt/vhavard
-    base64 -w0 append-bootstrap.ign > append-bootstrap.base64
-    base64 -w0 master.ign > master.base64
-    base64 -w0 worker.ign > worker.base64
-    ```
+  ```
+  cd /opt/vhavard
+  base64 -w0 append-bootstrap.ign > append-bootstrap.base64
+  base64 -w0 master.ign > master.base64
+  base64 -w0 worker.ign > worker.base64
+  ```
 
-  ### Create the RHCOS Template in vSphere
+### Create the RHCOS Template in vSphere
 
-    1. From any computer, download the openshift 4.x vmware template and store it locally.
+  1. From any computer, download the openshift 4.x vmware template and store it locally.
 
-      **NOTE:** If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
+    **NOTE:** If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
 
-      Otherwise, download the needed .ova file.  For example:
+    Otherwise, download the needed .ova file.  For example:
 
-    ```
-    wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-vmware.ova
-    ```
+  ```
+  wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-vmware.ova
+  ```
 
-    From the vSphere Web Client, click on the location (cluster/folder) where you would like to put your template, right-click, on the cluster/folder and click `Deploy OVF Template...`.
+  From the vSphere Web Client, click on the location (cluster/folder) where you would like to put your template, right-click, on the cluster/folder and click `Deploy OVF Template...`.
 
-    Continue to use the wizard to upload your template.  Remember where you put it because you will use it in the next step.
+  Continue to use the wizard to upload your template.  Remember where you put it because you will use it in the next step.
 
   ### Configure vCenter and Create your Cluster Nodes
 
-    **NOTE:** You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.
+  **NOTE:** You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.
 
-    1. With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
+  1. With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
 
-    ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
+  ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
 
-    1. Find your previously uploaded rhcos template and create your bootstrap node.  Right-click on the template and click "New VM from this Template".
+  1. Find your previously uploaded rhcos template and create your bootstrap node.  Right-click on the template and click "New VM from this Template".
 
-    ![Create VM from Template](/images/vm-from-template.png "Create VM from Template")
+  ![Create VM from Template](/images/vm-from-template.png "Create VM from Template")
 
-    1. On the `Select a name and folder` screen, name your VM so you know it's the bootstrap node (e.g. ocp-42-bootstrap), put it into the folder you created in the previous step and click 'Next'.
+  1. On the `Select a name and folder` screen, name your VM so you know it's the bootstrap node (e.g. ocp-42-bootstrap), put it into the folder you created in the previous step and click 'Next'.
 
-    1. On the next screen (`Select a compute resource`), select a compute resource location for your VM and click 'Next'.
+  1. On the next screen (`Select a compute resource`), select a compute resource location for your VM and click 'Next'.
 
-    1. On the next screen (`Select storage`), choose the datastore you put in the `install-config.yaml` file in step 10 under the 'Create the Installation Server' section and click 'Next'.
+  1. On the next screen (`Select storage`), choose the datastore you put in the `install-config.yaml` file in step 10 under the 'Create the Installation Server' section and click 'Next'.
 
-    1. On the next screen (`Select clone options`), check the box to customize the virtual machine's hardware, make sure `Power on virtual machine after creation` box is *unchecked* and click 'Next'.
+  1. On the next screen (`Select clone options`), check the box to customize the virtual machine's hardware, make sure `Power on virtual machine after creation` box is *unchecked* and click 'Next'.
 
-    1. On the next screen (`Customize hardware`), set the CPU and Memory values appropriately based on the table below and make sure your network adapter is set to the correct network for your OCP cluster.  For the IBM Cloud Adoption Lab, this is the `OCP` network.
+  1. On the next screen (`Customize hardware`), set the CPU and Memory values appropriately based on the table below and make sure your network adapter is set to the correct network for your OCP cluster.  For the IBM Cloud Adoption Lab, this is the `OCP` network.
 
-    | Node Type | CPU | Memory |
-    |:---------:|:---:|:-------|
-    | Bootstrap |  4  | 16Gi   |
-    | Control   |  4  | 16Gi   |
-    | Compute   |  2  | 8Gi    |
+  | Node Type | CPU | Memory |
+  |:---------:|:---:|:-------|
+  | Bootstrap |  4  | 16Gi   |
+  | Control   |  4  | 16Gi   |
+  | Compute   |  2  | 8Gi    |
 
-    1. Click the `VM Options` tab and expand the `Advanced` twistie.
+  1. Click the `VM Options` tab and expand the `Advanced` twistie.
 
-      1. Under `Configuration Parameters`, click the `Edit Configuration...` button.
+    1. Under `Configuration Parameters`, click the `Edit Configuration...` button.
 
-      1. At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
+    1. At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
 
-      ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
+    ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
 
-      1. Click 'Next' and then 'Finish' to finish VM creation, but **do not yet boot the new node.**
+    1. Click 'Next' and then 'Finish' to finish VM creation, but **do not yet boot the new node.**
 
-      1. Find your newly created VM in the vSphere Web Console and click on it.  On the top-right, click `Configure`, then under `Settings`, click on `vApp Options`.
+    1. Find your newly created VM in the vSphere Web Console and click on it.  On the top-right, click `Configure`, then under `Settings`, click on `vApp Options`.
 
-      If vApp Options are not Enalbed, enable them.
+    If vApp Options are not Enalbed, enable them.
 
-      Scroll to the bottom of the vApp Options and find the `Properties` section.
+    Scroll to the bottom of the vApp Options and find the `Properties` section.
 
-      You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`.
+    You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`.
 
-      1. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table.
+    1. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table.
 
-      In the blank, put `base64` and click `OK`.
+    In the blank, put `base64` and click `OK`.
 
-      1. On your installation machine cat the text of append-bootstrap.b64 file to the screen:
+    1. On your installation machine cat the text of append-bootstrap.b64 file to the screen:
 
-        ```
-        cat append-bootstrap.base64
-        ```
+      ```
+      cat append-bootstrap.base64
+      ```
 
-        Copy the output from this file into your clipboard/paste buffer.
+      Copy the output from this file into your clipboard/paste buffer.
 
-        Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click `OK`.
+      Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click `OK`.
 
-        You have now created your bootstrap node.
+      You have now created your bootstrap node.
 
-    1. Repeat these steps for each node in your cluster.  For the master/control plan nodes use the master.base64 ignition file and for the compute/worker nodes use the worker.base64 text.
+  1. Repeat these steps for each node in your cluster.  For the master/control plan nodes use the master.base64 ignition file and for the compute/worker nodes use the worker.base64 text.
 
-    ### Note the MAC addresses for all of your VMs.
+  ### Note the MAC addresses for all of your VMs.
 
-    You will need to know the MAC address for each of the nodes you just created.
+  You will need to know the MAC address for each of the nodes you just created.
 
-      1. In the vCenter client, locate each node you just created, select it, and on the right, click the `Configure` tab.
+    1. In the vCenter client, locate each node you just created, select it, and on the right, click the `Configure` tab.
 
-      1. Expand the `VM Hardware` tistie and under that, the `Network adapter 1` twistie.
+    1. Expand the `VM Hardware` tistie and under that, the `Network adapter 1` twistie.
 
-      1. Make a note of the MAC address for each cluster node.
+    1. Make a note of the MAC address for each cluster node.
 
-      ![mac-address](/images/mac-address.png "MAC address")
+    ![mac-address](/images/mac-address.png "MAC address")
   </details>
   <details>
   <summary>Configure the Bare Metal Environment</summary>
 
-    ## Bare Metal Installation Specifics
-    Installation of OCP in a bare metal environment requires either mounting an .iso to the local machine to install the operating system or installing via PXE (Pre-eXecution Environment).  In this tutorial, we will use a legacy PXE server.
+  ## Bare Metal Installation Specifics
+  Installation of OCP in a bare metal environment requires either mounting an .iso to the local machine to install the operating system or installing via PXE (Pre-eXecution Environment).  In this tutorial, we will use a legacy PXE server.
 
-    Installation of a PXE server is beyond the scope of this document.  If no PXE server exists in the environment one should be created.
+  Installation of a PXE server is beyond the scope of this document.  If no PXE server exists in the environment one should be created.
 
-    ## Create (but don't boot) your cluster nodes
-    Before you can configure the PXE and DHCP servers, you will need to know the MAC addresses of all the nodes in your cluster.  Since we will be using virtual machines rather than bare metal servers, we will need to first create the VMs on the hypervisor.
+  ## Create (but don't boot) your cluster nodes
+  Before you can configure the PXE and DHCP servers, you will need to know the MAC addresses of all the nodes in your cluster.  Since we will be using virtual machines rather than bare metal servers, we will need to first create the VMs on the hypervisor.
 
-    Assuming the environment is KVM, use `virt-manager` or `virsh` to create a VM for each node that will be a part of your cluster.  Make note of the MAC address of each node and what type of node it should be (bootstrap, control plane (master), compute (worker)).
+  Assuming the environment is KVM, use `virt-manager` or `virsh` to create a VM for each node that will be a part of your cluster.  Make note of the MAC address of each node and what type of node it should be (bootstrap, control plane (master), compute (worker)).
 
-    See the table below for recommended sizing of the various nodes:
+  See the table below for recommended sizing of the various nodes:
 
-    | Node Type | CPU | Memory |  Disk |
-    |:---------:|:---:|:-------|:-----:|
-    | Bootstrap |  4  | 16Gi   | 120GB |
-    | Control   |  4  | 16Gi   | 120GB |
-    | Compute   |  2  | 8Gi    | 120GB |
+  | Node Type | CPU | Memory |  Disk |
+  |:---------:|:---:|:-------|:-----:|
+  | Bootstrap |  4  | 16Gi   | 120GB |
+  | Control   |  4  | 16Gi   | 120GB |
+  | Compute   |  2  | 8Gi    | 120GB |
 
-    ## Configure the PXE server
-    There are three files you will need for a PXE install:
-      * rhcos-4.2.0-x86_64-installer-initramfs.img
-      * rhcos-4.2.0-x86_64-installer-kernel
-      * rhcos-4.2.0-x86_64-metal-bios.raw.gz
+  ## Configure the PXE server
+  There are three files you will need for a PXE install:
+    * rhcos-4.2.0-x86_64-installer-initramfs.img
+    * rhcos-4.2.0-x86_64-installer-kernel
+    * rhcos-4.2.0-x86_64-metal-bios.raw.gz
 
-    <br>On your **installation/web server machine**, change to your project folder and download the metal-bios file from the Red Hat download site:
+  <br>On your **installation/web server machine**, change to your project folder and download the metal-bios file from the Red Hat download site:
 
-    ```
-    cd /opt/vhavard
-    wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-metal-bios.raw.gz
-    ```
+  ```
+  cd /opt/vhavard
+  wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-metal-bios.raw.gz
+  ```
 
-    On the **PXE server**, you will need the other two files.
+  On the **PXE server**, you will need the other two files.
 
-    In this document we will assume that the tftpboot path is /tftpboot.
+  In this document we will assume that the tftpboot path is /tftpboot.
 
-    Create a new subdirectory named "rhcos" under /tftpboot.  Download the other two files to this directory:
+  Create a new subdirectory named "rhcos" under /tftpboot.  Download the other two files to this directory:
 
-    ```
-    mkdir -p /tftpboot/rhcos
-    cd /tftpboot/rhcos
-    wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-installer-initramfs.img
-    wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-installer-kernel
-    ```
+  ```
+  mkdir -p /tftpboot/rhcos
+  cd /tftpboot/rhcos
+  wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-installer-initramfs.img
+  wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-installer-kernel
+  ```
 
-    Under the /tftpboot directory should be a subdirectory named pxelinux.cfg.  For a streamlined installation, we will not use a menu-based installation.  Instead, we will use the MAC address of the VM to specify the exact configuration which should be applied to the VM and it will be automatically applied at boot time.
+  Under the /tftpboot directory should be a subdirectory named pxelinux.cfg.  For a streamlined installation, we will not use a menu-based installation.  Instead, we will use the MAC address of the VM to specify the exact configuration which should be applied to the VM and it will be automatically applied at boot time.
 
-    To create a custom installation configuration for a VM, you must create a file named for the MAC address of the VM in the /tftpboot/pxelinux.cfg/ directory.
+  To create a custom installation configuration for a VM, you must create a file named for the MAC address of the VM in the /tftpboot/pxelinux.cfg/ directory.
 
-    The format of the filename is <address-type>-<xx-xx-xx-xx-xx-xx> where <address-type> is "01" for ARP and "xx-xx-xx-xx-xx-xx" represents the mac address of the VM with each "xx" being an octet of the mac address.  For example, "01-00-50-56-a5-bc-2d".
+  The format of the filename is <address-type>-<xx-xx-xx-xx-xx-xx> where <address-type> is "01" for ARP and "xx-xx-xx-xx-xx-xx" represents the mac address of the VM with each "xx" being an octet of the mac address.  For example, "01-00-50-56-a5-bc-2d".
 
-    The file should have the following contents:
+  The file should have the following contents:
 
-    IMPORTANT: Replace the URL in square brackets (removing the square brackets) with the URL of the metal-bios file you downloaded to your installation/web server and the URL of the bootstrap.ign ignition file, respectively.
+  IMPORTANT: Replace the URL in square brackets (removing the square brackets) with the URL of the metal-bios file you downloaded to your installation/web server and the URL of the bootstrap.ign ignition file, respectively.
 
-    ```
-    DEFAULT pxeboot
-    TIMEOUT 20
-    PROMPT 0
-    LABEL pxeboot
-        KERNEL rhcos/rhcos-4.2.0-x86_64-installer-kernel
-        APPEND ip=dhcp rd.neednet=1 initrd=rhcos/rhcos-4.2.0-x86_64-installer-initramfs.img console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=sda coreos.inst.image_url=[http://172.18.1.30/pxetest/rhcos-4.2.0-x86_64-metal-bios.raw.gz] coreos.inst.ignition_url=[http://172.18.1.30/pxetest/bootstrap.ign]
-    ```
+  ```
+  DEFAULT pxeboot
+  TIMEOUT 20
+  PROMPT 0
+  LABEL pxeboot
+      KERNEL rhcos/rhcos-4.2.0-x86_64-installer-kernel
+      APPEND ip=dhcp rd.neednet=1 initrd=rhcos/rhcos-4.2.0-x86_64-installer-initramfs.img console=tty0 console=ttyS0 coreos.inst=yes coreos.inst.install_dev=sda coreos.inst.image_url=[http://172.18.1.30/pxetest/rhcos-4.2.0-x86_64-metal-bios.raw.gz] coreos.inst.ignition_url=[http://172.18.1.30/pxetest/bootstrap.ign]
+  ```
 
-    Create a file for each of the nodes in your cluster, with each file pointing to the correct ignition file for the the type of node to which it should apply.
+  Create a file for each of the nodes in your cluster, with each file pointing to the correct ignition file for the the type of node to which it should apply.
 
-    For example, if your bootstrap node's mac address is 00:50:56:a5:2a:63, you will create a file named `01-00-50-56-a5-2a-63` with the contents noted above.
+  For example, if your bootstrap node's mac address is 00:50:56:a5:2a:63, you will create a file named `01-00-50-56-a5-2a-63` with the contents noted above.
 
-    If the node were a master node the file contents would be identical, but the ignition_url location would be the URL for the master.ign file, and the path for a worker node would be the same, but point to worker.ign on that same server.
+  If the node were a master node the file contents would be identical, but the ignition_url location would be the URL for the master.ign file, and the path for a worker node would be the same, but point to worker.ign on that same server.
 
-    When all of the files have been created, double check to make sure there are no typos.  There is no need to restart the service, changes are picked up immediately.
+  When all of the files have been created, double check to make sure there are no typos.  There is no need to restart the service, changes are picked up immediately.
   </details>
 
 ### Provision two new VMs to use as External Load Balancers
@@ -519,29 +519,27 @@ We will discuss each of these in turn in the rest of this document.
   1. You will configure your load balancers when you get your IP addresses assigned.
 
 
-### CSPLAB: Request a new subnet for your cluster
+### IBM Cloud Adoption Lab Users: Request a new subnet for your cluster
 
-  If you are deploying a cluster into the IBM Cloud Adoption Lab's OCP environment you will need to be assigned a subnet.  Send an email to the csplab-admin mailing list to request the subnet.
+IBM employees who are deploying a cluster into the IBM Cloud Adoption Lab's OCP environment you will need to be assigned a subnet.  Send an email to the csplab-admin mailing list to request the subnet.
 
-  When you request your subnet, provide the MAC address for each of your cluster nodes including the 2 load balancers.
+When you request your subnet, provide the MAC address for each of your cluster nodes including the 2 load balancers.
 
-  The lab admins will configure the DHCP and DNS servers and router for your assigned subnet.
+The lab admins will configure the DHCP and DNS servers and router for your assigned subnet.
 
-  If you are deploying into the CSPLAB you can ignore the steps `Configure DHCP Server` and `Configure DNS Server` sections, these will be done for you.
+If you are deploying into the IBM Cloud Adoption Lab you can ignore the steps `Configure DHCP Server` and `Configure DNS Server` sections, these will be done for you.
 
 ### Configure the DHCP server
 
-Each node will need to be added to the DHCP server so that it can get its IP address and hostname at boot time.
+Each node will need to be added to the DHCP server so that it can get a static mapped IP address and hostname at boot time.
 
-It is also possible to add this information to the ignition files, but doing so is out of the scope of this document.
+It is also possible to add this information to the ignition files, but doing so is out of the scope of this document.  Note, however, that if you plan to modify the ignition files to add static IP addresses, you must create a separate ignition file for each node rather than just one for each type of node.
 
-If modifying ignition files, you must create a separate ignition file for each node rather than just one for each type of node.
-
-See Appendix B for an example dhcpd.conf file.
+See Appendix B for an example dhcpd.conf file if using the standard isc-dhcp-server dhcp package.
 
 If the nodes are on the correct network and the DHCP server is configured correctly, each node should boot with the IP address and hostname you configured for each node.
 
-**IMPORTANT:** Make sure the hostname you specify for the node in the DHCP server is the same as the hostname you use for your DNS server where that is possible.
+**IMPORTANT:** Make sure the hostname you specify for the node in the DHCP server is the same as the hostname you use for your DNS server.
 
 ### Configure the DNS Server
 
@@ -555,7 +553,7 @@ Make the following DNS updates make sure the hostnames and IP addresses match th
 
 1. api-int.\<cluster_name\>.\<base_domain\>
 
-  Points to the load balancer for the control lane nodes (master nodes).
+  Points to the load balancer for the control plane nodes (master nodes). The IP address for `api` and `api-int` should be the same.
 
   e.g. **api-int.vhavard.ocp.csplab.local**
 
@@ -570,9 +568,9 @@ Make the following DNS updates make sure the hostnames and IP addresses match th
   Points to each of the etcd nodes, respectively (master nodes, normally).
 
   e.g. </br>
-      **etcd-0.vhavard.oc.csplab.local**</br>
-      **etcd-1.vhavard.ocp.csplab.local**</br>
-      **etcd-2.vhavard.ocplcsplab.local**
+      **etcd-0.vhavard.oc.csplab.local** <- same IP address as control-plane-1 (aka master1)</br>
+      **etcd-1.vhavard.ocp.csplab.local** <- same IP address as control-plane-2 (aka master2)</br>
+      **etcd-2.vhavard.ocplcsplab.local** <- same IP address as control-plane-3 (aka master3)
 
 1. SRV Records
 
@@ -584,7 +582,7 @@ _etcd-server-ssl._tcp.<cluster_name>.<base_domain>  86400 IN    SRV 0        10 
 _etcd-server-ssl._tcp.<cluster_name>.<base_domain>  86400 IN    SRV 0        10     2380 etcd-1.<cluster_name>.<base_domain>.
 _etcd-server-ssl._tcp.<cluster_name>.<base_domain>  86400 IN    SRV 0        10     2380 etcd-2.<cluster_name>.<base_domain>.
   ```
-e.g.
+  e.g.
 
   ```
 # _service._proto.name.                            TTL    class SRV priority weight port target.
@@ -655,6 +653,8 @@ Installation normally take about 30 minutes.
 If you do not get a completed result then you need to troubleshoot what is failing.  Watching the logs on the bootstrap server as noted above can give you information about what is failing.
 
 You can also ssh to one of the master nodes and execute `journalctl -f` to watch the logfile for potential errors.
+
+You may also find it helpful to watch the traffic going through the control plane load balancer (e.g. via the haproxy log files).  You should see traffic from all nodes as they pull configuration information from the bootstrap node.  You may be able to see errors here if there are configuration issues with any of the specific nodes or the bootstrap node.
 
 ## Remove bootstrap server from control plane load balancer
 
@@ -747,9 +747,11 @@ $ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --pa
 
 Your image-registry custer operator should complete its installation in a couple of minutes and your cluster will be usable.
 
-2. Option 2 - Configure NFS for persistent storage
+1. Option 2 - Configure NFS for persistent storage
 
-  1. In order to configure persistent storage for the image repositoryml you will need an NFS server configured to serve up NFS volumes.  Creation of an NFS server is beyond the scope of this document, however, to prevent problems, the exports for the mounted NFS volume should be specified with the following options:
+  **Note:** Using NFS in a production environment is **not** recommended.  It is described here because it is the easiest to get configured and up and running.  The recommendation is to use Ceph/rook for all persistent storage needs. Documentation for getting this installed and configured is coming soon.
+
+  1. In order to configure persistent storage for the image repositoryml you will need a storage server configured to serve up ReadWriteMany (RWX) volumes.  Creation of an NFS server is beyond the scope of this document, however, to prevent problems, the exports for the mounted NFS volume should be specified with the following options:
 
   ```
   /storage	*(rw,no_subtree_check,sync,no_wdelay,insecure,no_root_squash)
@@ -872,35 +874,33 @@ Your image-registry custer operator should complete its installation in a couple
 
   The result should look something like this:
 
-    ```
-    ...
+  ...
 
-    spec:
-      defaultRoute: false
-      httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
-      logging: 2
-      managementState: Managed
-      proxy:
-        http: ""
-        https: ""
-        noProxy: ""
-      readOnly: false
-      replicas: 1
-      requests:
-        read:
-          maxInQueue: 0
-          maxRunning: 0
-          maxWaitInQueue: 0s
-        write:
-          maxInQueue: 0
-          maxRunning: 0
-          maxWaitInQueue: 0s
-      storage:
-        pvc:
-          claim:
+  spec:
+    defaultRoute: false
+    httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
+    logging: 2
+    managementState: Managed
+    proxy:
+      http: ""
+      https: ""
+      noProxy: ""
+    readOnly: false
+    replicas: 1
+    requests:
+      read:
+        maxInQueue: 0
+        maxRunning: 0
+        maxWaitInQueue: 0s
+      write:
+        maxInQueue: 0
+        maxRunning: 0
+        maxWaitInQueue: 0s
+    storage:
+      pvc:
+        claim:
+  ...
 
-        ...
-    ```
   When this is complete, recheck your clusteroperator status to make sure the status becomes available.
 
   ```
