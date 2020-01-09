@@ -294,12 +294,19 @@ We will discuss each of these in turn in the rest of this document.
   Where vhavard is the name of your cluster just as in the previous step.
 
 1. Environment-specific configurations
+
+  **STORAGE NOTE:** If you are going to be installing rook/Ceph or Gluster storage you may also want to consider adding additional compute nodes to use as storage nodes.  If using separate storage nodes for Ceph, provision three additional nodes (minimum, but can be more) and name them appropriately (e.g. storage-0, storage-1, storage-2).  These should be provisioned exactly like compute nodes with the exception of the extra disk as noted below.
+
+  Alternatively, you can also just use all compute nodes as storage nodes without designating them separately.  When doing this for Ceph storage you must have a minimum of three.  In this document we will assume there are three separate storage nodes.
+
+  All nodes which will also be used as storage nodes will need a second hard disk provisioned (the installer will only use /dev/sda).  This second hard disk will be /dev/sdb and will be used by Ceph when installing the Ceph storage cluster.  You can also add more than one additional disk to be used by the Ceph storage cluster, but only one is required.
+
   <details>
   <summary>Configure VMware Environment</summary>
 
   1. Create the 'append-bootstrap.ign' File
 
-  The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
+  <br>The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
 
   In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
 
@@ -345,9 +352,9 @@ We will discuss each of these in turn in the rest of this document.
 
     Otherwise, download the needed .ova file.  For example:
 
-  ```
-  wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-vmware.ova
-  ```
+    ```
+    wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-vmware.ova
+    ```
 
   From the vSphere Web Client, click on the location (cluster/folder) where you would like to put your template, right-click, on the cluster/folder and click `Deploy OVF Template...`.
 
@@ -355,7 +362,7 @@ We will discuss each of these in turn in the rest of this document.
 
   ### Configure vCenter and Create your Cluster Nodes
 
-  **NOTE:** You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.
+  **NOTE:** You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.  
 
   1. With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
 
@@ -405,9 +412,9 @@ We will discuss each of these in turn in the rest of this document.
 
     1. On your installation machine cat the text of append-bootstrap.b64 file to the screen:
 
-      ```
-      cat append-bootstrap.base64
-      ```
+    ```
+    cat append-bootstrap.base64
+    ```
 
       Copy the output from this file into your clipboard/paste buffer.
 
@@ -591,7 +598,7 @@ _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     
 _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-2.vhavard.ocp.csplab.local.
   ```
 
-### Configure your haproxy nodes
+### Configure your haproxy nodes (load balancers)
 
 Once you have IP addresses assigned for your load balancers, bootstrap node, control plane nodes, and compute nodes, you need to configure your load balancers.
 
@@ -733,23 +740,306 @@ service-catalog-controller-manager   4.2.0     True        False         False  
 storage                              4.2.0     True        False         False      5m30s
 ```
 
-## Configure Persistent Storage for the Image Registry
+## Configure Storage for the image-registry Operator
 
 The image registry requires persistent storage with access mode of ReadWriteMany (RWX), however, the vSphere storage class does not support RWX.  There are two options, 1) do not use persistent storage, in which case an images placed in the registry are lost with each start, or 2) configure persistent storage which does support RWX (e.g. NFS).
 
-1. Option 1 - Do not use persistent storage
 
-If you just want to get the cluster up and running quickly, you can tell the image registry operator to not use persistent storage.  To do this, execute the following command:
+_Option 1_ - Do not use persistent storage
 
-```
-$ oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
-```
+  If you just want to get the cluster up and running quickly, you can tell the image registry operator to not use persistent storage.  To do this, execute the following command:
 
-Your image-registry custer operator should complete its installation in a couple of minutes and your cluster will be usable.
+  ```
+  oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+  ```
 
-1. Option 2 - Configure NFS for persistent storage
+  Your image-registry cluster operator should complete its installation in a couple of minutes and your cluster will be usable.
 
-  **Note:** Using NFS in a production environment is **not** recommended.  It is described here because it is the easiest to get configured and up and running.  The recommendation is to use Ceph/rook for all persistent storage needs. Documentation for getting this installed and configured is coming soon.
+_Option 2_ - Configure persistent storage
+
+  <details>
+  <summary>Configure Ceph storage (recommended)</summary>
+  <br>NOTE:  These instructions should be carried out on the installation node.
+
+  <br>If you have not already done so, add at least one additional hard disk to all compute nodes which should be used as storage nodes and note the node names of all storage nodes (this will be needed later).
+
+  ```
+  sysadmin@ocp42install:/opt$ oc get nodes
+  NAME              STATUS   ROLES    AGE   VERSION
+  compute-0         Ready    worker   41h   v1.14.6+8e46c0036
+  compute-1         Ready    worker   41h   v1.14.6+8e46c0036
+  compute-2         Ready    worker   41h   v1.14.6+8e46c0036
+  control-plane-0   Ready    master   42h   v1.14.6+8e46c0036
+  control-plane-1   Ready    master   42h   v1.14.6+8e46c0036
+  control-plane-2   Ready    master   42h   v1.14.6+8e46c0036
+  storage-0         Ready    worker   41h   v1.14.6+8e46c0036
+  storage-1         Ready    worker   41h   v1.14.6+8e46c0036
+  storage-2         Ready    worker   42h   v1.14.6+8e46c0036
+  ```
+
+Label storage nodes
+
+  ```
+  oc label node storage-0 role=storage-node
+  oc label node storage-1 role=storage-node
+  oc label node storage-2 role=storage-node
+  ```
+
+Clone the rook project from github
+
+  ```
+  cd /opt
+  git clone https://github.com/rook/rook.git
+  ```
+
+  You shiould now have a subdirectory under /opt named `rook`.
+
+Change to the `ceph` directory:
+
+  ```
+  cd /opt/rook/cluster/examples/kubernetes/ceph
+  ```
+
+Create the common and operator objects
+  ```
+  oc create -f common.yaml
+  oc create -f operator-openshift.yaml
+  ```
+
+Wait for all pods to enter the 'Running' state
+
+  ```
+  watch -n5 "oc get pods -n rook-ceph"
+  ```
+
+Modify the cluster.yaml file for your environment.
+
+  ```
+  apiVersion: ceph.rook.io/v1
+  kind: CephCluster
+  metadata:
+    name: rook-ceph
+    namespace: rook-ceph
+  spec:
+    cephVersion:
+      image: ceph/ceph:v14.2.5
+      allowUnsupported: false
+    dataDirHostPath: /var/lib/rook
+    skipUpgradeChecks: false
+    continueUpgradeAfterChecksEvenIfNotHealthy: false
+    mon:
+      count: 3
+      allowMultiplePerNode: false
+    dashboard:
+      enabled: true
+      ssl: true
+    monitoring:
+      enabled: false
+      rulesNamespace: rook-ceph
+    network:
+      hostNetwork: false
+    rbdMirroring:
+      workers: 0
+    placement:
+      all:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: role
+                operator: In
+                values:
+                - storage-node
+        podAffinity:
+        podAntiAffinity:
+        tolerations:
+        - key: storage-node
+          operator: Exists
+    annotations:
+    resources:
+      mgr:
+        limits:
+          cpu: "500m"
+          memory: "1024Mi"
+        requests:
+          cpu: "500m"
+          memory: "1024Mi"
+    removeOSDsIfOutAndSafeToRemove: false
+    storage: # cluster level storage configuration and selection
+      useAllNodes: false
+      useAllDevices: false
+      config:
+      nodes:
+      - name: "storage-0"
+        devices: # specific devices to use for storage can be specified for each node
+        - name: "sdb"
+          config:
+            osdsPerDevice: "1"
+      - name: "storage-1"
+        devices: # specific devices to use for storage can be specified for each node
+        - name: "sdb"
+          config:
+            osdsPerDevice: "1"
+      - name: "storage-2"
+        devices: # specific devices to use for storage can be specified for each node
+        - name: "sdb"
+          config:
+            osdsPerDevice: "1"
+    disruptionManagement:
+      managePodBudgets: false
+      osdMaintenanceTimeout: 30
+      manageMachineDisruptionBudgets: false
+      machineDisruptionBudgetNamespace: openshift-machine-api
+  ```
+
+Create the Ceph cluster
+
+  ```
+  oc create -f cluster.yaml
+  ```
+
+Wait for all pods to enter 'Running' state
+
+  ```
+  watch -n5 "oc get pods -n rook-ceph"
+  ```
+
+Create the Ceph toolbox pod to check cluster health
+
+  ```
+  oc create -f toolbox.yaml
+  ```
+
+  It should take less than a minute to provision.  Check with `oc get pods -n rook-ceph`.
+
+Check the health of the Ceph cluster
+
+  ```
+  oc -n rook-ceph exec -it <rook_pod> -- /usr/bin/ceph -s
+  ```
+
+Should return something like this:
+
+  ```
+  [sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+  cluster:
+    id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum a,b,c (age 13m)
+    mgr: a(active, since 12m)
+    osd: 3 osds: 3 up (since 11m), 3 in (since 11m)
+
+  data:
+    pools:   0 pools, 0 pgs
+    objects: 0 objects, 0 B
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:
+  ```
+
+  You now have a running Ceph cluster, provisioned by rook.  You now need to configure OCP to consume it.
+
+Deploy the `rbd` storage class for non-ReadWriteMany PVs
+
+  ```
+  cd /opt/rook/cluster/examples/kubernetes/ceph/csi/rbd
+  oc create -f storageclass.yaml
+  ```
+
+  NOTE: Ceph rbd volumes are raw storage volumes.  The storage class defines how the volume should be formatted after it is created.  The default is ext4.  If you would like something other than ext4 (e.g. xfs), modify the storage class to specify `csi.storage.k8s.io/fstype: xfs`.
+
+  Check that your new storage class was created:
+
+  ```
+  oc get sc
+  ```
+
+Deploy the `CephFS` storage class for ReadWriteMany PVs.
+
+  IMPORTANT: Although Ceph supports unlimited filesystems, rook (the k8s implementation of Ceph), only supports one.  This means that you can only deploy one single RWX PV using rook/CephFS.  If you need more than one RWX volume, you much use an external Ceph implementation and integrate it with OCP.  Doing so is outside of the scope of this document.
+
+  As of this writing, allowing multiple filesystems in rook/ceph is *experimental* and is thus possible, but doing so would not be production ready and so is outside the scope of this document.
+
+  For our OCP 4.2 deployment, we need one RWX volume to use for the image registry.  We will deploy the only available filesystem PV for use by the image registry later in this document.
+
+  ```
+  cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
+  oc create -f storageclass.yaml
+  oc get sc
+  ```
+
+Create a filesystem to be used by our image registry
+
+  ```
+  /opt/rook/cluster/examples/kubernetes/ceph
+  oc create -f filesystem.yaml
+  ```
+
+Wait for all pod to reach 'Running' state
+
+  ```
+  watch -n5 "oc get pods -n rook-ceph"
+  ```
+
+Check Ceph cluster health:
+
+  ```
+  [sysadmin@vhavard-installer ceph]$ oc -n rook-ceph exec -it rook-ceph-tools-7f9b9bfdb4-p6g5r -- /usr/bin/ceph -s
+  cluster:
+    id:     8eaa6336-6ff1-4721-9978-867f5fdfdafd
+    health: HEALTH_OK
+
+  services:
+    mon: 3 daemons, quorum a,b,c (age 34m)
+    mgr: a(active, since 4m)
+    mds: myfs:1 {0=myfs-a=up:active} 1 up:standby-replay
+    osd: 3 osds: 3 up (since 32m), 3 in (since 32m)
+
+  data:
+    pools:   10 pools, 80 pgs
+    objects: 37 objects, 4.4 KiB
+    usage:   3.0 GiB used, 1.5 TiB / 1.5 TiB avail
+    pgs:     80 active+clean
+
+  io:
+    client:   1.2 KiB/s rd, 0 B/s wr, 1 op/s rd, 0 op/s wr
+  ```
+
+Create a PVC to be consumed by the image registry (pvc.yaml)
+
+  ```
+  # pvc.yaml
+  ---
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: image-registry-storage
+    namespace: openshift-image-registry
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 100Gi
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: csi-cephfs
+  ```
+
+Deploy the PVC:
+
+  ```
+  oc create -f pvc.yaml
+  ```
+
+  </details>
+
+
+  <details>
+  <summary>Configure NFS Storage (not recommended for production)</summary>
+  <br>**Note:** Using NFS in a production environment is **not** recommended.  It is described here because it is the easiest to get configured and up and running.  The recommendation is to use rook/Ceph for all persistent storage needs.
 
   1. In order to configure persistent storage for the image repositoryml you will need a storage server configured to serve up ReadWriteMany (RWX) volumes.  Creation of an NFS server is beyond the scope of this document, however, to prevent problems, the exports for the mounted NFS volume should be specified with the following options:
 
@@ -860,8 +1150,12 @@ Your image-registry custer operator should complete its installation in a couple
   NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
   image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
   ```
+</details>
 
-  1. Last, configure the image-registry operator to consume the provisioned PVC edit the operator and set the storage values as specified:
+
+Configure the image-registry operator to use persistent storage
+
+  Configure the image-registry operator to consume the provisioned PVC edit the operator and set the storage values as specified:
 
   ```
   $ oc edit configs.imageregistry.operator.openshift.io
@@ -963,9 +1257,13 @@ INFO Login to the console with user: kubeadmin, password: wSbzT-DCZCU-BRYF7-C7bX
 
 Login to your new cluster as kubeadmin with the credentials output to the screen.  If you lose that screen output, the same information can be found on your installation server in the `<projectdir>/auth/kubeadmin-password` file.
 
-# Integrating your cluster with Microsoft Active Directory for authentication
+# Post-Install Tasks to Have a Usable Cluster
+<details>
+<summary>
+1. Integrating with Microsoft Active Directory for authentication
+</summary>
 
-Login to your cluster as kubeadmin as noted above.
+<br>Login to your cluster as kubeadmin as noted above.
 
 Navigate to "Administration -> Cluster Settings -> Global Configuration", scroll down and click the "OAuth" link.
 
@@ -1050,6 +1348,7 @@ Click the `Create` button to create the role binding.  Your user should now be a
 **Note:** You an also create groups and apply the role to a group, then anyone within that group will have that role.
 
 You can also sync local groups from LDAP groups.  For more information see: https://docs.openshift.com/container-platform/4.2/authentication/ldap-syncing.html
+</details>
 
 # Appendix A - Example DNS Configuration
 
