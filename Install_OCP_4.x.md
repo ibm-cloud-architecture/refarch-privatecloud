@@ -301,6 +301,7 @@ We will discuss each of these in turn in the rest of this document.
 
   <details>
   <summary>Configure VMware Environment</summary>
+  
   ####  VMware Installation Specifics
 
   Create the 'append-bootstrap.ign' File
