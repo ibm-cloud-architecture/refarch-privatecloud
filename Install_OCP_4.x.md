@@ -388,35 +388,35 @@ We will discuss each of these in turn in the rest of this document.
 
   Click the `VM Options` tab and expand the `Advanced` twistie.
 
-    Under `Configuration Parameters`, click the `Edit Configuration...` button.
+  Under `Configuration Parameters`, click the `Edit Configuration...` button.
 
-    At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
+  At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
 
-    ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
+  ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
 
-    Click 'Next' and then 'Finish' to finish VM creation, but <strong>do not yet boot the new node.</strong>
+  Click 'Next' and then 'Finish' to finish VM creation, but <strong>do not yet boot the new node.</strong>
 
-    Find your newly created VM in the vSphere Web Console and click on it.  On the top-right, click `Configure`, then under `Settings`, click on `vApp Options`.
+  Find your newly created VM in the vSphere Web Console and click on it.  On the top-right, click `Configure`, then under `Settings`, click on `vApp Options`.
 
-    If vApp Options are not Enabled, enable them.
+  If vApp Options are not Enabled, enable them.
 
-    Scroll to the bottom of the vApp Options and find the `Properties` section.
+  Scroll to the bottom of the vApp Options and find the `Properties` section.
 
-    You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`.
+  You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`.
 
-    Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table.
+  Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table.
 
-    In the blank, put `base64` and click `OK`.
+  In the blank, put `base64` and click `OK`.
 
-    On your installation machine cat the text of append-bootstrap.b64 file to the screen:
+  On your installation machine cat the text of append-bootstrap.b64 file to the screen:
 
-    ```
-    cat append-bootstrap.base64
-    ```
+  ```
+  cat append-bootstrap.base64
+  ```
 
-    Copy the output from this file into your clipboard/paste buffer.
+  Copy the output from this file into your clipboard/paste buffer.
 
-    Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click `OK`.
+  Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click `OK`.
 
   You have now created your bootstrap node.
 
@@ -426,13 +426,13 @@ We will discuss each of these in turn in the rest of this document.
 
   You will need to know the MAC address for each of the nodes you just created.
 
-    In the vCenter client, locate each node you just created, select it, and on the right, click the `Configure` tab.
+  In the vCenter client, locate each node you just created, select it, and on the right, click the `Configure` tab.
 
-    Expand the `VM Hardware` tistie and under that, the `Network adapter 1` twistie.
+  Expand the `VM Hardware` tistie and under that, the `Network adapter 1` twistie.
 
-    Make a note of the MAC address for each cluster node.
+  Make a note of the MAC address for each cluster node.
 
-    ![mac-address](/images/mac-address.png "MAC address")
+  ![mac-address](/images/mac-address.png "MAC address")
   </details>
 
   <details>
