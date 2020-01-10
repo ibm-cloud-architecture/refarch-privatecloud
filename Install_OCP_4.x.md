@@ -295,7 +295,7 @@ We will discuss each of these in turn in the rest of this document.
 
 1. Environment-specific configurations
 
-  **STORAGE NOTE:** If you are going to be installing rook/Ceph or Gluster storage you may also want to consider adding additional compute nodes to use as storage nodes.  If using separate storage nodes for Ceph, provision three additional nodes (minimum, but can be more) and name them appropriately (e.g. storage-0, storage-1, storage-2).  These should be provisioned exactly like compute nodes with the exception of the extra disk as noted below.
+  <strong>STORAGE NOTE:</strong> If you are going to be installing rook/Ceph or Gluster storage you may also want to consider adding additional compute nodes to use as storage nodes.  If using separate storage nodes for Ceph, provision three additional nodes (minimum, but can be more) and name them appropriately (e.g. storage-0, storage-1, storage-2).  These should be provisioned exactly like compute nodes with the exception of the extra disk as noted below.
 
   Alternatively, you can also just use all compute nodes as storage nodes without designating them separately.  When doing this for Ceph storage you must have a minimum of three.  In this document we will assume there are three separate storage nodes.
 
@@ -304,51 +304,51 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>Configure VMware Environment</summary>
 
-  1. Create the 'append-bootstrap.ign' File
+  #### Create the 'append-bootstrap.ign' File
 
-  <br>The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
+    The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
 
-  In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
+    In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
 
-  <b>IMPORTANT:</b> _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
+    <strong>IMPORTANT:</strong> _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
 
-  ```
-  {
-  "ignition": {
-    "config": {
-      "append": [
-        {
-          "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
-          "verification": {}
-        }
-      ]
+    ```
+    {
+    "ignition": {
+      "config": {
+        "append": [
+          {
+            "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
+            "verification": {}
+          }
+        ]
+      },
+      "timeouts": {},
+      "version": "2.1.0"
     },
-    "timeouts": {},
-    "version": "2.1.0"
-  },
-  "networkd": {},
-  "passwd": {},
-  "storage": {},
-  "systemd": {}
-  }
-  ```
+    "networkd": {},
+    "passwd": {},
+    "storage": {},
+    "systemd": {}
+    }
+    ```
 
-  Where `source` is the URL where the vCenter server can download the bootstrap.ign file (from your locally running web server).
+    Where `source` is the URL where the vCenter server can download the bootstrap.ign file (from your locally running web server).
 
-  1. The ignition files will need to be encoded into base64 strings so they can be placed in a form blank.  In the /opt/<project> directory (e.g. /opt/vhavard), encode master.ign, worker.ign, and append-bootstrap.ign into base64 strings.
+    The ignition files will need to be encoded into base64 strings so they can be placed in a form blank.  In the /opt/<project> directory (e.g. /opt/vhavard), encode master.ign, worker.ign, and append-bootstrap.ign into base64 strings.
 
-  ```
-  cd /opt/vhavard
-  base64 -w0 append-bootstrap.ign > append-bootstrap.base64
-  base64 -w0 master.ign > master.base64
-  base64 -w0 worker.ign > worker.base64
-  ```
+    ```
+    cd /opt/vhavard
+    base64 -w0 append-bootstrap.ign > append-bootstrap.base64
+    base64 -w0 master.ign > master.base64
+    base64 -w0 worker.ign > worker.base64
+    ```
 
-  ### Create the RHCOS Template in vSphere
+  #### Create the RHCOS Template in vSphere
 
-  1. From any computer, download the openshift 4.x vmware template and store it locally.
+    From any computer, download the openshift 4.x vmware template and store it locally.
 
-    **NOTE:** If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
+    <strong>NOTE:</strong> If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
 
     Otherwise, download the needed .ova file.  For example:
 
@@ -360,27 +360,27 @@ We will discuss each of these in turn in the rest of this document.
 
   Continue to use the wizard to upload your template.  Remember where you put it because you will use it in the next step.
 
-  ### Configure vCenter and Create your Cluster Nodes
+  #### Configure vCenter and Create your Cluster Nodes
 
-  **NOTE:** You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.  
+  <strong>NOTE:</strong> You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.  
 
-  1. With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
+  With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
 
-  ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
+    ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
 
-  1. Find your previously uploaded rhcos template and create your bootstrap node.  Right-click on the template and click "New VM from this Template".
+  Find your previously uploaded rhcos template and create your bootstrap node.  Right-click on the template and click "New VM from this Template".
 
-  ![Create VM from Template](/images/vm-from-template.png "Create VM from Template")
+    ![Create VM from Template](/images/vm-from-template.png "Create VM from Template")
 
-  1. On the `Select a name and folder` screen, name your VM so you know it's the bootstrap node (e.g. ocp-42-bootstrap), put it into the folder you created in the previous step and click 'Next'.
+  On the `Select a name and folder` screen, name your VM so you know it's the bootstrap node (e.g. ocp-42-bootstrap), put it into the folder you created in the previous step and click 'Next'.
 
-  1. On the next screen (`Select a compute resource`), select a compute resource location for your VM and click 'Next'.
+  On the next screen (`Select a compute resource`), select a compute resource location for your VM and click 'Next'.
 
-  1. On the next screen (`Select storage`), choose the datastore you put in the `install-config.yaml` file in step 10 under the 'Create the Installation Server' section and click 'Next'.
+  On the next screen (`Select storage`), choose the datastore you put in the `install-config.yaml` file in step 10 under the 'Create the Installation Server' section and click 'Next'.
 
-  1. On the next screen (`Select clone options`), check the box to customize the virtual machine's hardware, make sure `Power on virtual machine after creation` box is *unchecked* and click 'Next'.
+  On the next screen (`Select clone options`), check the box to customize the virtual machine's hardware, make sure `Power on virtual machine after creation` box is *unchecked* and click 'Next'.
 
-  1. On the next screen (`Customize hardware`), set the CPU and Memory values appropriately based on the table below and make sure your network adapter is set to the correct network for your OCP cluster.  For the IBM Cloud Adoption Lab, this is the `OCP` network.
+  On the next screen (`Customize hardware`), set the CPU and Memory values appropriately based on the table below and make sure your network adapter is set to the correct network for your OCP cluster.  For the IBM Cloud Adoption Lab, this is the `OCP` network.
 
   | Node Type | CPU | Memory |
   |:---------:|:---:|:-------|
@@ -388,54 +388,55 @@ We will discuss each of these in turn in the rest of this document.
   | Control   |  4  | 16Gi   |
   | Compute   |  2  | 8Gi    |
 
-  1. Click the `VM Options` tab and expand the `Advanced` twistie.
+  Click the `VM Options` tab and expand the `Advanced` twistie.
 
-    1. Under `Configuration Parameters`, click the `Edit Configuration...` button.
+    Under `Configuration Parameters`, click the `Edit Configuration...` button.
 
-    1. At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
+    At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
 
-    ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
+      ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
 
-    1. Click 'Next' and then 'Finish' to finish VM creation, but **do not yet boot the new node.**
+    Click 'Next' and then 'Finish' to finish VM creation, but <strong>do not yet boot the new node.</strong>
 
-    1. Find your newly created VM in the vSphere Web Console and click on it.  On the top-right, click `Configure`, then under `Settings`, click on `vApp Options`.
+    Find your newly created VM in the vSphere Web Console and click on it.  On the top-right, click `Configure`, then under `Settings`, click on `vApp Options`.
 
-    If vApp Options are not Enalbed, enable them.
+    If vApp Options are not Enabled, enable them.
 
     Scroll to the bottom of the vApp Options and find the `Properties` section.
 
     You will have two properties one labeled `Ignition config data encoding` and one labeled `Ignition config data`.
 
-    1. Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table.
+    Select the property labeled `Ignition config data encoding` and click `Set Value` at the top of the table.
 
     In the blank, put `base64` and click `OK`.
 
-    1. On your installation machine cat the text of append-bootstrap.b64 file to the screen:
+    On your installation machine cat the text of append-bootstrap.b64 file to the screen:
 
-    ```
-    cat append-bootstrap.base64
-    ```
+      ```
+      cat append-bootstrap.base64
+      ```
 
-      Copy the output from this file into your clipboard/paste buffer.
+    Copy the output from this file into your clipboard/paste buffer.
 
-      Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click `OK`.
+    Back in the vSphere web client, select the property labeled `Ignition config data` and click `Set Value` at the top of the table. Paste the base64 string in your clipboard into this blank and click `OK`.
 
-      You have now created your bootstrap node.
+  You have now created your bootstrap node.
 
-  1. Repeat these steps for each node in your cluster.  For the master/control plan nodes use the master.base64 ignition file and for the compute/worker nodes use the worker.base64 text.
+  Repeat these steps for each node in your cluster.  For the master/control plan nodes use the master.base64 ignition file and for the compute/worker nodes use the worker.base64 text.
 
   ### Note the MAC addresses for all of your VMs.
 
   You will need to know the MAC address for each of the nodes you just created.
 
-    1. In the vCenter client, locate each node you just created, select it, and on the right, click the `Configure` tab.
+    In the vCenter client, locate each node you just created, select it, and on the right, click the `Configure` tab.
 
-    1. Expand the `VM Hardware` tistie and under that, the `Network adapter 1` twistie.
+    Expand the `VM Hardware` tistie and under that, the `Network adapter 1` twistie.
 
-    1. Make a note of the MAC address for each cluster node.
+    Make a note of the MAC address for each cluster node.
 
-    ![mac-address](/images/mac-address.png "MAC address")
+      ![mac-address](/images/mac-address.png "MAC address")
   </details>
+
   <details>
   <summary>Configure the Bare Metal Environment</summary>
 
@@ -491,7 +492,7 @@ We will discuss each of these in turn in the rest of this document.
 
   The file should have the following contents:
 
-  <b>IMPORTANT:</b> Replace the URL in square brackets (removing the square brackets) with the URL of the metal-bios file you downloaded to your installation/web server and the URL of the bootstrap.ign ignition file, respectively.
+  <strong>IMPORTANT:</strong> Replace the URL in square brackets (removing the square brackets) with the URL of the metal-bios file you downloaded to your installation/web server and the URL of the bootstrap.ign ignition file, respectively.
 
   ```
   DEFAULT pxeboot
@@ -626,34 +627,34 @@ Once you have the load balancers, dhcp server, and dns server configured, you ca
 
 1. Issue the following command and wait for a completed result:
 
-```
-[sysadmin@localhost opt]$ ./openshift-install --dir=./vhavard wait-for bootstrap-complete --log-level info
-```
+  ```
+  [sysadmin@localhost opt]$ ./openshift-install --dir=./vhavard wait-for bootstrap-complete --log-level info
+  ```
 
-Anticipated result:
+  Anticipated result:
 
-```
-INFO Waiting up to 30m0s for the Kubernetes API at https://api.vhavard.ocp.csplab.local:6443...
-INFO API v1.13.4+c2a5caf up                       
-INFO Waiting up to 30m0s for bootstrapping to complete...
-INFO It is now safe to remove the bootstrap resources
-```
+  ```
+  INFO Waiting up to 30m0s for the Kubernetes API at https://api.vhavard.ocp.csplab.local:6443...
+  INFO API v1.13.4+c2a5caf up                       
+  INFO Waiting up to 30m0s for bootstrapping to complete...
+  INFO It is now safe to remove the bootstrap resources
+  ```
 
 You can watch the installation progress by logging into the bootstrap server and use journalctl.
 
 Because of the ssh key you provided in the install-config.yaml you can ssh directly to the bootstrap node without credentials:
 
-```
-ssh core@bootstrap.vhavard.ocp.csplab.local
-```
+  ```
+  ssh core@bootstrap.vhavard.ocp.csplab.local
+  ```
 
 Where bootstrap.vhavard.ocp.csplab.local is the hostname or IP address of your bootstrap server.
 
 Once logged in, you can monitor progress with the following command:
 
-```
-journalctl -b -f -u bootkube.service
-```
+  ```
+  journalctl -b -f -u bootkube.service
+  ```
 
 Installation normally take about 30 minutes.
 
@@ -685,17 +686,21 @@ system:admin
 
 ## Make sure all nodes are in Ready status
 
-1. List all Nodes
-```
-[sysadmin@localhost opt]$ oc get nodes
-NAME      STATUS   ROLES    AGE   VERSION
-master1   Ready    master   50m   v1.13.4+12ee15d4a
-master2   Ready    master   50m   v1.13.4+12ee15d4a
-master3   Ready    master   50m   v1.13.4+12ee15d4a
-worker1   Ready    worker   23m   v1.13.4+12ee15d4a
-worker2   Ready    worker   22m   v1.13.4+12ee15d4a
-worker3   Ready    worker   23m   v1.13.4+12ee15d4a
-```
+List all Nodes
+
+  ```
+  sysadmin@ocp42install:~$ oc get nodes
+  NAME              STATUS   ROLES    AGE   VERSION
+  compute-0         Ready    worker   20m   v1.14.6+8e46c0036
+  compute-1         Ready    worker   20m   v1.14.6+8e46c0036
+  compute-2         Ready    worker   20m   v1.14.6+8e46c0036
+  control-plane-0   Ready    master   20m   v1.14.6+8e46c0036
+  control-plane-1   Ready    master   20m   v1.14.6+8e46c0036
+  control-plane-2   Ready    master   20m   v1.14.6+8e46c0036
+  storage-0         Ready    worker   20m   v1.14.6+8e46c0036
+  storage-1         Ready    worker   20m   v1.14.6+8e46c0036
+  storage-2         Ready    worker   20m   v1.14.6+8e46c0036
+  ```
 
 ## Make sure all controllers are up
 
@@ -703,42 +708,42 @@ Once the initial boot is complete it will still take a short while for the clust
 
 Watch the following command until all operators except for image-registry are available.
 
-```
-watch -n5 oc get clusteroperators
-```
+  ```
+  watch -n5 oc get clusteroperators
+  ```
 
 When complete the output should look something like this:
 
-```
-$ watch -n5 oc get clusteroperators
+  ```
+  $ watch -n5 oc get clusteroperators
 
-NAME                                 VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
-authentication                       4.2.0     True        False         False      69s
-cloud-credential                     4.2.0     True        False         False      12m
-cluster-autoscaler                   4.2.0     True        False         False      11m
-console                              4.2.0     True        False         False      46s
-dns                                  4.2.0     True        False         False      11m
-image-registry                                 False       True          False      5m26s
-ingress                              4.2.0     True        False         False      5m36s
-kube-apiserver                       4.2.0     True        False         False      8m53s
-kube-controller-manager              4.2.0     True        False         False      7m24s
-kube-scheduler                       4.2.0     True        False         False      12m
-machine-api                          4.2.0     True        False         False      12m
-machine-config                       4.2.0     True        False         False      7m36s
-marketplace                          4.2.0     True        False         False      7m54m
-monitoring                           4.2.0     True        False         False      7h54s
-network                              4.2.0     True        False         False      5m9s
-node-tuning                          4.2.0     True        False         False      11m
-openshift-apiserver                  4.2.0     True        False         False      11m
-openshift-controller-manager         4.2.0     True        False         False      5m943s
-openshift-samples                    4.2.0     True        False         False      3m55s
-operator-lifecycle-manager           4.2.0     True        False         False      11m
-operator-lifecycle-manager-catalog   4.2.0     True        False         False      11m
-service-ca                           4.2.0     True        False         False      11m
-service-catalog-apiserver            4.2.0     True        False         False      5m26s
-service-catalog-controller-manager   4.2.0     True        False         False      5m25s
-storage                              4.2.0     True        False         False      5m30s
-```
+  NAME                                 VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+  authentication                       4.2.0     True        False         False      69s
+  cloud-credential                     4.2.0     True        False         False      12m
+  cluster-autoscaler                   4.2.0     True        False         False      11m
+  console                              4.2.0     True        False         False      46s
+  dns                                  4.2.0     True        False         False      11m
+  image-registry                                 False       True          False      5m26s
+  ingress                              4.2.0     True        False         False      5m36s
+  kube-apiserver                       4.2.0     True        False         False      8m53s
+  kube-controller-manager              4.2.0     True        False         False      7m24s
+  kube-scheduler                       4.2.0     True        False         False      12m
+  machine-api                          4.2.0     True        False         False      12m
+  machine-config                       4.2.0     True        False         False      7m36s
+  marketplace                          4.2.0     True        False         False      7m54m
+  monitoring                           4.2.0     True        False         False      7h54s
+  network                              4.2.0     True        False         False      5m9s
+  node-tuning                          4.2.0     True        False         False      11m
+  openshift-apiserver                  4.2.0     True        False         False      11m
+  openshift-controller-manager         4.2.0     True        False         False      5m943s
+  openshift-samples                    4.2.0     True        False         False      3m55s
+  operator-lifecycle-manager           4.2.0     True        False         False      11m
+  operator-lifecycle-manager-catalog   4.2.0     True        False         False      11m
+  service-ca                           4.2.0     True        False         False      11m
+  service-catalog-apiserver            4.2.0     True        False         False      5m26s
+  service-catalog-controller-manager   4.2.0     True        False         False      5m25s
+  storage                              4.2.0     True        False         False      5m30s
+  ```
 
 ## Configure Storage for the image-registry Operator
 
@@ -749,9 +754,9 @@ _Option 1_ - Do not use persistent storage
 
   If you just want to get the cluster up and running quickly, you can tell the image registry operator to not use persistent storage.  To do this, execute the following command:
 
-  ```
-  oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
-  ```
+    ```
+    oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+    ```
 
   Your image-registry cluster operator should complete its installation in a couple of minutes and your cluster will be usable.
 
@@ -763,19 +768,19 @@ _Option 2_ - Configure persistent storage
 
   <br>If you have not already done so, add at least one additional hard disk to all compute nodes which should be used as storage nodes and note the node names of all storage nodes (this will be needed later).
 
-  ```
-  sysadmin@ocp42install:/opt$ oc get nodes
-  NAME              STATUS   ROLES    AGE   VERSION
-  compute-0         Ready    worker   41h   v1.14.6+8e46c0036
-  compute-1         Ready    worker   41h   v1.14.6+8e46c0036
-  compute-2         Ready    worker   41h   v1.14.6+8e46c0036
-  control-plane-0   Ready    master   42h   v1.14.6+8e46c0036
-  control-plane-1   Ready    master   42h   v1.14.6+8e46c0036
-  control-plane-2   Ready    master   42h   v1.14.6+8e46c0036
-  storage-0         Ready    worker   41h   v1.14.6+8e46c0036
-  storage-1         Ready    worker   41h   v1.14.6+8e46c0036
-  storage-2         Ready    worker   42h   v1.14.6+8e46c0036
-  ```
+    ```
+    sysadmin@ocp42install:/opt$ oc get nodes
+    NAME              STATUS   ROLES    AGE   VERSION
+    compute-0         Ready    worker   41h   v1.14.6+8e46c0036
+    compute-1         Ready    worker   41h   v1.14.6+8e46c0036
+    compute-2         Ready    worker   41h   v1.14.6+8e46c0036
+    control-plane-0   Ready    master   42h   v1.14.6+8e46c0036
+    control-plane-1   Ready    master   42h   v1.14.6+8e46c0036
+    control-plane-2   Ready    master   42h   v1.14.6+8e46c0036
+    storage-0         Ready    worker   41h   v1.14.6+8e46c0036
+    storage-1         Ready    worker   41h   v1.14.6+8e46c0036
+    storage-2         Ready    worker   42h   v1.14.6+8e46c0036
+    ```
 
 Label storage nodes
 
@@ -792,7 +797,7 @@ Clone the rook project from github
   git clone https://github.com/rook/rook.git
   ```
 
-  You shiould now have a subdirectory under /opt named `rook`.
+  You should now have a subdirectory under /opt named `rook`.
 
 Change to the `ceph` directory:
 
@@ -801,6 +806,7 @@ Change to the `ceph` directory:
   ```
 
 Create the common and operator objects
+
   ```
   oc create -f common.yaml
   oc create -f operator-openshift.yaml
@@ -947,7 +953,7 @@ Deploy the `rbd` storage class for non-ReadWriteMany PVs
   oc create -f storageclass.yaml
   ```
 
-  NOTE: Ceph rbd volumes are raw storage volumes.  The storage class defines how the volume should be formatted after it is created.  The default is ext4.  If you would like something other than ext4 (e.g. xfs), modify the storage class to specify `csi.storage.k8s.io/fstype: xfs`.
+  <strong>NOTE:</strong> Ceph rbd volumes are raw storage volumes.  The storage class defines how the volume should be formatted after it is created.  The default is ext4.  If you would like something other than ext4 (e.g. xfs), modify the storage class to specify `csi.storage.k8s.io/fstype: xfs`.
 
   Check that your new storage class was created:
 
@@ -957,17 +963,17 @@ Deploy the `rbd` storage class for non-ReadWriteMany PVs
 
 Deploy the `CephFS` storage class for ReadWriteMany PVs.
 
-  IMPORTANT: Although Ceph supports unlimited filesystems, rook (the k8s implementation of Ceph), only supports one.  This means that you can only deploy one single RWX PV using rook/CephFS.  If you need more than one RWX volume, you much use an external Ceph implementation and integrate it with OCP.  Doing so is outside of the scope of this document.
+  <strong>IMPORTANT:</strong> Although Ceph supports unlimited filesystems, rook (the k8s implementation of Ceph), only supports one.  This means that you can only deploy one single RWX PV using rook/CephFS.  If you need more than one RWX volume, you much use an external Ceph implementation and integrate it with OCP.  Doing so is outside of the scope of this document.
 
   As of this writing, allowing multiple filesystems in rook/ceph is *experimental* and is thus possible, but doing so would not be production ready and so is outside the scope of this document.
 
   For our OCP 4.2 deployment, we need one RWX volume to use for the image registry.  We will deploy the only available filesystem PV for use by the image registry later in this document.
 
-  ```
-  cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
-  oc create -f storageclass.yaml
-  oc get sc
-  ```
+    ```
+    cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
+    oc create -f storageclass.yaml
+    oc get sc
+    ```
 
 Create a filesystem to be used by our image registry
 
@@ -1039,9 +1045,9 @@ Deploy the PVC:
 
   <details>
   <summary>Configure NFS Storage (not recommended for production)</summary>
-  <br>**Note:** Using NFS in a production environment is **not** recommended.  It is described here because it is the easiest to get configured and up and running.  The recommendation is to use rook/Ceph for all persistent storage needs.
+  <br><strong>Note:</strong> Using NFS in a production environment is <strong>not</strong> recommended.  It is described here because it is the easiest to get configured and up and running.  The recommendation is to use rook/Ceph for all persistent storage needs.
 
-  1. In order to configure persistent storage for the image repositoryml you will need a storage server configured to serve up ReadWriteMany (RWX) volumes.  Creation of an NFS server is beyond the scope of this document, however, to prevent problems, the exports for the mounted NFS volume should be specified with the following options:
+  1. In order to configure persistent storage for the image repository you will need a storage server configured to serve up ReadWriteMany (RWX) volumes.  Creation of an NFS server is beyond the scope of this document, however, to prevent problems, the exports for the mounted NFS volume should be specified with the following options:
 
   ```
   /storage	*(rw,no_subtree_check,sync,no_wdelay,insecure,no_root_squash)
@@ -1152,8 +1158,7 @@ Deploy the PVC:
   ```
 </details>
 
-
-Configure the image-registry operator to use persistent storage
+<br>Configure the image-registry operator to use persistent storage
 
   Configure the image-registry operator to consume the provisioned PVC edit the operator and set the storage values as specified:
 
@@ -1168,8 +1173,7 @@ Configure the image-registry operator to use persistent storage
 
   The result should look something like this:
 
-  ...
-
+  ```
   spec:
     defaultRoute: false
     httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
@@ -1193,7 +1197,7 @@ Configure the image-registry operator to use persistent storage
     storage:
       pvc:
         claim:
-  ...
+  ```
 
   When this is complete, recheck your clusteroperator status to make sure the status becomes available.
 
@@ -1309,7 +1313,7 @@ If you are using TLS for authentication, use the `CA File` blank to put your CA 
 
 Click 'Add' to create your new identity provider.
 
-**IMPORTANT:** You can have multiple identity providers, but a single userid can only be used by one.  For example, if I have an htpasswd provider and a user `vhavard` is defined and claimed from that provider, I cannot also have a user named `vhavard` from the LDAP identity provider.
+IMPORTANT: You can have multiple identity providers, but a single userid can only be used by one.  For example, if I have an htpasswd provider and a user `vhavard` is defined and claimed from that provider, I cannot also have a user named `vhavard` from the LDAP identity provider.
 
 When this is complete you should be able to login with any value user from your LDAP identity provider as the most basic user.
 
