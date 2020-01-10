@@ -88,9 +88,7 @@ We will discuss each of these in turn in the rest of this document.
   # Stop the firewall and set selinux to passive
   systemctl stop firewalld
   setenforce 0
-  ```
 
-  ```
   # make changes persist over a reboot
   systemctl disable firewalld
   sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config
@@ -284,7 +282,7 @@ We will discuss each of these in turn in the rest of this document.
 
 1.  Create your ignition files
 
-  **Note:** The installer will create ignition files from these manifest files and then delete the manifest files.  If you would like to keep a copy of these files, make a backup of them before taking the next step.
+  <strong>Note:</strong> The installer will create ignition files from these manifest files and then delete the manifest files.  If you would like to keep a copy of these files, make a backup of them before taking the next step.
 
   ```
   cd /opt
@@ -306,43 +304,43 @@ We will discuss each of these in turn in the rest of this document.
 
   #### Create the 'append-bootstrap.ign' File
 
-    The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
+  The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
 
-    In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
+  In your project folder (e.g. /opt/vhavard), create a new file named append-bootstrap.ign with the following contents:
 
-    <strong>IMPORTANT:</strong> _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
+  <strong>IMPORTANT:</strong> _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
 
-    ```
-    {
-    "ignition": {
-      "config": {
-        "append": [
-          {
-            "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
-            "verification": {}
-          }
-        ]
-      },
-      "timeouts": {},
-      "version": "2.1.0"
+  ```
+  {
+  "ignition": {
+    "config": {
+      "append": [
+        {
+          "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
+          "verification": {}
+        }
+      ]
     },
-    "networkd": {},
-    "passwd": {},
-    "storage": {},
-    "systemd": {}
-    }
-    ```
+    "timeouts": {},
+    "version": "2.1.0"
+  },
+  "networkd": {},
+  "passwd": {},
+  "storage": {},
+  "systemd": {}
+  }
+  ```
 
-    Where `source` is the URL where the vCenter server can download the bootstrap.ign file (from your locally running web server).
+  Where `source` is the URL where the vCenter server can download the bootstrap.ign file (from your locally running web server).
 
-    The ignition files will need to be encoded into base64 strings so they can be placed in a form blank.  In the /opt/<project> directory (e.g. /opt/vhavard), encode master.ign, worker.ign, and append-bootstrap.ign into base64 strings.
+  The ignition files will need to be encoded into base64 strings so they can be placed in a form blank.  In the /opt/<project> directory (e.g. /opt/vhavard), encode master.ign, worker.ign, and append-bootstrap.ign into base64 strings.
 
-    ```
-    cd /opt/vhavard
-    base64 -w0 append-bootstrap.ign > append-bootstrap.base64
-    base64 -w0 master.ign > master.base64
-    base64 -w0 worker.ign > worker.base64
-    ```
+  ```
+  cd /opt/vhavard
+  base64 -w0 append-bootstrap.ign > append-bootstrap.base64
+  base64 -w0 master.ign > master.base64
+  base64 -w0 worker.ign > worker.base64
+  ```
 
   #### Create the RHCOS Template in vSphere
 
@@ -1059,14 +1057,14 @@ Deploy the PVC:
 
   1. To create the storage class create a file on your installation server named `sc.yml` with the following contents:
 
-    ```
-    kind: StorageClass
-    apiVersion: storage.k8s.io/v1
-    metadata:
-      name: non-dynamic
-    provisioner: no-provisioning
-    parameters:
-    ```
+  ```
+  kind: StorageClass
+  apiVersion: storage.k8s.io/v1
+  metadata:
+    name: non-dynamic
+  provisioner: no-provisioning
+  parameters:
+  ```
 
   Create the storage class by executing `oc create -f sc.yml`.  Your new storage class name is `non-dynamic`.
 
@@ -1076,36 +1074,36 @@ Deploy the PVC:
 
   To remove the default flag for the `thin` (vsphere) storage class, execute the following command:
 
-    ```
-    oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
-    ```
+  ```
+  oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+  ```
 
   Next, you will need to set your newly created storage class as the default.  Do that by executing the following command:
 
-    ```
-    oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-    ```
+  ```
+  oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+  ```
 
   Your new `non-dynamic` storage class is now the default.
 
   1. Create a file on the installation server named `pv.yml` with the following contents:
 
-    ```
-    apiVersion: v1
-    kind: PersistentVolume
-    metadata:
-      name: [pv0001]
-    spec:
-      capacity:
-        storage: 100Gi
-      accessModes:
-      - ReadWriteMany
-      nfs:
-        path: [/server]
-        server: [10.x.x.138]
-      persistentVolumeReclaimPolicy: Retain
-      storageClassName: non-dynamic
-    ```
+  ```
+  apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: [pv0001]
+  spec:
+    capacity:
+      storage: 100Gi
+    accessModes:
+    - ReadWriteMany
+    nfs:
+      path: [/server]
+      server: [10.x.x.138]
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: non-dynamic
+  ```
 
   Replace `pv0001` with something more descriptive like `image-registry-pv`.
 
@@ -1115,47 +1113,47 @@ Deploy the PVC:
 
   Deploy your PV to the clsuter with the following command:
 
-    ```
-    oc create -f pv.yml
-    ```
+  ```
+  oc create -f pv.yml
+  ```
 
   1. Create a file on the installation server named `pvc.yml` with the following contents.
 
-    ```
-    apiVersion: v1
-    kind: PersistentVolumeClaim
-    metadata:
-      finalizers:
-      - kubernetes.io/pvc-protection
-      name: image-registry-storage
-      namespace: openshift-image-registry
-    spec:
-      accessModes:
-      - ReadWriteMany
-      resources:
-        requests:
-          storage: 100Gi
-    ```
+  ```
+  apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: image-registry-storage
+    namespace: openshift-image-registry
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 100Gi
+  ```
 
   Deploy the PVC to the cluster with the following command:
 
-    ```
-    oc create -f pvc.yml
-    ```
+  ```
+  oc create -f pvc.yml
+  ```
 
   1. Check to make sure your PVC is bound to your PV
 
-    ```
-    oc get pv --all-namespaces
-    ```
+  ```
+  oc get pv --all-namespaces
+  ```
 
   The result should show the PV bound to a PVC.
 
-    ```
-    [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
-    NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
-    image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
-    ```
+  ```
+  [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
+  NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
+  image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
+  ```
 </details>
 
 <br>Configure the image-registry operator to use persistent storage
