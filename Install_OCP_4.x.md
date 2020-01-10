@@ -768,19 +768,19 @@ _Option 2_ - Configure persistent storage
 
   <br>If you have not already done so, add at least one additional hard disk to all compute nodes which should be used as storage nodes and note the node names of all storage nodes (this will be needed later).
 
-    ```
-    sysadmin@ocp42install:/opt$ oc get nodes
-    NAME              STATUS   ROLES    AGE   VERSION
-    compute-0         Ready    worker   41h   v1.14.6+8e46c0036
-    compute-1         Ready    worker   41h   v1.14.6+8e46c0036
-    compute-2         Ready    worker   41h   v1.14.6+8e46c0036
-    control-plane-0   Ready    master   42h   v1.14.6+8e46c0036
-    control-plane-1   Ready    master   42h   v1.14.6+8e46c0036
-    control-plane-2   Ready    master   42h   v1.14.6+8e46c0036
-    storage-0         Ready    worker   41h   v1.14.6+8e46c0036
-    storage-1         Ready    worker   41h   v1.14.6+8e46c0036
-    storage-2         Ready    worker   42h   v1.14.6+8e46c0036
-    ```
+  ```
+  sysadmin@ocp42install:/opt$ oc get nodes
+  NAME              STATUS   ROLES    AGE   VERSION
+  compute-0         Ready    worker   41h   v1.14.6+8e46c0036
+  compute-1         Ready    worker   41h   v1.14.6+8e46c0036
+  compute-2         Ready    worker   41h   v1.14.6+8e46c0036
+  control-plane-0   Ready    master   42h   v1.14.6+8e46c0036
+  control-plane-1   Ready    master   42h   v1.14.6+8e46c0036
+  control-plane-2   Ready    master   42h   v1.14.6+8e46c0036
+  storage-0         Ready    worker   41h   v1.14.6+8e46c0036
+  storage-1         Ready    worker   41h   v1.14.6+8e46c0036
+  storage-2         Ready    worker   42h   v1.14.6+8e46c0036
+  ```
 
 Label storage nodes
 
@@ -1059,14 +1059,14 @@ Deploy the PVC:
 
   1. To create the storage class create a file on your installation server named `sc.yml` with the following contents:
 
-  ```
-  kind: StorageClass
-  apiVersion: storage.k8s.io/v1
-  metadata:
-    name: non-dynamic
-  provisioner: no-provisioning
-  parameters:
-  ```
+    ```
+    kind: StorageClass
+    apiVersion: storage.k8s.io/v1
+    metadata:
+      name: non-dynamic
+    provisioner: no-provisioning
+    parameters:
+    ```
 
   Create the storage class by executing `oc create -f sc.yml`.  Your new storage class name is `non-dynamic`.
 
@@ -1076,36 +1076,36 @@ Deploy the PVC:
 
   To remove the default flag for the `thin` (vsphere) storage class, execute the following command:
 
-  ```
-  oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
-  ```
+    ```
+    oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+    ```
 
   Next, you will need to set your newly created storage class as the default.  Do that by executing the following command:
 
-  ```
-  oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-  ```
+    ```
+    oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    ```
 
   Your new `non-dynamic` storage class is now the default.
 
   1. Create a file on the installation server named `pv.yml` with the following contents:
 
-  ```
-  apiVersion: v1
-  kind: PersistentVolume
-  metadata:
-    name: [pv0001]
-  spec:
-    capacity:
-      storage: 100Gi
-    accessModes:
-    - ReadWriteMany
-    nfs:
-      path: [/server]
-      server: [10.x.x.138]
-    persistentVolumeReclaimPolicy: Retain
-    storageClassName: non-dynamic
-  ```
+    ```
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: [pv0001]
+    spec:
+      capacity:
+        storage: 100Gi
+      accessModes:
+      - ReadWriteMany
+      nfs:
+        path: [/server]
+        server: [10.x.x.138]
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: non-dynamic
+    ```
 
   Replace `pv0001` with something more descriptive like `image-registry-pv`.
 
@@ -1115,55 +1115,53 @@ Deploy the PVC:
 
   Deploy your PV to the clsuter with the following command:
 
-  ```
-  oc create -f pv.yml
-  ```
+    ```
+    oc create -f pv.yml
+    ```
 
   1. Create a file on the installation server named `pvc.yml` with the following contents.
 
-  ```
-  apiVersion: v1
-  kind: PersistentVolumeClaim
-  metadata:
-    finalizers:
-    - kubernetes.io/pvc-protection
-    name: image-registry-storage
-    namespace: openshift-image-registry
-  spec:
-    accessModes:
-    - ReadWriteMany
-    resources:
-      requests:
-        storage: 100Gi
-  ```
+    ```
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      finalizers:
+      - kubernetes.io/pvc-protection
+      name: image-registry-storage
+      namespace: openshift-image-registry
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 100Gi
+    ```
 
   Deploy the PVC to the cluster with the following command:
 
-  ```
-  oc create -f pvc.yml
-  ```
+    ```
+    oc create -f pvc.yml
+    ```
 
   1. Check to make sure your PVC is bound to your PV
 
-  ```
-  oc get pv --all-namespaces
-  ```
+    ```
+    oc get pv --all-namespaces
+    ```
 
   The result should show the PV bound to a PVC.
 
-  ```
-  [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
-  NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
-  image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
-  ```
+    ```
+    [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
+    NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
+    image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
+    ```
 </details>
 
 <br>Configure the image-registry operator to use persistent storage
 
-  Configure the image-registry operator to consume the provisioned PVC edit the operator and set the storage values as specified:
-
   ```
-  $ oc edit configs.imageregistry.operator.openshift.io
+  oc edit configs.imageregistry.operator.openshift.io
 
     storage:
       pvc:
@@ -1393,12 +1391,15 @@ $ORIGIN 0.18.172.IN-ADDR.ARPA.
 10       IN  PTR    ns1.ocp.csplab.local.
 $ORIGIN 1.18.172.IN-ADDR.ARPA.
 1       IN  PTR    gwy.vhavard.ocp.csplab.local.
-2       IN  PTR    control-plane-1.vhavard.ocp.csplab.local.
-3       IN  PTR    control-plane-2.vhavard.ocp.csplab.local.
-4       IN  PTR    control-plane-3.vhavard.ocp.csplab.local.
-5       IN  PTR    compute1.vhavard.ocp.csplab.local.
-6       IN  PTR    compute2.vhavard.ocp.csplab.local.
-7       IN  PTR    compute3.vhavard.ocp.csplab.local.
+2       IN  PTR    control-plane-0.vhavard.ocp.csplab.local.
+3       IN  PTR    control-plane-1.vhavard.ocp.csplab.local.
+4       IN  PTR    control-plane-2.vhavard.ocp.csplab.local.
+5       IN  PTR    storage-0.vhavard.ocp.csplab.local.
+6       IN  PTR    storage-1.vhavard.ocp.csplab.local.
+7       IN  PTR    sgtorage-2.vhavard.ocp.csplab.local.
+5       IN  PTR    compute-0.vhavard.ocp.csplab.local.
+6       IN  PTR    compute-1.vhavard.ocp.csplab.local.
+7       IN  PTR    compute-2.vhavard.ocp.csplab.local.
 11       IN  PTR    api-int.vhavard.ocp.csplab.local.
 11       IN  PTR    api.vhavard.ocp.csplab.local.
 12       IN  PTR    compute-lb.vhavard.ocp.csplab.local.
@@ -1494,40 +1495,58 @@ host vhavard-bootstrap {
   option host-name "bootstrap";
 }
 
-host vhavard-master1 {
+host vhavard-control-plane-0 {
   hardware ethernet 00:50:56:a5:22:5b;
   fixed-address 172.18.1.2;
-  option host-name "master1";
+  option host-name "control-plane-0";
 }
 
-host vhavard-master2 {
+host vhavard-control-plane-1 {
   hardware ethernet 00:50:56:a5:1e:a7;
   fixed-address 172.18.1.3;
-  option host-name "master2";
+  option host-name "control-plane-1]";
 }
 
-host vhavard-master3 {
+host vhavard-control-plane-2 {
   hardware ethernet 00:50:56:a5:1d:8d;
   fixed-address 172.18.1.4;
-  option host-name "master3";
+  option host-name "control-plane-2]";
 }
 
-host vhavard-worker1 {
+host vhavard-storage-0 {
+  hardware ethernet 00:50:56:a5:e9:8f;
+  fixed-address 172.18.1.5;
+  option host-name "storage-0";
+}
+
+host vhavard-storage-1 {
+  hardware ethernet 00:50:56:a5:ef:47;
+  fixed-address 172.18.1.6;
+  option host-name "storage-1";
+}
+
+host vhavard-storage-2 {
+  hardware ethernet 00:50:56:a5:f4:2a;
+  fixed-address 172.18.1.7;
+  option host-name "storage-2";
+}
+
+host vhavard-compute-0 {
   hardware ethernet 00:50:56:a5:e9:14;
   fixed-address 172.18.1.5;
-  option host-name "worker1";
+  option host-name "compute-0";
 }
 
-host vhavard-worker2 {
+host vhavard-compute-1 {
   hardware ethernet 00:50:56:a5:ef:d0;
   fixed-address 172.18.1.6;
-  option host-name "worker2";
+  option host-name "compute-1";
 }
 
-host vhavard-worker3 {
+host vhavard-compute-2 {
   hardware ethernet 00:50:56:a5:f4:53;
   fixed-address 172.18.1.7;
-  option host-name "worker3";
+  option host-name "compute-2";
 }
 ```
 
