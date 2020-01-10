@@ -1311,7 +1311,7 @@ If you are using TLS for authentication, use the `CA File` blank to put your CA 
 
 Click 'Add' to create your new identity provider.
 
-IMPORTANT: You can have multiple identity providers, but a single userid can only be used by one.  For example, if I have an htpasswd provider and a user `vhavard` is defined and claimed from that provider, I cannot also have a user named `vhavard` from the LDAP identity provider.
+<strong>IMPORTANT:</strong> You can have multiple identity providers, but a single userid can only be used by one.  For example, if I have an htpasswd provider and a user `vhavard` is defined and claimed from that provider, I cannot also have a user named `vhavard` from the LDAP identity provider.
 
 When this is complete you should be able to login with any value user from your LDAP identity provider as the most basic user.
 
@@ -1347,7 +1347,7 @@ At the top of this page, click "Create Binding" which will bring up a form.
 
 Click the `Create` button to create the role binding.  Your user should now be a cluster administrator.
 
-**Note:** You an also create groups and apply the role to a group, then anyone within that group will have that role.
+<strong>Note:</strong> You an also create groups and apply the role to a group, then anyone within that group will have that role.
 
 You can also sync local groups from LDAP groups.  For more information see: https://docs.openshift.com/container-platform/4.2/authentication/ldap-syncing.html
 </details>
