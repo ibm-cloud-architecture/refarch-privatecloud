@@ -344,15 +344,15 @@ We will discuss each of these in turn in the rest of this document.
 
   #### Create the RHCOS Template in vSphere
 
-    From any computer, download the openshift 4.x vmware template and store it locally.
+  From any computer, download the openshift 4.x vmware template and store it locally.
 
-    <strong>NOTE:</strong> If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
+  <strong>NOTE:</strong> If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
 
-    Otherwise, download the needed .ova file.  For example:
+  Otherwise, download the needed .ova file.  For example:
 
-    ```
-    wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-vmware.ova
-    ```
+  ```
+  wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-vmware.ova
+  ```
 
   From the vSphere Web Client, click on the location (cluster/folder) where you would like to put your template, right-click, on the cluster/folder and click `Deploy OVF Template...`.
 
