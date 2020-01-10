@@ -445,7 +445,7 @@ We will discuss each of these in turn in the rest of this document.
 
   Installation of a PXE server is beyond the scope of this document.  If no PXE server exists in the environment one should be created.
 
-  ## Create (but don't boot) your cluster nodes
+  #### Create (but don't boot) your cluster nodes
   Before you can configure the PXE and DHCP servers, you will need to know the MAC addresses of all the nodes in your cluster.  Since we will be using virtual machines rather than bare metal servers, we will need to first create the VMs on the hypervisor.
 
   Assuming the environment is KVM, use `virt-manager` or `virsh` to create a VM for each node that will be a part of your cluster.  Make note of the MAC address of each node and what type of node it should be (bootstrap, control plane (master), compute (worker)).
@@ -458,20 +458,20 @@ We will discuss each of these in turn in the rest of this document.
   | Control   |  4  | 16Gi   | 120GB |
   | Compute   |  2  | 8Gi    | 120GB |
 
-  ## Configure the PXE server
+  #### Configure the PXE server
   There are three files you will need for a PXE install:
     * rhcos-4.2.0-x86_64-installer-initramfs.img
     * rhcos-4.2.0-x86_64-installer-kernel
     * rhcos-4.2.0-x86_64-metal-bios.raw.gz
 
-  <br>On your **installation/web server machine**, change to your project folder and download the metal-bios file from the Red Hat download site:
+  <br>On your <strong>installation/web server machine</strong>, change to your project folder and download the metal-bios file from the Red Hat download site:
 
   ```
   cd /opt/vhavard
   wget -c https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/4.2/latest/rhcos-4.2.0-x86_64-metal-bios.raw.gz
   ```
 
-  On the **PXE server**, you will need the other two files.
+  On the <strong>PXE server</strong>, you will need the other two files.
 
   In this document we will assume that the tftpboot path is /tftpboot.
 
@@ -514,17 +514,17 @@ We will discuss each of these in turn in the rest of this document.
 
 ### Provision two new VMs to use as external load balancers
 
-  1. In the csplab, use the template named rhel80-cli-template in the sandbox datastore to instantiate two new VMs.  Otherwise, install any linux VM you choose, in your example, we will use RHEL 8.0.
+1. In the csplab, use the template named rhel80-cli-template in the sandbox datastore to instantiate two new VMs.  Otherwise, install any linux VM you choose, in your example, we will use RHEL 8.0.
 
-  1. Name your VMs for their purpose, e.g. `ocp-42-control-lb`, `ocp-42-compute-lb`.
+1. Name your VMs for their purpose, e.g. `ocp-42-control-lb`, `ocp-42-compute-lb`.
 
-  1. Install the haproxy packages on the VMs
+1. Install the haproxy packages on the VMs
 
-  ```
-  yum install -y haproxy
-  ```
+```
+yum install -y haproxy
+```
 
-  1. You will configure your load balancers when you get your IP addresses assigned.
+1. You will configure your load balancers when you get your IP addresses assigned.
 
 
 ### IBM Cloud Adoption Lab Users: Request a new subnet for your cluster
@@ -576,9 +576,9 @@ Make the following DNS updates make sure the hostnames and IP addresses match th
   Points to each of the etcd nodes, respectively (master nodes, normally).
 
   e.g. </br>
-      **etcd-0.vhavard.oc.csplab.local** <- same IP address as control-plane-1 (aka master1)</br>
-      **etcd-1.vhavard.ocp.csplab.local** <- same IP address as control-plane-2 (aka master2)</br>
-      **etcd-2.vhavard.ocplcsplab.local** <- same IP address as control-plane-3 (aka master3)
+      **etcd-0.vhavard.oc.csplab.local** <- same IP address as control-plane-0 (aka master1)</br>
+      **etcd-1.vhavard.ocp.csplab.local** <- same IP address as control-plane-1 (aka master2)</br>
+      **etcd-2.vhavard.ocplcsplab.local** <- same IP address as control-plane-2 (aka master3)
 
 1. SRV Records
 
@@ -754,9 +754,9 @@ _Option 1_ - Do not use persistent storage
 
   If you just want to get the cluster up and running quickly, you can tell the image registry operator to not use persistent storage.  To do this, execute the following command:
 
-    ```
-    oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
-    ```
+  ```
+  oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+  ```
 
   Your image-registry cluster operator should complete its installation in a couple of minutes and your cluster will be usable.
 
@@ -764,7 +764,7 @@ _Option 2_ - Configure persistent storage
 
   <details>
   <summary>Configure Ceph storage (recommended)</summary>
-  <br>NOTE:  These instructions should be carried out on the installation node.
+  <br><strong>NOTE:</strong>  These instructions should be carried out on the installation node.
 
   <br>If you have not already done so, add at least one additional hard disk to all compute nodes which should be used as storage nodes and note the node names of all storage nodes (this will be needed later).
 
@@ -814,9 +814,9 @@ Create the common and operator objects
 
 Wait for all pods to enter the 'Running' state
 
-  ```
-  watch -n5 "oc get pods -n rook-ceph"
-  ```
+    ```
+    watch -n5 "oc get pods -n rook-ceph"
+    ```
 
 Modify the cluster.yaml file for your environment.
 
@@ -969,11 +969,11 @@ Deploy the `CephFS` storage class for ReadWriteMany PVs.
 
   For our OCP 4.2 deployment, we need one RWX volume to use for the image registry.  We will deploy the only available filesystem PV for use by the image registry later in this document.
 
-    ```
-    cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
-    oc create -f storageclass.yaml
-    oc get sc
-    ```
+  ```
+  cd /opt/rook/cluster/examples/kubernetes/ceph/csi/cephfs
+  oc create -f storageclass.yaml
+  oc get sc
+  ```
 
 Create a filesystem to be used by our image registry
 
