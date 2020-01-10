@@ -301,10 +301,10 @@ We will discuss each of these in turn in the rest of this document.
 
   <details>
   <summary>Configure VMware Environment</summary>
-  
-  ####  VMware Installation Specifics
 
-  Create the 'append-bootstrap.ign' File
+  ###  VMware Installation Specifics
+
+  #### Create the 'append-bootstrap.ign' File
 
   The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
 
@@ -440,7 +440,7 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>Configure the Bare Metal Environment</summary>
 
-  #### Bare Metal Installation Specifics
+  ### Bare Metal Installation Specifics
   Installation of OCP in a bare metal environment requires either mounting an .iso to the local machine to install the operating system or installing via PXE (Pre-eXecution Environment).  In this tutorial, we will use a legacy PXE server.
 
   Installation of a PXE server is beyond the scope of this document.  If no PXE server exists in the environment one should be created.
