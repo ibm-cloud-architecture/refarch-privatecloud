@@ -364,11 +364,11 @@ We will discuss each of these in turn in the rest of this document.
 
   With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
 
-    ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
+ ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
 
   Find your previously uploaded rhcos template and create your bootstrap node.  Right-click on the template and click "New VM from this Template".
 
-    ![Create VM from Template](/images/vm-from-template.png "Create VM from Template")
+  ![Create VM from Template](/images/vm-from-template.png "Create VM from Template")
 
   On the `Select a name and folder` screen, name your VM so you know it's the bootstrap node (e.g. ocp-42-bootstrap), put it into the folder you created in the previous step and click 'Next'.
 
@@ -392,7 +392,7 @@ We will discuss each of these in turn in the rest of this document.
 
     At the bottom of the page next to `Name:` type `disk.EnableUUID` and next to `Value:` type `TRUE`. Then click the `Add` button and then the `Next` button.
 
-      ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
+    ![disk.EnableUUID](images/disk-enable-uuid.png "disk.EnableUUID = TRUE")
 
     Click 'Next' and then 'Finish' to finish VM creation, but <strong>do not yet boot the new node.</strong>
 
@@ -410,9 +410,9 @@ We will discuss each of these in turn in the rest of this document.
 
     On your installation machine cat the text of append-bootstrap.b64 file to the screen:
 
-      ```
-      cat append-bootstrap.base64
-      ```
+    ```
+    cat append-bootstrap.base64
+    ```
 
     Copy the output from this file into your clipboard/paste buffer.
 
@@ -432,7 +432,7 @@ We will discuss each of these in turn in the rest of this document.
 
     Make a note of the MAC address for each cluster node.
 
-      ![mac-address](/images/mac-address.png "MAC address")
+    ![mac-address](/images/mac-address.png "MAC address")
   </details>
 
   <details>
