@@ -1068,7 +1068,7 @@ Deploy the PVC:
   parameters:
   ```
 
-  Create the storage class by executing `oc create -f sc.yml`.  Your new storage class name is `non-dynamic`.
+  Create the storage class by executing `oc create -f sc.yml`.  Your new storage class name is `nfs`.
 
   1. Make your new storage class the default.
 
@@ -1083,10 +1083,10 @@ Deploy the PVC:
   Next, you will need to set your newly created storage class as the default.  Do that by executing the following command:
 
   ```
-  oc patch storageclass non-dynamic -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+  oc patch storageclass nfs -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
   ```
 
-  Your new `non-dynamic` storage class is now the default.
+  Your new `nfs` storage class is now the default.
 
   1. Create a file on the installation server named `pv.yml` with the following contents:
 
@@ -1104,7 +1104,7 @@ Deploy the PVC:
       path: [/server]
       server: [10.x.x.138]
     persistentVolumeReclaimPolicy: Retain
-    storageClassName: non-dynamic
+    storageClassName: nfs 
   ```
 
   Replace `pv0001` with something more descriptive like `image-registry-pv`.
@@ -1154,7 +1154,7 @@ Deploy the PVC:
   ```
   [sysadmin@localhost vhavard]$ oc get pv --all-namespaces
   NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                                             STORAGECLASS   REASON   AGE
-  image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   non-dynamic             7h22m
+  image-repo   100Gi      RWX            Retain           Bound    openshift-image-registry/image-registry-storage   nfs             7h22m
   ```
 </details>
 
