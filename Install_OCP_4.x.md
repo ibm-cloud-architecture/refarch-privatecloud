@@ -1063,7 +1063,7 @@ Deploy the PVC:
   kind: StorageClass
   apiVersion: storage.k8s.io/v1
   metadata:
-    name: non-dynamic
+    name: nfs
   provisioner: no-provisioning
   parameters:
   ```
