@@ -840,7 +840,7 @@ Modify the cluster.yaml file for your environment.
       enabled: true
       ssl: true
     monitoring:
-      enabled: false
+      enabled: true
       rulesNamespace: rook-ceph
     network:
       hostNetwork: false
