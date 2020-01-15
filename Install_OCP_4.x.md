@@ -1,5 +1,39 @@
 # User Provisioned Installation of Red Hat OpenShift 4.x on VMware Virtual Infrastructure
 
+## Table of Contents
+- [Introduction](#intro)
+- [Installation Overview](#overview)
+  * [Terminology](#term)
+  * [Install Process & Topology](#top)
+- [Preparation](#prep)
+  * [Create the Installation Server](#install-server)
+	  + [VMware Installation Specifics](#vmware-install-details)
+		+ [Create the 'append-bootstrap.ign' File](#append-bootstrap)
+		+ [Create the RHCOS Template in vSphere](#rhcos-template)
+		+ [Configure vCenter and Create your Cluster Nodes](#configure-vcenter)
+	+ [Note the MAC addresses for all of your VMs](#note-mac-addresses)
+	+ [Bare Metal Installation Specifics](#bare-metal-specifics)
+		+ [Create (but don’t boot) your cluster nodes](#create-cluster-nodes)
+			+ [Configure the PXE server](#configure-pxe-server)
+		+ [Provision two new VMs to use as external load balancers](#provision-lbs)
+		+ [IBM Cloud Adoption Lab Users: Request a new subnet for your cluster](#request-subnet)
+		+ [Configure the DHCP server](#configure-dhcp-server)
+		+ [Configure the DNS server](#configure-dns-server)
+		+ [Configure your haproxy nodes (load balancers)](#configure-haproxy-nodes)
+			+ [Boot your nodes](#boot-nodes)
+- [Remove bootstrap server from control plane load balancer](#remove-bootstrap-server)
+- [Login to the ocp cluster](#login-to-ocp-cluster)
+- [Make sure all nodes are in Ready status](#confirm-ready-node-status)
+- [Make sure all controllers are up](#confirm-controller-status)
+- [Configure Storage for the image-registry Operator](#configure-image-registry-storage)
+- [Ensure cluster is up and ready](#confirm-cluster-running-status)
+- [Post-Install Tasks to Have a Usable Cluster](#post-install-tasks)
+- [Appendix A - Example DNS configuration](#appendix-a)
+- [Appendix B - Example DHCP configuration](#appendix-b)
+- [Appendix C - Example haproxy configuration](#appendix-c)
+
+
+<a name="intro"></a>
 ## Introduction
 Installing OpenShift (OCP) 4.x requires a significant amount of pre-planning and infrastructure preparation.
 
@@ -15,13 +49,20 @@ This document will *not* describe doing an IPI installation, but you can still u
 
 Many of the steps to install OCP 4x in a UPI environment are common regardless of your hypervisor or bare metal infrastructure. To make the document more readable, there are collapsible sections for details of the specific environment you are trying to use, VMware or Bare Metal.  Open the expand the appropriate sections for the type of environment you are deploying.
 
-## Terminology
+<a name="overview"></a>
+## Installation Overview
+
+<a name="term"></a>
+### Terminology
 * __Host__ - A physical machine with a hypervisor installed which can be used to host one or more virtual machines.
 * __Server__ - A physical or virtual machine that is used to provide services to other machines.
 * __Workstation__ - A physical or virtual machine that is typically used by a single person as a desktop on which work can be done.  This is typically a laptop, desktop, or virtual machine provided by some technology such as Citrix.
 * __VM__ - A Virtual Machine which can be provisioned as a server or workstation and runs as a "guest" on a "host" machine.
 * __Guest__ - Another name for a Virtual Machine.
 * __Node__ - A specialized physical or virtual machine dedicated to a specific function.  For example, a "node" could be a Storage Node, Compute Node, Master Node, Worker node, Infrastructure Node, etc.
+
+<a name="top"></a>
+### Install Process & Topology
 
 Installation in a UPI environment includes the following basic steps:
 
@@ -74,8 +115,10 @@ In this guide we will use the following topology:
 <br>
 We will discuss each of these in turn in the rest of this document.
 
+<a name="prep"></a>
 ## Preparation
 
+<a name="install-server"></a>
 ### Create the Installation Server
 
 1. Create a new virtual machine which is network accessible from the location where your OCP cluster will run.  Only the basic server packages are needed, no UI is needed.  This guide will assume this server is running RHEL 8.0.
@@ -302,8 +345,10 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>Configure VMware Environment</summary>
 
+  <a name="vmware-install-details"></a>
   ###  VMware Installation Specifics
 
+  <a name="append-bootstrap"></a>
   #### Create the 'append-bootstrap.ign' File
 
   The bootstrap.ign file is too large to be used when deploying the VMs as documented below so you will need to create a smaller file which will cause the VMware server to grab this file from the webserver you configured on the installation server.  Because we created a softlink for our project folder, the file is already accessible for download.  We just need to create the `append-bootstrap.ign` file for use when we deploy our bootstrap node.
@@ -344,6 +389,7 @@ We will discuss each of these in turn in the rest of this document.
   base64 -w0 worker.ign > worker.base64
   ```
 
+  <a name="rhcos-template"></a>
   #### Create the RHCOS Template in vSphere
 
   From any computer, download the openshift 4.x vmware template and store it locally.
@@ -360,6 +406,7 @@ We will discuss each of these in turn in the rest of this document.
 
   Continue to use the wizard to upload your template.  Remember where you put it because you will use it in the next step.
 
+  <a name="configure-vcenter"></a>
   #### Configure vCenter and Create your Cluster Nodes
 
   <strong>NOTE:</strong> You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.  
@@ -424,6 +471,7 @@ We will discuss each of these in turn in the rest of this document.
 
   Repeat these steps for each node in your cluster.  For the master/control plan nodes use the master.base64 ignition file and for the compute/worker nodes use the worker.base64 text.
 
+  <a name="note-mac-addresses"></a>
   ### Note the MAC addresses for all of your VMs.
 
   You will need to know the MAC address for each of the nodes you just created.
@@ -440,11 +488,13 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>Configure the Bare Metal Environment</summary>
 
+  <a name="bare-metal-specifics"></a>
   ### Bare Metal Installation Specifics
   Installation of OCP in a bare metal environment requires either mounting an .iso to the local machine to install the operating system or installing via PXE (Pre-eXecution Environment).  In this tutorial, we will use a legacy PXE server.
 
   Installation of a PXE server is beyond the scope of this document.  If no PXE server exists in the environment one should be created.
 
+  <a name="create-cluster-nodes"></a>
   #### Create (but don't boot) your cluster nodes
   Before you can configure the PXE and DHCP servers, you will need to know the MAC addresses of all the nodes in your cluster.  Since we will be using virtual machines rather than bare metal servers, we will need to first create the VMs on the hypervisor.
 
@@ -458,6 +508,7 @@ We will discuss each of these in turn in the rest of this document.
   | Control   |  4  | 16Gi   | 120GB |
   | Compute   |  2  | 8Gi    | 120GB |
 
+  <a name="configure-pxe-server"></a>
   #### Configure the PXE server
   There are three files you will need for a PXE install:
     * rhcos-4.2.0-x86_64-installer-initramfs.img
@@ -512,6 +563,7 @@ We will discuss each of these in turn in the rest of this document.
   When all of the files have been created, double check to make sure there are no typos.  There is no need to restart the service, changes are picked up immediately.
   </details>
 
+<a name="provision-lbs"></a>
 ### Provision two new VMs to use as external load balancers
 
 1. In the csplab, use the template named rhel80-cli-template in the sandbox datastore to instantiate two new VMs.  Otherwise, install any linux VM you choose, in your example, we will use RHEL 8.0.
@@ -526,7 +578,7 @@ yum install -y haproxy
 
 1. You will configure your load balancers when you get your IP addresses assigned.
 
-
+<a name="request-subnet"></a>
 ### IBM Cloud Adoption Lab Users: Request a new subnet for your cluster
 
 IBM employees who are deploying a cluster into the IBM Cloud Adoption Lab's OCP environment you will need to be assigned a subnet.  Send an email to the csplab-admin mailing list to request the subnet.
@@ -537,6 +589,7 @@ The lab admins will configure the DHCP and DNS servers and router for your assig
 
 If you are deploying into the IBM Cloud Adoption Lab you can ignore the steps `Configure DHCP Server` and `Configure DNS Server` sections, these will be done for you.
 
+<a name="configure-dhcp-server"></a>
 ### Configure the DHCP server
 
 Each node will need to be added to the DHCP server so that it can get a static mapped IP address and hostname at boot time.
@@ -549,6 +602,7 @@ If the nodes are on the correct network and the DHCP server is configured correc
 
 **IMPORTANT:** Make sure the hostname you specify for the node in the DHCP server is the same as the hostname you use for your DNS server.
 
+<a name="configure-dns-server"></a>
 ### Configure the DNS Server
 
 Make the following DNS updates make sure the hostnames and IP addresses match the information specified in the DHCP server:
@@ -599,6 +653,7 @@ _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     
 _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-2.vhavard.ocp.csplab.local.
   ```
 
+<a name="configure-haproxy-nodes"></a>
 ### Configure your haproxy nodes (load balancers)
 
 Once you have IP addresses assigned for your load balancers, bootstrap node, control plane nodes, and compute nodes, you need to configure your load balancers.
@@ -617,6 +672,7 @@ If not already provided via the DHCP server, create static IP addresses for the 
 
   1. For an example configuration see Appendix C.
 
+<a name="boot-nodes"></a>
 #### Boot your nodes
 
 Once you have the load balancers, dhcp server, and dns server configured, you can boot your cluster nodes and they will come up and configure themselves based on the ignition files you provided.
@@ -664,6 +720,7 @@ You can also ssh to one of the master nodes and execute `journalctl -f` to watch
 
 You may also find it helpful to watch the traffic going through the control plane load balancer (e.g. via the haproxy log files).  You should see traffic from all nodes as they pull configuration information from the bootstrap node.  You may be able to see errors here if there are configuration issues with any of the specific nodes or the bootstrap node.
 
+<a name="remove-bootstrap-server"></a>
 ## Remove bootstrap server from control plane load balancer
 
 Once the installation has successfully completed, you must login to the control plane load balancer and remove the bootstrap server from the list of backend servers and restart the haproxy service.
@@ -674,6 +731,7 @@ systemctl restart haproxy
 
 When this is done you should be able to login to your new cluster.
 
+<a name="login-to-ocp-cluster"></a>
 ## Login to the ocp cluster
 
 From your installation machine where you installed the oc binary:
@@ -684,6 +742,7 @@ oc whoami
 system:admin
 ```
 
+<a name="confirm-ready-node-status"></a>
 ## Make sure all nodes are in Ready status
 
 List all Nodes
@@ -702,6 +761,7 @@ List all Nodes
   storage-2         Ready    worker   20m   v1.14.6+8e46c0036
   ```
 
+<a name="confirm-controller-status"></a>
 ## Make sure all controllers are up
 
 Once the initial boot is complete it will still take a short while for the cluster operators to complete their configuration.
@@ -745,6 +805,7 @@ When complete the output should look something like this:
   storage                              4.2.0     True        False         False      5m30s
   ```
 
+<a name="configure-image-registry-storage"></a>
 ## Configure Storage for the image-registry Operator
 
 The image registry requires persistent storage with access mode of ReadWriteMany (RWX), however, the vSphere storage class does not support RWX.  There are two options, 1) do not use persistent storage, in which case an images placed in the registry are lost with each start, or 2) configure persistent storage which does support RWX (e.g. NFS).
@@ -1236,6 +1297,7 @@ Deploy the PVC:
   storage                                    4.2.0     True        False         False	  7h56m
   ```
 
+<a name="confirm-cluster-running-status"></a>
 ## Ensure cluster is up and ready
 
 To complete your installation run the following command.  When the installation is complete it will output the credentials for the initial login to your new cluster.
@@ -1259,6 +1321,7 @@ INFO Login to the console with user: kubeadmin, password: wSbzT-DCZCU-BRYF7-C7bX
 
 Login to your new cluster as kubeadmin with the credentials output to the screen.  If you lose that screen output, the same information can be found on your installation server in the `<projectdir>/auth/kubeadmin-password` file.
 
+<a name="post-install-tasks"></a>
 # Post-Install Tasks to Have a Usable Cluster
 <details>
 <summary>
@@ -1352,6 +1415,7 @@ Click the `Create` button to create the role binding.  Your user should now be a
 You can also sync local groups from LDAP groups.  For more information see: https://docs.openshift.com/container-platform/4.2/authentication/ldap-syncing.html
 </details>
 
+<a name="appendix-a"></a>
 # Appendix A - Example DNS Configuration
 
 ## named.conf.local
@@ -1449,6 +1513,7 @@ _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     
 _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-2.vhavard.ocp.csplab.local.
 ```
 
+<a name="appendix-b"></a>
 # Appendix B - Example DHCP configuration
 
 ## dhcpd.conf
@@ -1550,7 +1615,8 @@ host vhavard-compute-2 {
 }
 ```
 
-# Appendix C - Example haproxy comfiguration
+<a name="appendix-c"></a>
+# Appendix C - Example haproxy configuration
 
 1. Control plane haproxy.conf
 
