@@ -702,6 +702,36 @@ List all Nodes
   storage-2         Ready    worker   20m   v1.14.6+8e46c0036
   ```
 
+Note: If you don't see all nodes listed you may need to approve some certificate signing requests (CSRs).
+
+To check issue the command:
+
+```
+oc get csr
+```
+
+If you see any CSR in a pending state you must approve each one. If all CSRs were automatically approved you may not see anything in this list.
+
+The command to approve a csr is:
+
+```
+oc adm certificate approve <csr-name>
+```
+
+The CSR name is the first column in the list of CSRs.
+
+There are two CSRs you must approve for each node, the first will be the client-side and the second will be the server side.  You will not see the server-side CSR until the client-side CSR has been approved.  So, when you go in and approve all the client-side CSRs, wait a minute or two and check for any new CSRs and approve the server-side requests.
+
+Once both have been approved, you should be able to execute `oc get nodes` and see all nodes listed.  It will take another few minutes for all those nodes to get to the `ready` state, but if you give it a few minutes they should all complete.
+
+If you have waited a long time before checking the CSRs, the process will end and get restarted and you could have dozens or even more pending CSRs.  You must approve all of them.  That can be a fairly tedious task and you can run the following command to approve them all at once:
+
+```
+oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
+```
+
+Note that `jq` in the above string of commands is an application you will likely need to install via your package manager (`yum -y install jq`).
+
 ## Make sure all controllers are up
 
 Once the initial boot is complete it will still take a short while for the cluster operators to complete their configuration.
@@ -1104,7 +1134,7 @@ Deploy the PVC:
       path: [/server]
       server: [10.x.x.138]
     persistentVolumeReclaimPolicy: Retain
-    storageClassName: nfs 
+    storageClassName: nfs
   ```
 
   Replace `pv0001` with something more descriptive like `image-registry-pv`.
