@@ -1070,6 +1070,7 @@ Deploy the PVC:
   oc create -f pvc.yaml
   ```
 
+See Appendix D for more information working with Ceph including useful commands.
   </details>
 
 
@@ -1382,6 +1383,7 @@ Click the `Create` button to create the role binding.  Your user should now be a
 You can also sync local groups from LDAP groups.  For more information see: https://docs.openshift.com/container-platform/4.2/authentication/ldap-syncing.html
 </details>
 
+----
 # Appendix A - Example DNS Configuration
 
 ## named.conf.local
@@ -1479,6 +1481,7 @@ _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     
 _etcd-server-ssl._tcp.vhavard.ocp.csplab.local  86400 IN    SRV 0        10     2380 etcd-2.vhavard.ocp.csplab.local.
 ```
 
+----
 # Appendix B - Example DHCP configuration
 
 ## dhcpd.conf
@@ -1579,6 +1582,8 @@ host vhavard-compute-2 {
   option host-name "compute-2";
 }
 ```
+
+----
 
 # Appendix C - Example haproxy comfiguration
 
@@ -1727,3 +1732,65 @@ host vhavard-compute-2 {
       server  worker2 172.18.1.6:80 check
       server  worker3 172.18.1.7:80 check
   ```
+----
+# Appendix D - Useful Ceph Commands
+
+## Gaining access to the rook/Ceph toolbox container
+To gain access to the rook/Ceph tools container use the following command:
+
+```
+kubectl exec -it -n rook-ceph rook-ceph-tools-<pod specific string> -- bash
+```
+
+This will put you at a bash command prompt inside the ceph toolbox container.  From this container you can administer your Ceph cluster.
+
+To see the health of your cluster execute:
+
+```
+ceph -s
+```
+
+## Dealing with the `Too FEW PGs` warning
+If you receive a message indicating you do not have enough PG's (Placement Groups), you can increase them.  Note, however, that this is a warning and not an error.  Calculating the proper number of PGs to use for any given Ceph cluster at any given point in time based on the number of OSDs and pools, etc. is beyond the scope of this document, however, you can make this error go away by increasing the number of PGs defined for a pool as follows.
+
+First, list the pools you have in your ceph cluster by issuing the command `ceph osd lspools`.  This will list all the pools in your cluster.
+
+If you have a pool named `rbdpool`, you can increase the number of PGs for that pool to 64 by issuing the command:
+
+```
+sudo ceph osd pool set rbdpool pg_num 64
+```
+
+If you increase the number of PGs, hyou should also increase the number of PGPs
+
+```
+sudo ceph osd pool set rbdpool pgp_num 64
+```
+
+For more information about PGs and how to determine what this number should be see https://docs.ceph.com/docs/master/rados/operations/placement-groups/.
+
+## Listing block devices
+
+```
+rbd ls <poolname>
+```
+----
+# Appendix E - Adding a new node to an existing cluster
+Add a node to an existing 4.2 cluster with a CoreOS node
+
+1. Configure the machine/VM in the same way you did for the rest of the cluster.  There is no need to recreate the ignition files.  Use the same ignition files you used in the initial installation even if it has been more than 24 hours since they were created.
+  1. Add mac addresses to dhcp server
+  1. Add DNS records to nameserver
+  1. Prepare the machine/VM
+    * VMware Only: Add a new VM from the template and put the base64 encoded worker.ign file into the vApp properties
+    * Bare Metal Only: Add the mac addresses to the PXE server with the worker stansas
+1. Boot the VM and allow it to go through its entire installation installation process
+1. If it has been more than an hour since the ign files were created, the certificates will not automatically be approved.  Login to your cluster from  your installation server and issue `oc get csr` to list pending certificate signing requests.
+1. Install the `jq` command using yum: `yum install -y jq`
+1. Approve all pending requests: `oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve`.
+1. Recheck pending requests to see if any more have arrived `oc get csr`
+1. Repeat the above command to approve all pending requests and repeat until all requests are approved.
+1. Check node status: `oc get nodes`.  The new node[s] should exist in the cluster.  
+  * If they do not, troubleshoot compute node installation as per a new installation.
+  * If they are in a 'NotReady' state, wait for installation to complete and recheck until they are in a 'Ready' state: `watch -n5 oc get nodes`
+1. Once the status changes to "Ready" the new compute node is ready for use.
