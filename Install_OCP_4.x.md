@@ -220,7 +220,7 @@ We will discuss each of these in turn in the rest of this document.
       username: username
       password: password
       datacenter: [CSPLAB]
-      defaultDatastore: [SANDBOX-5-17]
+      defaultDatastore: [SANDBOX-OCS]
   pullSecret: '[contents of pull-secret.txt]'
   sshKey: '[contents of ~/.ssh/id_rsa.pub]'
   ```
