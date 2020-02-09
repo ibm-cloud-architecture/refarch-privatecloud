@@ -196,12 +196,12 @@ We will discuss each of these in turn in the rest of this document.
 
 1. In your project directory, create a file named `install-config.yaml` with the following contents (_expand the section for your target environment_):
 
-  <b>IMPORTANT:</b> _Replace values in square brackets in the text below (including the square brackets) with values from your environment._
-
   <details>
   <summary>VMware Environment</summary>
 
-  ```
+  <br><b>IMPORTANT:</b> _Replace values in square brackets in the text below (including the square brackets) with values from your environment._
+
+  ```yaml
   apiVersion: v1
   baseDomain: [ocp.csplab.local]
   compute:
@@ -220,7 +220,7 @@ We will discuss each of these in turn in the rest of this document.
       username: username
       password: password
       datacenter: [CSPLAB]
-      defaultDatastore: [SANDBOX_TIER4]
+      defaultDatastore: [SANDBOX-5-17]
   pullSecret: '[contents of pull-secret.txt]'
   sshKey: '[contents of ~/.ssh/id_rsa.pub]'
   ```
@@ -247,7 +247,9 @@ We will discuss each of these in turn in the rest of this document.
   <details>
   <summary>Bare Metal Environment</summary>
 
-  ```
+  <br><b>IMPORTANT:</b> _Replace values in square brackets in the text below (including the square brackets) with values from your environment._
+
+  ```yaml
   apiVersion: v1
   baseDomain: [ocp.csplab.local]
   compute:
@@ -262,7 +264,7 @@ We will discuss each of these in turn in the rest of this document.
     name: [baremetal]
   networking:
     clusterNetworks:
-    - cidr: [10.254.0.0/16]
+    - cidr: [10.253.0.0/16]
       hostPrefix: [23]
     networkType: OpenShiftSDN
     serviceNetwork:
@@ -343,7 +345,7 @@ We will discuss each of these in turn in the rest of this document.
 
   <strong>IMPORTANT:</strong> _Replace the URL in the square brackets (including the square brackets) with the URL to the bootstarp.ign file on your web server/installation server._
 
-  ```
+  ```json
   {
   "ignition": {
     "config": {
@@ -887,7 +889,7 @@ Wait for all pods to enter the 'Running' state
 
 Modify the cluster.yaml file for your environment.
 
-  ```
+  ```yaml
   apiVersion: ceph.rook.io/v1
   kind: CephCluster
   metadata:
@@ -1081,7 +1083,7 @@ Check Ceph cluster health:
 
 Create a PVC to be consumed by the image registry (pvc.yaml)
 
-  ```
+  ```yaml
   # pvc.yaml
   ---
   apiVersion: v1
@@ -1126,7 +1128,7 @@ See Appendix D for more information working with Ceph including useful commands.
 
   1. To create the storage class create a file on your installation server named `sc.yml` with the following contents:
 
-  ```
+  ```yaml
   kind: StorageClass
   apiVersion: storage.k8s.io/v1
   metadata:
@@ -1157,7 +1159,7 @@ See Appendix D for more information working with Ceph including useful commands.
 
   1. Create a file on the installation server named `pv.yml` with the following contents:
 
-  ```
+  ```yaml
   apiVersion: v1
   kind: PersistentVolume
   metadata:
@@ -1188,7 +1190,7 @@ See Appendix D for more information working with Ceph including useful commands.
 
   1. Create a file on the installation server named `pvc.yml` with the following contents.
 
-  ```
+  ```yaml
   apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
@@ -1240,7 +1242,7 @@ See Appendix D for more information working with Ceph including useful commands.
 
   The result should look something like this:
 
-  ```
+  ```yaml
   spec:
     defaultRoute: false
     httpSecret: 76c5cf9d7cd2684b7805495d1d31578009e035f0750dd2c5b79e57e2c6db1ce4e05d101b58e25feb00382a66044b76513d792f8628609b5d417ed2101b52a62c
@@ -1381,6 +1383,8 @@ If you are using TLS for authentication, use the `CA File` blank to put your CA 
 Click 'Add' to create your new identity provider.
 
 <strong>IMPORTANT:</strong> You can have multiple identity providers, but a single userid can only be used by one.  For example, if I have an htpasswd provider and a user `vhavard` is defined and claimed from that provider, I cannot also have a user named `vhavard` from the LDAP identity provider.
+
+<strong>IMPORTANT:</strong> If the connection is not secure (uses ldap:// and not ldaps://), you will need to edit the YAML from the UI and change the value of `insecure: ` to `true` from `false`.  As of OCP 4.3 there is no way to specify insecure in the UI prior to creating the identity provider.
 
 When this is complete you should be able to login with any value user from your LDAP identity provider as the most basic user.
 
