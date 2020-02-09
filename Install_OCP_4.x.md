@@ -4,7 +4,7 @@
 - [Terminology](#terminology)
 - [Preparation](#preparation)
   - [Create the Installation Server](#create-the-installation-server)
-  
+
   - [Provision two new VMs to use as external load balancers](#provision-two-new-vms-to-use-as-external-load-balancers)
   - [IBM Cloud Adoption Lab Users: Request a new subnet for your cluster](#ibm-cloud-adoption-lab-users-request-a-new-subnet-for-your-cluster)
   - [Configure the DHCP server](#configure-the-dhcp-server)
@@ -237,7 +237,7 @@ We will discuss each of these in turn in the rest of this document.
 
   * **platform.vsphere.datacenter** - The datacenter under which files should be created.
 
-  * **platform.vsphere.defaultDatastore** - The datastore on which files should be stored.  A storage class will be created on your openshift cluster for dynamic storage provisioning to this datastore.
+  * **platform.vsphere.defaultDatastore** - The datastore on which files should be stored.  A storage class will be created on your openshift cluster for dynamic storage provisioning to this datastore.  **IMPORTANT:** At the time of this writing, OCP 4.x does not support using a datastore cluster as the target of the vsphere storage provider.  The value for this keyword must be a datastore and not a datstore cluster.
 
   * **pullSecret** - The contents of the pull secret you got from the Red Hat URL noted above.
 
@@ -377,7 +377,7 @@ We will discuss each of these in turn in the rest of this document.
 
   #### Create the RHCOS Template in vSphere
 
-  From any computer, download the openshift 4.x vmware template and store it locally.
+  From any computer, download the openshift 4.x VMware template and store it locally.
 
   <strong>NOTE:</strong> If you are in the IBM Cloud Adoption Lab, this template will have already been created in the demo-vcenter server in the SANDBOX cluster with the filename `rhcos-4.x.x-x86_64-vmware-template`, where 4.x.x is the full version number (e.g. `rhcos-4.2.0-x86_64-vmware-template`).  You can skip the rest of this step.
 
@@ -395,9 +395,8 @@ We will discuss each of these in turn in the rest of this document.
 
   <strong>NOTE:</strong> You will need at the very least, 1 bootstrap node, and 3 control plane (master) nodes, and 2 compute (worker) nodes.  It is recommended that you use exactly 3 control plane nodes and a minimum of 2 compute nodes.  
 
-  With a browser, login to your vCenter server.  You will need to create a folder directly under your datacenter with the same name as your cluster.  For example, my cluster name is `vhavard`, so under my datacenter (named CSPLAB, I created a folder named `vhavard`).
+  With a browser, login to your vCenter server.  You will need to create a folder with the same name as your cluster.  This folder may be under any path and any number of levels deep, but the folder name must be unique in the datacenter, otherwise the installation will fail.
 
- ![vCenter folder](/images/vcenter-folder.png "vCenter Folder")
 
   Find your previously uploaded rhcos template and create your bootstrap node.  Right-click on the template and click "New VM from this Template".
 
@@ -413,11 +412,12 @@ We will discuss each of these in turn in the rest of this document.
 
   On the next screen (`Customize hardware`), set the CPU and Memory values appropriately based on the table below and make sure your network adapter is set to the correct network for your OCP cluster.  For the IBM Cloud Adoption Lab, this is the `OCP` network.
 
-  | Node Type | CPU | Memory |
-  |:---------:|:---:|:-------|
-  | Bootstrap |  4  | 16Gi   |
-  | Control   |  4  | 16Gi   |
-  | Compute   |  2  | 8Gi    |
+  | Node Type | CPU  | Memory |      Purpose      |
+  |:---------:|:----:|:-------|:------------------|
+  | Bootstrap |  4   | 16Gi   | Bootstrap Node    |
+  | Control   |  16  | 32Gi   | Master Nodes      |
+  | Compute   |  8   | 16Gi   | Worker Nodes      |
+  | Compute   |  16  | 64Gi   | Storage Nodes |
 
   Click the `VM Options` tab and expand the `Advanced` twistie.
 
@@ -483,11 +483,12 @@ We will discuss each of these in turn in the rest of this document.
 
   See the table below for recommended sizing of the various nodes:
 
-  | Node Type | CPU | Memory |  Disk |
-  |:---------:|:---:|:-------|:-----:|
-  | Bootstrap |  4  | 16Gi   | 120GB |
-  | Control   |  4  | 16Gi   | 120GB |
-  | Compute   |  2  | 8Gi    | 120GB |
+  | Node Type | CPU | Memory |  Disk[s] | Purpose |
+  |:---------:|:---:|:-------|:--------:|:--------|
+  | Bootstrap |  4  | 16Gi   | 120GB    | Bootstrap Node |
+  | Control   |  4  | 16Gi   | 120GB    | Master Nodes |
+  | Compute   |  2  | 8Gi    | 120GB    | Worker Nodes |
+  | Compute   | 16  | 64Gi   | 120GB, 500GB | Storage Nodes |
 
   #### Configure the PXE server
   There are three files you will need for a PXE install:
@@ -775,6 +776,8 @@ Watch the following command until all operators except for image-registry are av
 
 When complete the output should look something like this:
 
+**NOTE:** When installing OCP 4.3, the image-registry operator will automatically set to `Removed` so that the OCP installation will successfully complete.  In OCP 4.2, you must configure persistent storage or configure the image-registry operator to not use persistent storage before the installation will complete.
+
   ```
   $ watch -n5 oc get clusteroperators
 
@@ -808,7 +811,7 @@ When complete the output should look something like this:
 
 ## Configure Storage for the image-registry Operator
 
-The image registry requires persistent storage with access mode of ReadWriteMany (RWX), however, the vSphere storage class does not support RWX.  There are two options, 1) do not use persistent storage, in which case an images placed in the registry are lost with each start, or 2) configure persistent storage which does support RWX (e.g. NFS).
+The image registry requires persistent storage with access mode of ReadWriteMany (RWX), however, the vSphere storage class does not support RWX.  There are two options, 1) do not use persistent storage, in which case an images placed in the registry are lost with each start, or 2) configure persistent storage which does support RWX.
 
 
 _Option 1_ - Do not use persistent storage
@@ -823,8 +826,11 @@ _Option 1_ - Do not use persistent storage
 
 _Option 2_ - Configure persistent storage
 
+  For VMware installations using OpenShift Container Storage is highly recommended.
+  For more information see [Installing OpenShift Container Storage](using_ocs_4.md).
+
   <details>
-  <summary>Configure Ceph storage (recommended)</summary>
+  <summary>Configure Ceph storage (Recommended for Bare Metal)</summary>
   <br><strong>NOTE:</strong>  These instructions should be carried out on the installation node.
 
   <br>If you have not already done so, add at least one additional hard disk to all compute nodes which should be used as storage nodes and note the node names of all storage nodes (this will be needed later).
@@ -1104,7 +1110,6 @@ Deploy the PVC:
 See Appendix D for more information working with Ceph including useful commands.
   </details>
 
-
   <details>
   <summary>Configure NFS Storage (not recommended for production)</summary>
   <br><strong>Note:</strong> Using NFS in a production environment is <strong>not</strong> recommended.  It is described here because it is the easiest to get configured and up and running.  The recommendation is to use rook/Ceph for all persistent storage needs.
@@ -1230,6 +1235,8 @@ See Appendix D for more information working with Ceph including useful commands.
         claim:
   ```
   Leave the value of `claim` blank.
+
+  For OCP 4.3, also change the value of `managementState:` from `Removed` to `Managed`.
 
   The result should look something like this:
 
