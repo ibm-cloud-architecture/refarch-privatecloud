@@ -1,5 +1,36 @@
 # User Provisioned Installation of Red Hat OpenShift 4.x on VMware Virtual Infrastructure
 
+- [Introduction](#introduction)
+- [Terminology](#terminology)
+- [Preparation](#preparation)
+  - [Create the Installation Server](#create-the-installation-server)
+  
+  - [Provision two new VMs to use as external load balancers](#provision-two-new-vms-to-use-as-external-load-balancers)
+  - [IBM Cloud Adoption Lab Users: Request a new subnet for your cluster](#ibm-cloud-adoption-lab-users-request-a-new-subnet-for-your-cluster)
+  - [Configure the DHCP server](#configure-the-dhcp-server)
+  - [Configure the DNS Server](#configure-the-dns-server)
+  - [Configure your haproxy nodes (load balancers)](#configure-your-haproxy-nodes-load-balancers)
+    - [Boot your nodes](#boot-your-nodes)
+  - [Remove bootstrap server from control plane load balancer](#remove-bootstrap-server-from-control-plane-load-balancer)
+  - [Login to the ocp cluster](#login-to-the-ocp-cluster)
+  - [Make sure all nodes are in Ready status](#make-sure-all-nodes-are-in-ready-status)
+  - [Make sure all controllers are up](#make-sure-all-controllers-are-up)
+  - [Configure Storage for the image-registry Operator](#configure-storage-for-the-image-registry-operator)
+  - [Ensure cluster is up and ready](#ensure-cluster-is-up-and-ready)
+- [Post-Install Tasks to Have a Usable Cluster](#post-install-tasks-to-have-a-usable-cluster)
+- [Appendix A - Example DNS Configuration](#appendix-a---example-dns-configuration)
+  - [named.conf.local](#namedconflocal)
+  - [db.172.18](#db17218)
+  - [db.vhavard.ocp.csplab.local](#dbvhavardocpcsplablocal)
+- [Appendix B - Example DHCP configuration](#appendix-b---example-dhcp-configuration)
+  - [dhcpd.conf](#dhcpdconf)
+- [Appendix C - Example haproxy comfiguration](#appendix-c---example-haproxy-comfiguration)
+- [Appendix D - Useful Ceph Commands](#appendix-d---useful-ceph-commands)
+  - [Gaining access to the rook/Ceph toolbox container](#gaining-access-to-the-rookceph-toolbox-container)
+  - [Dealing with the `Too FEW PGs` warning](#dealing-with-the-too-few-pgs-warning)
+  - [Listing block devices](#listing-block-devices)
+- [Appendix E - Adding a new node to an existing cluster](#appendix-e---adding-a-new-node-to-an-existing-cluster)
+
 ## Introduction
 Installing OpenShift (OCP) 4.x requires a significant amount of pre-planning and infrastructure preparation.
 
