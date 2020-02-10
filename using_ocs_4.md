@@ -191,18 +191,18 @@ spec:
       claim:
   ```
 
-    Type `:wq` to save the operator .yaml and your image-registry will find and consume the PVC you created in the above step.
+  Type `:wq` to save the operator .yaml and your image-registry will find and consume the PVC you created in the above step.
 
 1. By default, in a VMware vSphere environment, the `thin` storage class is set as the default storage provider.  To use Ceph rbd storage as the default perform the following steps:
 
   1. Remove the `default` flag from the `thin` storage class
 
-    ```
-    oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
-    ```
+  ```
+  oc patch storageclass thin -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
+  ```
 
   1. Add the `default` flag to the 'ocs-block' storage class
 
-    ```
-    oc patch storageclass ocs-storagecluster-ceph-rbd  -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-    ```
+  ```
+  oc patch storageclass ocs-storagecluster-ceph-rbd  -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+  ```
