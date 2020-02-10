@@ -148,15 +148,13 @@ spec:
   ```
 
   1. Edit the image registry operator and for `managementState` change `Removed` to `Managed`. Then modify `storage: {}` line to reflect what is shown below. This tells the operator to use a PVC for storage.  You don't need to specify the PVC name, the operator will find the PVC created in the previous step.
+  **NOTE:** There will be a lot more in the yaml than what is listed here, it has been trimmed to reduce confusion.  Only values that should change are listed.
 
   ```
   oc edit configs.imageregistry.operator.openshift.io
   ```
 
   ```yaml
-apiVersion: imageregistry.operator.openshift.io/v1
-kind: Config
-metadata:
 spec:
   managementState: Managed
   storage:
