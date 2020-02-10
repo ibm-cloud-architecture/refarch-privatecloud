@@ -143,27 +143,21 @@ We will discuss each of these in turn in the rest of this document.
   ln -s /opt/vhavard /var/www/html/vhavard
   ```
 
-1.  Download the openshift client and installer and explode it into your /opt directory.
+1.  Download the OpenShift client and installer and explode it into your /opt directory.  Use your browser to follow the following link and download the client and installer tarballs for the latest release version
 
-  ```
-  cd /opt
-  wget -c https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux-4.2.0.tar.gz
-  wget -c https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux-4.2.0.tar.gz
-  ```
+  https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/
 
   Or, if you are in the IBM Cloud Adoption Lab you can get it from:
 
-  ```
-  cd /opt
-  wget -c http://storage4.csplab.local/storage/ocp/4.2/openshift-client-linux-4.2.0.tar.gz
-  wget -c http://storage4.csplab.local/storage/ocp/4.2/openshift-install-linux-4.2.0.tar.gz
-  ```
+  http://storage4.csplab.local/storage/ocp/
 
-  Explode the files into /opt
+
+  Explode the files into /opt (replace the x's in the command below with the version number you are exploding):
+  
   ```
   cd /opt
-  gunzip -c openshift-client-linux-4.2.0.tar.gz |tar -xvf -
-  gunzip -c openshift-install-linux-4.2.0.tar.gz |tar -xvf -
+  gunzip -c openshift-client-linux-4.x.x.tar.gz |tar -xvf -
+  gunzip -c openshift-install-linux-4.x.x.tar.gz |tar -xvf -
   ```
 
   Now copy the `oc` and `kubectl` binaries into your path
