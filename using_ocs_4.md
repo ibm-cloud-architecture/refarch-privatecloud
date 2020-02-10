@@ -83,11 +83,11 @@ spec: {}
 
 1. In the OCP UI, click on `Installed Operators`.  When the installation is complete you should see two deployed operators: `Openshift Container Storage` and `Amazon S3`.  Click on `Openshift Container Storage` to open this operator.
 
-  <img src="images/installed_operators.png" width="50%" height="50%">
+  <img src="images/installed_operators.png">
 
 1. On the `Installed Operators > Operator Details` page, scroll the tab bar all the way to the right to find and click `Storage Cluster` and then click `Create OCS Cluster Service`.
 
-  <img src="images/create_ocs_cluster_service.png" width="50%" height="50%">
+  <img src="images/create_ocs_cluster_service.png">
 
 1. The next screen will ask you to select which nodes OCS should use as storage nodes:  Choose your three storage nodes
 
