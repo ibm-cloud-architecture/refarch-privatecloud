@@ -161,9 +161,9 @@ metadata:
 .
 .
 spec:
- .
- .
- .
+  .
+  .
+  .
   managementState: Managed
   .
   .
