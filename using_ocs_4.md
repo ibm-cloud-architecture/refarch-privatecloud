@@ -157,17 +157,8 @@ spec:
 apiVersion: imageregistry.operator.openshift.io/v1
 kind: Config
 metadata:
-.
-.
-.
 spec:
-  .
-  .
-  .
   managementState: Managed
-  .
-  .
-  .
   storage:
     pvc:
       claim:
