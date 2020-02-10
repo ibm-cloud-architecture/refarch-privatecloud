@@ -17,7 +17,7 @@ OCS is a Ceph implementation published by Red Hat specifically for their OpenShi
 1. Create the `openshift-storage` namespace.
 
   Put the following .yaml into a file named ocs-namespace.yaml
-  ```
+  ```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -35,7 +35,7 @@ spec: {}
 2. Create a storage group for OCS
 
   Put the following .yaml into a file named ocs-storage-group.yaml
-  ```
+  ```yaml
   apiVersion: operators.coreos.com/v1
   kind: OperatorGroup
   metadata:
@@ -115,7 +115,7 @@ oc adm taint nodes storage-2 node.ocs.openshift.io/storage=true:NoSchedule
   To retrieve a list of all tainted nodes execute:
 
   ```
-  oc get nodes -o go-template='{{range $item := .items}}{{with $nodename := $item.metadata.name}}{{range $taint := $item.spec.taints}}{{if and (eq $taint.key "node.ocs.openshift.io/storage") (eq $taint.effect "NoSchedule")}}{{printf "%s\n" $nodename}}{{end}}{{end}}{{end}}{{end}}'
+oc get nodes -o go-template='{{range $item := .items}}{{with $nodename := $item.metadata.name}}{{range $taint := $item.spec.taints}}{{if and (eq $taint.key "node.ocs.openshift.io/storage") (eq $taint.effect "NoSchedule")}}{{printf "%s\n" $nodename}}{{end}}{{end}}{{end}}{{end}}'
   ```
 
 1. At this point, you can use the ocs-storagecluster-cephfs storage class to deploy an RWX PVC for use by the image-registry.
@@ -124,7 +124,7 @@ oc adm taint nodes storage-2 node.ocs.openshift.io/storage=true:NoSchedule
 
     Create a file named image-registry-pvc.yaml with the following contents:
 
-  ```
+  ```yaml
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -153,7 +153,7 @@ spec:
   oc edit configs.imageregistry.operator.openshift.io
   ```
 
-  ```
+  ```yaml
 apiVersion: imageregistry.operator.openshift.io/v1
 kind: Config
 metadata:
