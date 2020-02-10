@@ -157,35 +157,17 @@ spec:
 apiVersion: imageregistry.operator.openshift.io/v1
 kind: Config
 metadata:
-  creationTimestamp: "2020-02-06T04:25:30Z"
-  finalizers:
-  - imageregistry.operator.openshift.io/finalizer
-  generation: 5
-  name: cluster
-  resourceVersion: "1257054"
-  selfLink: /apis/imageregistry.operator.openshift.io/v1/configs/cluster
-  uid: 6635f964-a342-4bb8-988d-3e4014166096
+.
+.
+.
 spec:
-  defaultRoute: true
-  disableRedirect: false
-  httpSecret: 57d1d3beecf77b7ec30cd3c9f8411dbed97319dc5972be32293a6ef1a82eef0ed65da420a597d25f3b1846a8eabdfb156f3849a74ca316f27aa9ab4a57e52022
-  logging: 2
+ .
+ .
+ .
   managementState: Managed
-  proxy:
-    http: ""
-    https: ""
-    noProxy: ""
-  readOnly: false
-  replicas: 1
-  requests:
-    read:
-      maxInQueue: 0
-      maxRunning: 0
-      maxWaitInQueue: 0s
-    write:
-      maxInQueue: 0
-      maxRunning: 0
-      maxWaitInQueue: 0s
+  .
+  .
+  .
   storage:
     pvc:
       claim:
