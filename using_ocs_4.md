@@ -60,17 +60,17 @@ spec: {}
 
 1. Navigate to the OperatorHub, on the left, click on `storage` and locate the `OpenShift Container Storage` in the list of operators and click to launch the installer.
 
-  ![Install OCS Operator](images/ocs_operator.png)
+  ![Install OCS Operator](images/ocs_operator.png =300px)
 
 1. On the next page, click the blue `Install` button at the top left.
 
-  ![Install Openshift](images/install_openshift.png)
+  ![Install Openshift](images/install_openshift.png =300px)
 
 1. On the next page select `A specific namespace on the cluster`, then click the drop-down box and select `openshift-storage`.  Leave the other radio buttons at their default values.
 
-  ![Install options](images/create_operator_subscription.png)
+  ![Install options](images/create_operator_subscription.png =300px)
 
-  ![Select Namespace](images/select_namespace.png)
+  ![Select Namespace](images/select_namespace.png =300px)
 
 1. As the operator begins to install you can watch the progress of the installation
 
