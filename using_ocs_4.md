@@ -83,15 +83,16 @@ spec: {}
 
 1. In the OCP UI, click on `Installed Operators`.  When the installation is complete you should see two deployed operators: `Openshift Container Storage` and `Amazon S3`.  Click on `Openshift Container Storage` to open this operator.
 
-  ![Installed Operators](images/installed_operators.png)
+  <img src="images/installed_operators.png" width="50%" height="50%">
 
 1. On the `Installed Operators > Operator Details` page, scroll the tab bar all the way to the right to find and click `Storage Cluster` and then click `Create OCS Cluster Service`.
 
-  ![Create Cluster Service](images/create_ocs_cluster_service.png)
+  <img src="images/create_ocs_cluster_service.png" width="50%" height="50%">
 
 1. The next screen will ask you to select which nodes OCS should use as storage nodes:  Choose your three storage nodes
 
   ![Select Storage Nodes](images/choose_storage_nodes.png)
+  <img src="images/cloose_storage_nodes.png" width="50%" height="50%">
 
 1. Wait until the cluster installation is complete
 
@@ -103,7 +104,7 @@ spec: {}
 
 1. Once all pods are deployed the GUI will show the OCS operator as `Up to Date`.  You should then be able to see three new storage classes.  ocs-storagecluster-ceph-rbd, ocs-storagecluster-cephfs, and ocs-storage.noobaa.io.  TODO: These are named something different and this text needs to be updated.
 
-  ![Installed Operators](images/installed_operators.png)
+  <img src="images/installed_operators.png" width="50%" height="50%">
 
 1. Next, you should taint your storage nodes so that user workloads will not run on your storage nodes
 
