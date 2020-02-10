@@ -154,7 +154,7 @@ spec:
   oc edit configs.imageregistry.operator.openshift.io
   ```
 
-  ```yaml
+  ```
 spec:
   managementState: Managed
   storage:
