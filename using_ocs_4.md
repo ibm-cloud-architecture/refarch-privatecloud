@@ -68,10 +68,9 @@ spec: {}
 
 1. On the next page select `A specific namespace on the cluster`, then click the drop-down box and select `openshift-storage`.  Leave the other radio buttons at their default values.
 
-  <img src="images/create_operator_subscription.png" width="50%" height="50%">
+  <img src="images/create_operator_subscription.png" width="50%" height="50%" border="1">
 
-  <img src="images/select_namespace.png" width="50%" height=
-  50%">
+  <img src="images/select_namespace.png" width="50%" height="50%">
 
 1. As the operator begins to install you can watch the progress of the installation
 
