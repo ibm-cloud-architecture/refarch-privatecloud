@@ -102,7 +102,7 @@ spec: {}
 
 1. Once all pods are deployed the GUI will show the OCS operator as `Up to Date`.  You should then be able to see three new storage classes.  ocs-storagecluster-ceph-rbd, ocs-storagecluster-cephfs, and ocs-storage.noobaa.io.  TODO: These are named something different and this text needs to be updated.
 
-  <img src="images/installed_operators.png" width="50%" height="50%">
+  <img src="images/installed_operators.png">
 
 1. Next, you should taint your storage nodes so that user workloads will not run on your storage nodes
 
