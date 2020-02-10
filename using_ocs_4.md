@@ -155,11 +155,11 @@ spec:
   ```
 
   ```
-spec:
-  managementState: Managed
-  storage:
-    pvc:
-      claim:
+  spec:
+    managementState: Managed
+    storage:
+      pvc:
+        claim:
   ```
 
   Type `:wq` to save the operator .yaml and your image-registry will find and consume the PVC you created in the above step.
