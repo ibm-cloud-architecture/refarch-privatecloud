@@ -100,7 +100,7 @@ spec: {}
 
   This could take several minutes to complete.  This step is complete when all pods get to the `Running state`.  As before, this deployment happens in stages and when one set of pods gets to a `Running` state additional pods will appear.  When all pods get to the `Running` state the deployment is complete.
 
-1. Once all pods are deployed the GUI will show the OCS operator as `Up to Date`.  You should then be able to see three new storage classes.  ocs-storagecluster-ceph-rbd, ocs-storagecluster-cephfs, and ocs-storage.noobaa.io.  TODO: These are named something different and this text needs to be updated.
+1. Once all pods are deployed the GUI will show the OCS operator as `Up to Date`.  You should then be able to see three new storage classes.  ocs-storagecluster-ceph-rbd, ocs-storagecluster-cephfs, and ocs-storage.noobaa.io.
 
   <img src="images/installed_operators.png">
 
