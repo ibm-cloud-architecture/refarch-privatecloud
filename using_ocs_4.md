@@ -90,7 +90,7 @@ spec: {}
 
 1. The next screen will ask you to select which nodes OCS should use as storage nodes:  Choose your three storage nodes
 
-  <img src="images/cloose_storage_nodes.png" width="50%" height="50%" border="1">
+  <img src="images/choose_storage_nodes.png" width="50%" height="50%" border="1">
 
 1. Wait until the cluster installation is complete
 
