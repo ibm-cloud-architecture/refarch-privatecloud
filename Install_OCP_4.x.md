@@ -303,7 +303,7 @@ We will discuss each of these in turn in the rest of this document.
 
   Of particular note is the manifests/cluster-config.yaml file where you can change the default networking subnets.  See the `bare metal` section of the install-config.yaml section above (step 11) for information on how to set these values if you need/want to change them.  Note that the subnets in this section must be valid for your environment meaning these subnets must not already exist in your environment, but will not (unless explicitly reconfigured) be routed outside of the cluster.
 
-  You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.
+  **You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.**
 
   This will make sure the cluster doesn't try to put your applications on master nodes.  Red Hat assumes that at some point in the future kubernetes will allow this and you may want to leave it true so you can use your control plane nodes as compute nodes as well.
 
