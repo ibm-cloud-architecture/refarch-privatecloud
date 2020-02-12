@@ -1041,7 +1041,7 @@ Deploy the `CephFS` storage class for ReadWriteMany PVs.
 Create a filesystem to be used by our image registry
 
   ```
-  /opt/rook/cluster/examples/kubernetes/ceph
+  cd /opt/rook/cluster/examples/kubernetes/ceph
   oc create -f filesystem.yaml
   ```
 
