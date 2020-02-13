@@ -1094,7 +1094,7 @@ Create a PVC to be consumed by the image registry (pvc.yaml)
       requests:
         storage: 100Gi
     persistentVolumeReclaimPolicy: Retain
-    storageClassName: csi-cephfs
+    storageClassName: rook-cephfs
   ```
 
 Deploy the PVC:
