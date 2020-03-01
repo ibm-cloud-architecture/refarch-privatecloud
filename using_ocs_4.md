@@ -21,9 +21,9 @@ OCS is a Ceph implementation published by Red Hat specifically for their OpenShi
 apiVersion: v1
 kind: Namespace
 metadata:
-  labels:
-    openshift.io/cluster-monitoring: "true"
-  name: openshift-storage
+    labels:
+      openshift.io/cluster-monitoring: "true"
+    name: openshift-storage
 spec: {}
   ```
 
@@ -32,7 +32,7 @@ spec: {}
   oc create -f ocs-namespace.yaml
   ```
 
-2. Create a storage group for OCS
+1. Create a storage group for OCS
 
   Put the following .yaml into a file named ocs-storage-group.yaml
   ```yaml
@@ -128,18 +128,18 @@ oc get nodes -o go-template='{{range $item := .items}}{{with $nodename := $item.
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  finalizers:
-  - kubernetes.io/pvc-protection
-  name: image-registry-storage
-  namespace: openshift-image-registry
+    finalizers:
+    - kubernetes.io/pvc-protection
+    name: image-registry-storage
+    namespace: openshift-image-registry
 spec:
-  accessModes:
-  - ReadWriteMany
-  resources:
-    requests:
-      storage: 100Gi
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: ocs-storagecluster-cephfs
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 100Gi
+    persistentVolumeReclaimPolicy: Retain
+    storageClassName: ocs-storagecluster-cephfs
   ```
     Deploy the PVC:
 

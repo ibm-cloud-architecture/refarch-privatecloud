@@ -65,6 +65,12 @@ In this guide we will use the following topology:
 * 3 control plane nodes (master nodes)
 * 3 compute nodes (worker nodes)
 
+**Notes**
+
+ * You do not need to create one install node per installation, you can reuse the same install node for as many installations needed.
+Each installation will simply be represented by a new folder under your `/opt` directory for example.
+ * There are several package managers available on Linux. If `yum` isn't available you can use `apt-get`
+
 <details>
 <summary>Basic Install Steps for VMware</summary>
 
@@ -211,8 +217,8 @@ We will discuss each of these in turn in the rest of this document.
   platform:
     vsphere:
       vcenter: [demo-vcenter.csplab.local]
-      username: username
-      password: password
+      username: [username]
+      password: [password]
       datacenter: [CSPLAB]
       defaultDatastore: [SANDBOX-OCS]
   pullSecret: '[contents of pull-secret.txt]'
@@ -221,7 +227,7 @@ We will discuss each of these in turn in the rest of this document.
 
   * **baseDomain** - You will access applications in your cluster through a subdomain of this domain which is named after your cluster.  For example, I use my userid (vhavard) as my cluster name, and my base domain is ocp.csplab.local, therefore, my cluster's domain will be vhavard.ocp.csplab.local.
 
-  * **metadata.name** - This is the name of your cluster.
+  * **metadata.name** - This is the name of your cluster, it <strong>must</strong> match the name of your folder on the install node.
 
   * **platform.vsphere.vcenter** - This is the hostname or IP address of your vsphere server.
 
@@ -303,7 +309,7 @@ We will discuss each of these in turn in the rest of this document.
 
   Of particular note is the manifests/cluster-config.yaml file where you can change the default networking subnets.  See the `bare metal` section of the install-config.yaml section above (step 11) for information on how to set these values if you need/want to change them.  Note that the subnets in this section must be valid for your environment meaning these subnets must not already exist in your environment, but will not (unless explicitly reconfigured) be routed outside of the cluster.
 
-  You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.
+  **You will need to edit manifests/cluster-scheduler-02-config.yml file and change the value of spec.mastersSchedulable to false.**
 
   This will make sure the cluster doesn't try to put your applications on master nodes.  Red Hat assumes that at some point in the future kubernetes will allow this and you may want to leave it true so you can use your control plane nodes as compute nodes as well.
 
@@ -650,10 +656,13 @@ If not already provided via the DHCP server, create static IP addresses for the 
 Once you have the load balancers, dhcp server, and dns server configured, you can boot your cluster nodes and they will come up and configure themselves based on the ignition files you provided.
 
 1. Power on all nodes
+   * For optimal results you should power on the bootstrap node first. Connect to it using SSH and watch the logs using the command `journalctl -b -f -u bootkube.service` until you see the message `Waiting for etcd cluster...`
+   * When you see the message above you can start booting your master nodes.
+   * Finally boot your compute and storage nodes.
 
   If you have everything configured properly, you should see the correct IP address for each node on the VMware console for each node, respectively.
 
-1. Issue the following command and wait for a completed result:
+2. Issue the following command and wait for a completed result:
 
   ```
   [sysadmin@localhost opt]$ ./openshift-install --dir=./vhavard wait-for bootstrap-complete --log-level info
@@ -694,7 +703,7 @@ You may also find it helpful to watch the traffic going through the control plan
 
 ## Remove bootstrap server from control plane load balancer
 
-Once the installation has successfully completed, you must login to the control plane load balancer and remove the bootstrap server from the list of backend servers and restart the haproxy service.
+Once the installation has successfully completed (You can confirm this by observing the message `bootkube.service complete` in the journal of the bootstrap server), you must login to the control plane load balancer and remove the bootstrap server from the list of backend servers and restart the haproxy service.
 
 ```
 systemctl restart haproxy
@@ -1041,7 +1050,7 @@ Deploy the `CephFS` storage class for ReadWriteMany PVs.
 Create a filesystem to be used by our image registry
 
   ```
-  /opt/rook/cluster/examples/kubernetes/ceph
+  cd /opt/rook/cluster/examples/kubernetes/ceph
   oc create -f filesystem.yaml
   ```
 
@@ -1094,7 +1103,7 @@ Create a PVC to be consumed by the image registry (pvc.yaml)
       requests:
         storage: 100Gi
     persistentVolumeReclaimPolicy: Retain
-    storageClassName: csi-cephfs
+    storageClassName: rook-cephfs
   ```
 
 Deploy the PVC:
