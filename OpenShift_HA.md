@@ -135,7 +135,7 @@ For this exercise, the following nodes will be deployed (non-HA instances will o
   ```
   cat > /etc/sysconfig/docker-storage-setup <<EOF
   STORAGE_DRIVER=overlay2
-  DEVS=/dev/vdb
+  DEVS=/dev/sdb
   CONTAINER_ROOT_LV_NAME=dockerlv
   CONTAINER_ROOT_LV_SIZE=100%FREE
   CONTAINER_ROOT_LV_MOUNT_PATH=/var/lib/docker
