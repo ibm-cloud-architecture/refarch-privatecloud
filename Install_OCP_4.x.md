@@ -868,6 +868,13 @@ Clone the rook project from github
   cd /opt
   git clone https://github.com/rook/rook.git
   ```
+* --Temporary--
+*And checkout the revision "3d5776f"*
+```
+git checkout 3d5776f
+```
+
+
 
   You should now have a subdirectory under /opt named `rook`.
 
@@ -1105,6 +1112,8 @@ Create a PVC to be consumed by the image registry (pvc.yaml)
     persistentVolumeReclaimPolicy: Retain
     storageClassName: rook-cephfs
   ```
+* --Temporary--
+On the last line, replace `rook-cephfs` by `csi-cephfs`
 
 Deploy the PVC:
 
