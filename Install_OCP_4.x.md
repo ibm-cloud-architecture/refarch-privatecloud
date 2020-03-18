@@ -552,7 +552,7 @@ We will discuss each of these in turn in the rest of this document.
 
 ... or ...
 
-1. Otherwise, install any linux VM you choose, in your example, we will use RHEL 8.0.
+1. Otherwise, install any linux VM you choose, in our example, we will use RHEL 8.0.
 
   * Name your VMs for their purpose, e.g. `ocp-42-control-lb`, `ocp-42-compute-lb`.
 
