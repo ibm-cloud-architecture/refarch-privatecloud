@@ -546,19 +546,21 @@ We will discuss each of these in turn in the rest of this document.
   When all of the files have been created, double check to make sure there are no typos.  There is no need to restart the service, changes are picked up immediately.
   </details>
 
-### Provision two new VMs to use as external load balancers
+### Provision your external load balancers
 
 1. In the csplab, use the template named rhel8-combined-haproxy-template to use a single load balancer for both the control and compute plans, or use the rhel8-control-haproxy-template and rhel8-compute-haproxy-template, respectively, in the sandbox datastore to instantiate two new VMs, one for the control plane and one for the compute plane.  
 
+... or ...
+
 1. Otherwise, install any linux VM you choose, in your example, we will use RHEL 8.0.
 
-  1. Name your VMs for their purpose, e.g. `ocp-42-control-lb`, `ocp-42-compute-lb`.
+  * Name your VMs for their purpose, e.g. `ocp-42-control-lb`, `ocp-42-compute-lb`.
 
-  1. Install the haproxy packages on the VMs
+  * Install the haproxy packages on the VMs
 
-  ```
-  yum install -y haproxy
-  ```
+    ```
+    yum install -y haproxy
+    ```
 
 1. You will configure your load balancers when you get your IP addresses assigned.
 
