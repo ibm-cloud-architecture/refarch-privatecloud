@@ -548,7 +548,7 @@ We will discuss each of these in turn in the rest of this document.
 
 ### Provision your external load balancers
 
-1. In the csplab, use the template named rhel8-combined-haproxy-template to use a single load balancer for both the control and compute plans, or use the rhel8-control-haproxy-template and rhel8-compute-haproxy-template, respectively, in the sandbox datastore to instantiate two new VMs, one for the control plane and one for the compute plane.  
+1. In the csplab, use the template named ubuntu1604-combined-haproxy-template to use a single load balancer for both the control and compute plans, or use the rhel8-control-haproxy-template and rhel8-compute-haproxy-template, respectively, in the sandbox datastore to instantiate two new VMs, one for the control plane and one for the compute plane.  
 
 ... or ...
 
