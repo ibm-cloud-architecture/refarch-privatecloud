@@ -351,7 +351,7 @@ We will discuss each of these in turn in the rest of this document.
     "config": {
       "append": [
         {
-          "source": "[http://172.18.1.30/vhavard/bootstrap.ign]",
+          "source": <"http://172.18.1.30/vhavard/bootstrap.ign">,
           "verification": {}
         }
       ]
