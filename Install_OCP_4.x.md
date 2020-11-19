@@ -872,15 +872,14 @@ Clone the rook project from github
   cd /opt
   git clone https://github.com/rook/rook.git
   ```
-* --Temporary--
-*And checkout the revision "3d5776f"*
+
+*And checkout the revision "release-1.1"*
 ```
-git checkout 3d5776f
+git checkout release-1.1
 ```
 
+You should now have a subdirectory under /opt named `rook`.
 
-
-  You should now have a subdirectory under /opt named `rook`.
 
 Change to the `ceph` directory:
 
@@ -1044,7 +1043,7 @@ Deploy the `rbd` storage class for non-ReadWriteMany PVs
   oc get sc
   ```
 
-Deploy the `CephFS` storage class for ReadWriteMany PVs.
+Deploy the `csi-cephfs` storage class for ReadWriteMany PVs.
 
   <strong>IMPORTANT:</strong> Although Ceph supports unlimited filesystems, rook (the k8s implementation of Ceph), only supports one.  This means that you can only deploy one single RWX PV using rook/CephFS.  If you need more than one RWX volume, you much use an external Ceph implementation and integrate it with OCP.  Doing so is outside of the scope of this document.
 
@@ -1114,10 +1113,8 @@ Create a PVC to be consumed by the image registry (pvc.yaml)
       requests:
         storage: 100Gi
     persistentVolumeReclaimPolicy: Retain
-    storageClassName: rook-cephfs
+    storageClassName: csi-cephfs
   ```
-* --Temporary--
-On the last line, replace `rook-cephfs` by `csi-cephfs`
 
 Deploy the PVC:
 
